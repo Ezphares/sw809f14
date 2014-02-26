@@ -7,9 +7,14 @@
 		$(function()
 		{
 			var options = {
-				zoom: 8
+				zoom: 8,
+				center: new google.maps.LatLng(-34.397, 150.644)
 			};
-			var map = new google.maps.Map($('#map')[0]);
+			var map = new google.maps.Map($('#map')[0], options);
+			$('#map').css({
+				width: '640px',
+				height: '480px'
+			});
 		});
 	</script>
 {% endblock %}
