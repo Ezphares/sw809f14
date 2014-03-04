@@ -4,10 +4,15 @@
 	<head>
 		<title>RunOff</title>
 		{% block scripts %}
+			<script type="text/javascript">
+				var STATIC_URL = '{{ STATIC_URL }}';
+			</script>
 			<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+			<script src="{{ STATIC_URL }}js/extensions.js"></script>
 		{% endblock %}
 	</head>
 	<body>
+		<h1>RunOff</h1>
 		<div id="content-wrapper">
 			{% block content %}
 			{% endblock %}

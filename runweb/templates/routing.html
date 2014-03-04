@@ -3,23 +3,12 @@
 {% block scripts %}
 	{{ block.super }}
 	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
-	<script type="text/javascript">
-		$(function()
-		{
-			var options = {
-				zoom: 8,
-				center: new google.maps.LatLng(-34.397, 150.644)
-			};
-			var map = new google.maps.Map($('#map')[0], options);
-			$('#map').css({
-				width: '640px',
-				height: '480px'
-			});
-		});
-	</script>
+	<script src="{{ STATIC_URL }}js/planner.js"></script>
 {% endblock %}
 
 {% block content %}
 	<div id="map">
+	</div>
+	<div id="controls">
 	</div>
 {% endblock %}
