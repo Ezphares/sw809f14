@@ -1,0 +1,33 @@
+/*
+ * GENERIC
+ */
+
+/* Soft reset */
+html, body, div, h1, h2, h3, h4, h5, h6, li, ul, ol
+{
+	margin: 0;
+	padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6
+{
+	font-family: sans-serif;
+}
+
+/* Clear fix */
+.clear
+{
+	clear: both;
+}
+
+/* Label and checkbox fixes */
+label
+{
+	display: inline-block;
+}
+
+input[type="checkbox"]
+{
+	line-height: inherit;
+	vertical-align: middle;
+}
