@@ -1,5 +1,10 @@
 {% extends 'master.html' %}
 
+{% block styles %}
+	{{ block.super }}
+	<link rel="stylesheet" href="{{ STATIC_URL }}css/route.css" />
+{% endblock %}
+
 {% block scripts %}
 	{{ block.super }}
 	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>

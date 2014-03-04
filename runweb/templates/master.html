@@ -3,6 +3,10 @@
 <html>
 	<head>
 		<title>RunOff</title>
+		{% block styles %}
+			<link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" />
+		{% endblock %}
+		
 		{% block scripts %}
 			<script type="text/javascript">
 				var STATIC_URL = '{{ STATIC_URL }}';
