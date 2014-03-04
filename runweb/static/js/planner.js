@@ -3,15 +3,16 @@
  * @class
  * @param {String} map A css selector identifying the element to contain the map
  * @param {String} controls A css selector identifying the element to contain waypoint controls
+ * @param {String} info A css selector identifying the element to display route information
  * @param {Number[]} [mapsize] the size of the map in pixels, given as [width, height]
  */
-Planner = function(map, controls, mapsize)
+Planner = function(map, controls, info, mapsize)
 {
 	// Mapsize is optional
 	mapsize = mapsize || [640, 480];
 
 	/** JQuery selectors of the elements used by the planner */
-	this.elements = {'map': $(map), 'controls': $(controls)};
+	this.elements = {'map': $(map), 'controls': $(controls), 'info': $(info)};
 	/** The google map object */
 	this.map = null;
 	/** An array of google map markers */
@@ -20,6 +21,8 @@ Planner = function(map, controls, mapsize)
 	this.directions = new google.maps.DirectionsService();
 	/** A google maps directionsrenderer instance */
 	this.route = null;
+	/** a google maps route information instance */
+	this.route_info = null;
 	/** Whether the route should start and end at the same point */
 	this.round_trip = false;
 	
@@ -27,8 +30,11 @@ Planner = function(map, controls, mapsize)
 	this.elements.map.css({'width': mapsize[0] + 'px',
 						   'height': mapsize[1] + 'px'});
 						   
+	this.elements.info.css({'height': mapsize[1] + 'px'});
+						   
 	this.initialize_map(this.elements.map[0]);
 	this.initialize_controls();
+	this.update_info();
 };
 
 /**
@@ -166,6 +172,8 @@ Planner.prototype.update_route = function()
 		{
 			if (status == google.maps.DirectionsStatus.OK)
 			{
+				planner.route_info = result.routes[0];
+				
 				// Update existing route if possible, otherwise create a new route
 				if (planner.route)
 				{
@@ -176,10 +184,13 @@ Planner.prototype.update_route = function()
 					var direction_options = {'directions': result,
 											 'draggable': false,   // We use custom draggable markers instead
 											 'map': planner.map,
-											 'suppressMarkers': true}
+											 'suppressMarkers': true,
+											 'preserveViewport': true}
 			
 					planner.route = new google.maps.DirectionsRenderer(direction_options);
 				}
+				
+				planner.update_info();
 			}
 			else
 			{
@@ -197,6 +208,7 @@ Planner.prototype.update_route = function()
 			this.route.setMap();
 			this.route = null;
 		}
+		this.update_info();
 	}
 };
 
@@ -244,10 +256,31 @@ Planner.prototype.clear = function()
 		this.route.setMap();
 		
 	this.route = null;
+	
+	this.update_info();
 };
 
+/**
+ * Updates the route information view
+ */
+Planner.prototype.update_info = function()
+{
+	this.elements.info.html('');
+	
+	if (!this.route)
+		$('<span></span>').text("No route entered").appendTo(this.elements.info);
+	else
+	{
+		var distance = 0;
+		for (var i = 0; i < this.route_info.legs.length; i++)
+		{
+			distance += this.route_info.legs[i].distance.value;
+		}
+		$('<span></span>').text("Route distance: " + distance + 'm').appendTo(this.elements.info);
+	}
+}
 
 $(function()
 {
-	m = new Planner('#map', '#controls');
+	m = new Planner('#route-map', '#route-controls', '#route-info');
 });

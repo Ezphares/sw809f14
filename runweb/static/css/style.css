@@ -20,6 +20,32 @@ h1, h2, h3, h4, h5, h6
 	clear: both;
 }
 
+/*
+ * Layout
+ */
+body
+{
+	background: #ddd;
+}
+
+#page-wrapper
+{
+	background: #fefefe;
+	border-radius: 2px;
+	width: 960px;
+	margin: 20px auto;
+}
+
+#content-wrapper
+{
+	margin: 10px;
+}
+
+
+
+
+
+
 /* Label and checkbox fixes */
 label
 {

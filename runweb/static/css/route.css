@@ -1,4 +1,45 @@
-#controls>*
+
+#route-controls
 {
-	display: block;
+	margin: 5px 0;
+	background: #88f;
+	border-radius: 4px;
+}
+
+#route-controls>*
+{
+	display: inline-block;
+	margin: 5px 5px;
+}
+
+#route-controls>label
+{
+	font-family: sans-serif;
+	padding-left: 5px;
+	background: #f8f8f8;
+	border-radius: 2px;
+	border: 1px solid #888;
+}
+
+#route-map
+{
+	float: left;
+	margin-bottom: 5px;
+	margin-right: 5px;
+	border-radius: 4px;
+}
+
+#route-info
+{
+	overflow: hidden;
+	height: 100%;
+	border-left: 1px solid #bbb;
+	border-radius: 10px;
+	padding: 0 5px;
+	font-family: sans-serif;
+}
+
+#route-info>*:first-child
+{
+	line-height: 25px;
 }
