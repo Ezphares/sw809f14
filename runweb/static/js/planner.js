@@ -132,29 +132,25 @@ Planner.prototype.update_route = function()
 	if (this.markers.length >= 2)
 	{
 		var plan = []
-		// Extract positions
+		// Extract positions. This has the nice side effect of copying the array, so markers are unaffected later on.
 		for (var i = 0; i < this.markers.length; i++)
 		{
 			plan.push(this.markers[i].getPosition());
 		}
 		
+		// If we are round-tripping, end at the last waypoint
 		if (this.round_trip)
 			plan.push(plan[0]);
 		
-		// Remove previous route
-		if (this.route)
-		{
-			this.route.setMap();
-			this.route = null;
-		}
-	
 		// Extract start and end point
 		var destination = plan.reverse().shift();
 		var origin = plan.reverse().shift();
 		
+		// Plan now contains intermediate waypoints. Wrap these so google maps understands them
 		for (var i = 0; i < plan.length; i++)
 		{
-			plan[i] = {'location': plan[i], 'stopover': true};
+			// We use the original markers, so stopover is set to false
+			plan[i] = {'location': plan[i], 'stopover': false};
 		}
 		
 		var route_options = {'origin': origin,
@@ -163,17 +159,44 @@ Planner.prototype.update_route = function()
 							 
 							 'travelMode': google.maps.TravelMode.WALKING,
 							 'avoidHighways': true,
-							 'avoidTolls': true}
+							 'avoidTolls': true,
+							 'optimizeWaypoints': false}
 		
 		this.directions.route(route_options, function(result, status)
 		{
-			var direction_options = {'directions': result,
-									 'draggable': true,
-									 'map': planner.map,
-									 'suppressMarkers': true}
-		
-			planner.route = new google.maps.DirectionsRenderer(direction_options);
+			if (status == google.maps.DirectionsStatus.OK)
+			{
+				// Update existing route if possible, otherwise create a new route
+				if (planner.route)
+				{
+					planner.route.setDirections(result);
+				}
+				else
+				{
+					var direction_options = {'directions': result,
+											 'draggable': false,   // We use custom draggable markers instead
+											 'map': planner.map,
+											 'suppressMarkers': true}
+			
+					planner.route = new google.maps.DirectionsRenderer(direction_options);
+				}
+			}
+			else
+			{
+				// Creating the route somehow failed
+				// TODO: Handle nicely
+				alert('Directions request failed: ' + status);
+			}
 		});
+	}
+	else
+	{
+		// Remove previous route
+		if (this.route)
+		{
+			this.route.setMap();
+			this.route = null;
+		}
 	}
 };
 
