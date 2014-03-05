@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect
 
 def session_login(request):
-    redirect = '/routes/planner/' #TODO overview
+    redirect = '/routes/'
     
     #Check if an alternate redirect was requested
     if 'next' in request.REQUEST:
@@ -20,6 +20,9 @@ def session_login(request):
 
     # Post requests attempt to authenticate
     else:
+        if (not 'username' in request.REQUEST) or (not 'password' in request.REQUEST):
+            return render(request, 'login.html', {'error': 'You must enter a username and password', 'redirect': redirect})
+			
         user = authenticate(username = request.REQUEST['username'], password = request.REQUEST['password'])
         if user:
             login(request, user)

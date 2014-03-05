@@ -21,11 +21,16 @@ h1, h2, h3, h4, h5, h6
 }
 
 /*
- * Layout
+ * LAYOUT
  */
 body
 {
 	background: #ddd;
+}
+
+table, th, td
+{
+	border: 1px inset #888;
 }
 
 #page-wrapper
@@ -34,6 +39,7 @@ body
 	border-radius: 2px;
 	width: 960px;
 	margin: 20px auto;
+	padding-bottom: 10px;
 }
 
 #content-wrapper
@@ -59,6 +65,18 @@ body
 {
 	display: inline-block;
 	margin: 5px;
+}
+ 
+/*
+ * ERRORS
+ */
+.error
+{
+	color: red;
+	border: 1px solid red;
+	padding: 2px;
+	border-radius: 2px;
+	background: #fcc;
 }
  
 /* Label and checkbox fixes */

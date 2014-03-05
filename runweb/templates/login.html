@@ -1,10 +1,6 @@
 {% extends 'master.html' %}
 
 {% block content %}
-	{% if error %}
-		<div class="error">{{ error }}</div>
-	{% endif %}
-	
 	<form action="/login/" method="POST">
 		<div>Username</div>
 		<input type="text" name="username" />

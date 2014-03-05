@@ -4,15 +4,16 @@
  * @param {String} map A css selector identifying the element to contain the map
  * @param {String} controls A css selector identifying the element to contain waypoint controls
  * @param {String} info A css selector identifying the element to display route information
+ * @param {String} load A css selector identifying an element of the map to load information from. An empty map will be loaded if this element does not exist
  * @param {Number[]} [mapsize] the size of the map in pixels, given as [width, height]
  */
-Planner = function(map, controls, info, mapsize)
+Planner = function(map, controls, info, load, mapsize)
 {
 	// Mapsize is optional
 	mapsize = mapsize || [640, 480];
 
 	/** JQuery selectors of the elements used by the planner */
-	this.elements = {'map': $(map), 'controls': $(controls), 'info': $(info)};
+	this.elements = {'map': $(map), 'controls': $(controls), 'info': $(info), 'load': $(load)};
 	/** The google map object */
 	this.map = null;
 	/** An array of google map markers */
@@ -25,6 +26,8 @@ Planner = function(map, controls, info, mapsize)
 	this.route = null;
 	/** Whether the route should start and end at the same point */
 	this.round_trip = false;
+	/** jQuery selector of a container where the route json is placed for upload */
+	this.json_container = null;
 	
 	// Setup map size
 	this.elements.map.css({'width': mapsize[0] + 'px',
@@ -56,6 +59,8 @@ Planner.prototype.initialize_map = function(target)
 		console.log(target);
 		planner.map = new google.maps.Map(target, options);
 		planner.map_events();
+		if (planner.elements.load.length)
+			planner.load(planner.elements.load.html());
 	};
 
 	// Check if geolocation is supported
@@ -92,6 +97,7 @@ Planner.prototype.map_events = function()
 		if (planner.markers.length >= 9)
 			return;
 		
+		// TODO: Create marker function
 		var marker_options = {'position': ev.latLng,
 							  'draggable': true};
 		
@@ -237,6 +243,9 @@ Planner.prototype.initialize_controls = function()
 		planner.round_trip = $(this).is(':checked');
 		planner.update_route();
 	});
+	
+	this.json_container = $('<input type="hidden" name="json" />');
+	$('<form action="" method="POST"><input type="text" name="name" value="Route name" /><input type="submit" /></form>').append(this.json_container).append(CSRF).appendTo(this.elements.controls);
 };
 
 /**
@@ -268,7 +277,10 @@ Planner.prototype.update_info = function()
 	this.elements.info.html('');
 	
 	if (!this.route_renderer)
+	{
 		$('<span></span>').text("No route entered").appendTo(this.elements.info);
+		this.json_container.val('{"waypoints":[]}');
+	}
 	else
 	{
 		var distance = 0;
@@ -277,10 +289,58 @@ Planner.prototype.update_info = function()
 			distance += this.route.legs[i].distance.value;
 		}
 		$('<span></span>').text("Route distance: " + distance + 'm').appendTo(this.elements.info);
+		
+		var waypoints = [];
+		for (var i = 0; i < this.markers.length; i++)
+		{
+			waypoints.push({'lat': this.markers[i].getPosition().lat(), 'lng': this.markers[i].getPosition().lng()});
+		}
+		
+		this.json_container.val(JSON.stringify({'waypoints': waypoints,
+												'distance': distance})); // TODO: Enter score here
 	}
 }
 
-$(function()
+/**
+ * Loads a route from a json representation
+ * @param {JSON} json the json representation to load
+ */
+Planner.prototype.load = function(json)
 {
-	m = new Planner('#route-map', '#route-controls', '#route-info');
-});
+	var data = JSON.parse(json);
+	console.log(data);
+	this.elements.controls.find('input[name="name"]').val(data['name']);
+	
+	var planner = this;
+	for (var i = 0; i < data.waypoints.length; i++)
+	{
+		// TODO: Create marker function
+		var marker_options = {'position': new google.maps.LatLng(data.waypoints[i].lat, data.waypoints[i].lng),
+							  'draggable': true};
+		
+		var marker = new google.maps.Marker(marker_options);
+		planner.markers.push(marker);
+		planner.update_route(planner);
+		
+		// Event to remove said waypoint
+		google.maps.event.addListener(marker, 'rightclick', function(ev)
+		{
+			marker.setMap();
+			
+			var index = planner.markers.indexOf(marker);
+			if (index >= 0)
+				planner.markers.splice(index, 1);
+				
+			planner.update_route(planner);
+		});
+		
+		// Event on drag
+		google.maps.event.addListener(marker, 'dragend', function(ev)
+		{
+			planner.update_route(planner);
+		});
+	}
+	
+	console.log(this.markers);
+	this.update_route();
+}
