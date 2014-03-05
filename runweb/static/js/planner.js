@@ -20,9 +20,9 @@ Planner = function(map, controls, info, mapsize)
 	/** A google maps directions service instance */
 	this.directions = new google.maps.DirectionsService();
 	/** A google maps directionsrenderer instance */
-	this.route = null;
+	this.route_renderer = null;
 	/** a google maps route information instance */
-	this.route_info = null;
+	this.route = null;
 	/** Whether the route should start and end at the same point */
 	this.round_trip = false;
 	
@@ -155,8 +155,8 @@ Planner.prototype.update_route = function()
 		// Plan now contains intermediate waypoints. Wrap these so google maps understands them
 		for (var i = 0; i < plan.length; i++)
 		{
-			// We use the original markers, so stopover is set to false
-			plan[i] = {'location': plan[i], 'stopover': false};
+			// Using stopover true, because it changes route algorithm to allow turning around on the spot
+			plan[i] = {'location': plan[i], 'stopover': true};
 		}
 		
 		var route_options = {'origin': origin,
@@ -166,18 +166,18 @@ Planner.prototype.update_route = function()
 							 'travelMode': google.maps.TravelMode.WALKING,
 							 'avoidHighways': true,
 							 'avoidTolls': true,
-							 'optimizeWaypoints': false}
+							 'optimizeWaypoints': false};
 		
 		this.directions.route(route_options, function(result, status)
 		{
 			if (status == google.maps.DirectionsStatus.OK)
 			{
-				planner.route_info = result.routes[0];
+				planner.route = result.routes[0];
 				
 				// Update existing route if possible, otherwise create a new route
-				if (planner.route)
+				if (planner.route_renderer)
 				{
-					planner.route.setDirections(result);
+					planner.route_renderer.setDirections(result);
 				}
 				else
 				{
@@ -187,7 +187,7 @@ Planner.prototype.update_route = function()
 											 'suppressMarkers': true,
 											 'preserveViewport': true}
 			
-					planner.route = new google.maps.DirectionsRenderer(direction_options);
+					planner.route_renderer = new google.maps.DirectionsRenderer(direction_options);
 				}
 				
 				planner.update_info();
@@ -203,10 +203,10 @@ Planner.prototype.update_route = function()
 	else
 	{
 		// Remove previous route
-		if (this.route)
+		if (this.route_renderer)
 		{
-			this.route.setMap();
-			this.route = null;
+			this.route_renderer.setMap();
+			this.route_renderer = null;
 		}
 		this.update_info();
 	}
@@ -252,10 +252,10 @@ Planner.prototype.clear = function()
 	this.markers = [];
 	
 	// Clear route
-	if (this.route)
-		this.route.setMap();
+	if (this.route_renderer)
+		this.route_renderer.setMap();
 		
-	this.route = null;
+	this.route_renderer = null;
 	
 	this.update_info();
 };
@@ -267,14 +267,14 @@ Planner.prototype.update_info = function()
 {
 	this.elements.info.html('');
 	
-	if (!this.route)
+	if (!this.route_renderer)
 		$('<span></span>').text("No route entered").appendTo(this.elements.info);
 	else
 	{
 		var distance = 0;
-		for (var i = 0; i < this.route_info.legs.length; i++)
+		for (var i = 0; i < this.route.legs.length; i++)
 		{
-			distance += this.route_info.legs[i].distance.value;
+			distance += this.route.legs[i].distance.value;
 		}
 		$('<span></span>').text("Route distance: " + distance + 'm').appendTo(this.elements.info);
 	}

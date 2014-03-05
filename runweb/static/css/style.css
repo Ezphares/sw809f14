@@ -41,11 +41,26 @@ body
 	margin: 10px;
 }
 
+/*
+ * TOP BAR
+ */
+#top-bar
+{
+	background: #4d4;
+	border-radius: 2px 2px 0 0;
+} 
 
+#menu
+{
+	list-style-type: none;
+}
 
-
-
-
+#menu>li
+{
+	display: inline-block;
+	margin: 5px;
+}
+ 
 /* Label and checkbox fixes */
 label
 {
