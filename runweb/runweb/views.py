@@ -7,8 +7,8 @@ def session_login(request):
     redirect = '/routes/planner/' #TODO overview
     
     #Check if an alternate redirect was requested
-    if 'ref' in request.REQUEST:
-        redirect = request.REQUEST['ref']
+    if 'next' in request.REQUEST:
+        redirect = request.REQUEST['next']
 
     # Do not log already authenticated users in
     if request.user.is_authenticated():
@@ -28,5 +28,6 @@ def session_login(request):
             return render(request, 'login.html', {'error': 'Invalid username or password', 'redirect': redirect})
 
 def session_logout(request):
+	# Clears the session and returns home
     logout(request)
     return HttpResponseRedirect('/')

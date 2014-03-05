@@ -12,7 +12,7 @@
 		<input type="password" name="password" />
 		
 		{% csrf_token %}
-		<input type="hidden" name="ref" value="{{ redirect }}"/>
+		<input type="hidden" name="next" value="{{ redirect }}"/>
 		<br /><input type="submit" />
 	</form>
 {% endblock %}
