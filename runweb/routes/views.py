@@ -2,6 +2,6 @@
 from django.shortcuts import render
 
 
-def home(request):
+def planner(request):
     return render(request, 'routing.html', {})
 

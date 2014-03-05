@@ -17,7 +17,14 @@
 	</head>
 	<body>
 		<div id="page-wrapper">
-			<h1>RunOff</h1>
+			<div id="top-bar">
+				<h1>RunOff</h1>
+				{% if user.is_authenticated %}
+					{% include 'menu_authenticated.html' %}
+				{% else %}
+					{% include 'menu_anonymous.html' %}
+				{% endif %}
+			</div>
 			<div id="content-wrapper">
 				{% block content %}
 				{% endblock %}
