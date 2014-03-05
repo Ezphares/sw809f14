@@ -1,7 +1,6 @@
 package dk.aau.student.runapp;
 
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,14 +9,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.content.Intent;
-import android.os.Build;
 
-public class MainActivity extends ActionBarActivity {
+public class RunOptions extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_run_options);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -31,7 +29,7 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.run_options, menu);
         return true;
     }
 
@@ -58,16 +56,20 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_run_options, container, false);
             return rootView;
         }
     }
 
-    /* Called when the user presses the RUN button */
-    public void runOptions (View view)
+    public void matchcomp(View view)
     {
-        Intent intent = new Intent(this, RunOptions.class);
+        Intent intent = new Intent(this, MatchComp.class);
         startActivity(intent);
     }
 
+    public void matchfriend(View view)
+    {
+        Intent intent = new Intent(this, MatchFriend.class);
+        startActivity(intent);
+    }
 }
