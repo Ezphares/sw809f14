@@ -4,5 +4,8 @@
     <string name="app_name">RunApp</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_run_options">Run Options</string>
+    <string name="title_activity_matchmake">Matchmaking</string>
+    <string name="title_activity_match_friend">Friend Matchmaking</string>
 
 </resources>

@@ -16,6 +16,30 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="dk.aau.student.runapp.RunOptions"
+            android:label="@string/title_activity_run_options"
+            android:parentActivityName="dk.aau.student.runapp.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="MainActivity" />
+        </activity>
+        <activity
+            android:name=".MatchComp"
+            android:label="@string/title_activity_matchmake"
+            android:parentActivityName="dk.aau.student.runapp.RunOptions" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="RunOptions" />
+        </activity>
+        <activity
+            android:name=".MatchFriend"
+            android:label="@string/title_activity_matchmake"
+            android:parentActivityName="dk.aau.student.runapp.RunOptions" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="RunOptions" />
+        </activity>
     </application>
 
 </manifest>
