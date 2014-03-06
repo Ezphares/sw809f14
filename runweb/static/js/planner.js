@@ -96,32 +96,8 @@ Planner.prototype.map_events = function()
 	{
 		if (planner.markers.length >= 9)
 			return;
-		
-		// TODO: Create marker function
-		var marker_options = {'position': ev.latLng,
-							  'draggable': true};
-		
-		var marker = new google.maps.Marker(marker_options);
-		planner.markers.push(marker);
-		planner.update_route(planner);
-		
-		// Event to remove said waypoint
-		google.maps.event.addListener(marker, 'rightclick', function(ev)
-		{
-			marker.setMap();
-			
-			var index = planner.markers.indexOf(marker);
-			if (index >= 0)
-				planner.markers.splice(index, 1);
-				
-			planner.update_route(planner);
-		});
-		
-		// Event on drag
-		google.maps.event.addListener(marker, 'dragend', function(ev)
-		{
-			planner.update_route(planner);
-		});
+
+		planner.add_marker(ev.latLng)
 	});
 };
 
@@ -307,40 +283,49 @@ Planner.prototype.update_info = function()
  */
 Planner.prototype.load = function(json)
 {
+	// TODO: Validate json
 	var data = JSON.parse(json);
 	console.log(data);
 	this.elements.controls.find('input[name="name"]').val(data['name']);
 	
-	var planner = this;
 	for (var i = 0; i < data.waypoints.length; i++)
-	{
-		// TODO: Create marker function
-		var marker_options = {'position': new google.maps.LatLng(data.waypoints[i].lat, data.waypoints[i].lng),
-							  'draggable': true};
-		
-		var marker = new google.maps.Marker(marker_options);
-		planner.markers.push(marker);
-		planner.update_route(planner);
-		
-		// Event to remove said waypoint
-		google.maps.event.addListener(marker, 'rightclick', function(ev)
-		{
-			marker.setMap();
-			
-			var index = planner.markers.indexOf(marker);
-			if (index >= 0)
-				planner.markers.splice(index, 1);
-				
-			planner.update_route(planner);
-		});
-		
-		// Event on drag
-		google.maps.event.addListener(marker, 'dragend', function(ev)
-		{
-			planner.update_route(planner);
-		});
-	}
+		this.add_marker(new google.maps.LatLng(data.waypoints[i].lat, data.waypoints[i].lng))
 	
 	console.log(this.markers);
 	this.update_route();
 }
+
+/*
+ * Adds a marker to the map, adding relevant events and updates the directions
+ * @param {google.maps.LatLng} position The LatLng object representing the position to add the marker
+ */
+Planner.prototype.add_marker = function(position)
+{
+	// Allow 'this' reference through callbacks
+	var planner = this;
+	
+	var marker_options = {'position': position,
+						  'draggable': true};
+	
+	var marker = new google.maps.Marker(marker_options);
+	this.markers.push(marker);
+	this.update_route(planner);
+	
+	// Event to remove said waypoint
+	google.maps.event.addListener(marker, 'rightclick', function(ev)
+	{
+		marker.setMap();
+		
+		var index = planner.markers.indexOf(marker);
+		if (index >= 0)
+			planner.markers.splice(index, 1);
+			
+		planner.update_route(planner);
+	});
+	
+	// Event on drag
+	google.maps.event.addListener(marker, 'dragend', function(ev)
+	{
+		planner.update_route(planner);
+	});
+};
