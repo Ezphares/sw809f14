@@ -7,6 +7,7 @@ from django.conf.urls import patterns, include, url
 urlpatterns = patterns('',
     # Examples:
     url(r'^(?:login/)?$', 'runweb.views.session_login', name='login'),
+    url(r'^register/$', 'runweb.views.register', name='register'),
     url(r'^logout/$', 'runweb.views.session_logout', name='logout'),
     url(r'^routes/', include('routes.urls')),
 
