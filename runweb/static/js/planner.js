@@ -222,7 +222,9 @@ Planner.prototype.initialize_controls = function()
 		planner.update_route();
 	});
 	
-	$('<label>Round-trip?<input type="checkbox"/></label>').appendTo(this.elements.controls).find('input').change(function(ev)
+	// TODO: Add checkbox to form or json container
+	var checkbox = $('<label>Round-trip?<input name="round_trip" type="checkbox"/></label>');
+	checkbox.find('input').change(function(ev)
 	{
 		planner.round_trip = $(this).is(':checked');
 		planner.update_route();
@@ -230,10 +232,9 @@ Planner.prototype.initialize_controls = function()
 	
 	this.json_container = $('<input type="hidden" name="json" />');
 	
-	if (typeof CSRF == 'undefined')
-		var CSRF = '';
-	
-	$('<form action="" method="POST"><input type="text" name="name" value="Route name" /><input type="submit" /></form>').append(this.json_container).append().appendTo(this.elements.controls);
+	var form = $('<form action="" method="POST"><input type="text" name="name" value="Route name" /><input type="submit" /></form>').prepend(checkbox).append(this.json_container).appendTo(this.elements.controls);
+	if (typeof CSRF != 'undefined')
+		form.append(CSRF);
 };
 
 /**
@@ -299,12 +300,20 @@ Planner.prototype.update_info = function()
  */
 Planner.prototype.load = function(json)
 {
-	// TODO: Validate json
+	// Most invalid json should either throw during parsing or in the waypoint for loop.
+	// Minor problems such as missing names produce reasonable results as it is
 	var data = JSON.parse(json);
-	this.elements.controls.find('input[name="name"]').val(data['name']);
+	this.elements.controls.find('input[name="name"]').val(data.name);
+	this.round_trip = !!data.round_trip;
+	this.elements.info.find('input[name="rund_trip"]').prop('checked', this.round_trip);
 	
 	for (var i = 0; i < data.waypoints.length; i++)
+	{
+		if (typeof data.waypoints[i].lat != 'number' || typeof data.waypoints[i].lng != 'number')
+			throw 'Attempting to load bad waypoint data';
+			
 		this.add_marker(new google.maps.LatLng(data.waypoints[i].lat, data.waypoints[i].lng), true)
+	}
 	
 	this.update_route();
 }
