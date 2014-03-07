@@ -8,9 +8,9 @@ class Route (models.Model):
     owner = models.ForeignKey(User)
 	
     def as_json(self):
-        return json.dumps({'name': self.name,
-                           'waypoints': [{'lat': wp.latitude, 'lng': wp.longitude} for wp in self.waypoint_set.all().order_by('index')],
-						   'round_trip': self.roundtrip})
+        return {'name': self.name,
+                'waypoints': [{'lat': wp.latitude, 'lng': wp.longitude} for wp in self.waypoint_set.all().order_by('index')],
+				'round_trip': self.roundtrip}
 
 class Waypoint (models.Model):
     route = models.ForeignKey(Route)

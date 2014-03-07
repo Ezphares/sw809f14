@@ -1,13 +1,16 @@
 # Create your views here.
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from routes.models import Route, Waypoint
 import json
 
 @login_required
-def list(request):
-    return render(request, 'route_list.html', {'routes': Route.objects.filter(owner = request.user)})
+def list(request, as_json = False):
+    if as_json:
+        return HttpResponse(json.dumps({'routes': [route.as_json() for route in Route.objects.filter(owner = request.user)]}))
+    else:
+	    return render(request, 'route_list.html', {'routes': Route.objects.filter(owner = request.user)})
 
 @login_required
 def planner(request, load = None):
@@ -21,7 +24,7 @@ def planner(request, load = None):
     if (request.method == 'GET'):
         data = {}
         if route:
-            data['load_route'] = route.as_json()
+            data['load_route'] = json.dumps(route.as_json())
         return render(request, 'routing.html', data)
     else:
         #TODO: Validate json
