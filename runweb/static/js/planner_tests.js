@@ -25,7 +25,6 @@ module('Planner',
 	}
 });
 
-
 test('Initialization', function()
 {
 	expect(2);
@@ -60,7 +59,7 @@ asyncTest('Second marker', function()
 		{
 			equal(planner.markers.length, 2, 'route should have two markers');
 			equal(planner.route.legs.length, 1, 'route should have 1 leg');
-			ok(planner.route.legs[0].distance.value < 10000, 'this route should be less than 10 kilometers');
+			ok(planner.route.legs[0].distance.value < 10000, 'this route should be less than 10 kilometers (nytorv - randers)');
 		}
 		start();
 	});
@@ -82,8 +81,8 @@ asyncTest('Third marker and clear', function()
 		{
 			equal(planner.markers.length, 3, 'route should have three markers');
 			equal(planner.route.legs.length, 2, 'route should have 2 legs');
-			ok(planner.route.legs[0].distance.value < 10000, 'this leg should be less than 10 kilometers');
-			ok(planner.route.legs[1].distance.value > 10000, 'this leg should be more than 10 kilometers');
+			ok(planner.route.legs[0].distance.value < 10000, 'this leg should be less than 10 kilometers (cassiopeia - nytorv)');
+			ok(planner.route.legs[1].distance.value > 10000, 'this leg should be more than 10 kilometers (nytorv - randers)');
 			planner.clear();
 			equal(planner.markers.length, 0, 'markers should be cleared');
 			equal(planner.route, null, 'route should be cleared');
@@ -98,6 +97,48 @@ asyncTest('Third marker and clear', function()
 	planner.add_marker(randers);
 });
 
+asyncTest('Roundtrips', function()
+{
+	expect(3);
+
+	var count = 0;
+	
+	planner.elements.map.on('route-changed', function()
+	{
+		if (++count == 2)
+		{
+			equal(planner.markers.length, 2, 'route should have two markers');
+			equal(planner.route.legs.length, 2, 'route should have 2 leg');
+			ok(planner.route.legs[0].start_location.equals(planner.route.legs[1].end_location), 'route starts and ends at the same point')
+		}
+		start();
+	});
+	
+	planner.round_trip = true;
+	planner.add_marker(cassiopeia, true);
+	stop();
+	planner.add_marker(nytorv);
+});
+
+test('Marker removal', function()
+{
+	expect(4);
+	
+	planner.add_marker(cassiopeia, true);
+	planner.add_marker(nytorv, true);
+	planner.add_marker(randers, true);
+	
+	equal(planner.markers.length, 3, '3 markers should be added');
+	
+	// Removing middle marker
+	google.maps.event.trigger(planner.markers[1], 'rightclick');
+	
+	equal(planner.markers.length, 2, 'middle marker should be removed');
+	
+	ok(planner.markers[0].getPosition().equals(cassiopeia), 'first marker should intact')
+	ok(planner.markers[1].getPosition().equals(randers), 'final marker should be intact')
+});
+
 asyncTest('Marker overflow', function()
 {
 	var max = 9;
@@ -108,7 +149,7 @@ asyncTest('Marker overflow', function()
 		// Test border values, max - 1, max, max + 1
 		if (++count >= max - 1)
 		{
-			ok(planner.markers.length <= max, 'max markers should not be exceeded');
+			ok(planner.markers.length <= max, 'max markers should not be exceeded (' + count + '/' + max + ')');
 		}
 			
 		start();
@@ -119,5 +160,28 @@ asyncTest('Marker overflow', function()
 		if (i > 0) stop();
 	
 		planner.add_marker(cassiopeia, true);
+	}
+});
+
+test('Bad markers', function()
+{
+	try
+	{
+		planner.add_marker();
+		ok(false, 'no marker position argument should throw');
+	}
+	catch (ex)
+	{
+		ok(true, 'no marker position argument should throw');
+	}
+
+	try
+	{
+		planner.add_marker('a');
+		ok(false, 'non-latlng marker positions should throw');
+	}
+	catch (ex)
+	{
+		ok(true, 'non-latlng marker positions should throw');
 	}
 });

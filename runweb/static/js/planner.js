@@ -34,8 +34,10 @@ Planner = function(map, controls, info, load, mapsize)
 						   'height': mapsize[1] + 'px'});
 						   
 	this.elements.info.css({'height': mapsize[1] + 'px'});
-						   
-	this.initialize_map(this.elements.map[0]);
+	
+	if (this.elements.map.length > 0)
+		this.initialize_map(this.elements.map[0]);
+		
 	this.initialize_controls();
 	this.update_info();
 };
@@ -261,6 +263,9 @@ Planner.prototype.clear = function()
  */
 Planner.prototype.update_info = function()
 {
+	if (this.elements.info.length == 0)
+		return;
+
 	this.elements.info.html('');
 	
 	if (!this.route_renderer)
@@ -312,6 +317,10 @@ Planner.prototype.load = function(json)
  */
 Planner.prototype.add_marker = function(position, supress_directions)
 {
+	// We only need to test if the latlng exists, google will test validity
+	if (!position)
+		throw "No marker position given"
+
 	// Allow 'this' reference through callbacks
 	var planner = this;
 

@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>QUnit Example</title>
+		<title>RunOff test suite</title>
 		<link rel="stylesheet" href="qunit-1.14.0.css">
 	</head>
 	<body>
@@ -21,7 +21,13 @@
 		<script src="planner.js"></script>
 		
 		<script src="qunit-1.14.0.js"></script>
-		<script src="tests.js"></script>
+		
+		<script type="text/javascript">
+			// Supress jQuery global errors, we want to test RunOff
+			var __e3_, _xdc_;
+		</script>
+		
+		<script src="planner_tests.js"></script>
 
 	</body>
 </html>
