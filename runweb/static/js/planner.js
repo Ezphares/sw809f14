@@ -56,7 +56,6 @@ Planner.prototype.initialize_map = function(target)
 	// Callback function
 	var load_map = function()
 	{
-		console.log(target);
 		planner.map = new google.maps.Map(target, options);
 		planner.map_events();
 		if (planner.elements.load.length)
@@ -94,9 +93,6 @@ Planner.prototype.map_events = function()
 	// Event to add a waypoint
 	google.maps.event.addListener(this.map, 'click', function(ev)
 	{
-		if (planner.markers.length >= 9)
-			return;
-
 		planner.add_marker(ev.latLng)
 	});
 };
@@ -110,7 +106,9 @@ Planner.prototype.update_route = function()
 	// Set map icons
 	for (var i = 0; i < this.markers.length; i++)
 	{
-		this.markers[i].setIcon(STATIC_URL + 'img/number_' + (i + 1) + '.png');
+		if (typeof STATIC_URL != 'undefined')
+			this.markers[i].setIcon(STATIC_URL + 'img/number_' + (i + 1) + '.png');
+			
 		this.markers[i].setMap(this.map);
 	}
 
@@ -180,6 +178,9 @@ Planner.prototype.update_route = function()
 				// TODO: Handle nicely
 				alert('Directions request failed: ' + status);
 			}
+			
+			// Trigger event, mainly for unit testing, but could be useful later.
+			planner.elements.map.trigger('route-changed');
 		});
 	}
 	else
@@ -190,7 +191,12 @@ Planner.prototype.update_route = function()
 			this.route_renderer.setMap();
 			this.route_renderer = null;
 		}
+		
+		this.route = null;
 		this.update_info();
+		
+		// Trigger event, mainly for unit testing, but could be useful later.
+		this.elements.map.trigger('route-changed');
 	}
 };
 
@@ -221,7 +227,11 @@ Planner.prototype.initialize_controls = function()
 	});
 	
 	this.json_container = $('<input type="hidden" name="json" />');
-	$('<form action="" method="POST"><input type="text" name="name" value="Route name" /><input type="submit" /></form>').append(this.json_container).append(CSRF).appendTo(this.elements.controls);
+	
+	if (typeof CSRF == 'undefined')
+		var CSRF = '';
+	
+	$('<form action="" method="POST"><input type="text" name="name" value="Route name" /><input type="submit" /></form>').append(this.json_container).append().appendTo(this.elements.controls);
 };
 
 /**
@@ -241,6 +251,7 @@ Planner.prototype.clear = function()
 		this.route_renderer.setMap();
 		
 	this.route_renderer = null;
+	this.route = null;
 	
 	this.update_info();
 };
@@ -285,33 +296,47 @@ Planner.prototype.load = function(json)
 {
 	// TODO: Validate json
 	var data = JSON.parse(json);
-	console.log(data);
 	this.elements.controls.find('input[name="name"]').val(data['name']);
 	
 	for (var i = 0; i < data.waypoints.length; i++)
-		this.add_marker(new google.maps.LatLng(data.waypoints[i].lat, data.waypoints[i].lng))
+		this.add_marker(new google.maps.LatLng(data.waypoints[i].lat, data.waypoints[i].lng), true)
 	
-	console.log(this.markers);
 	this.update_route();
 }
 
-/*
+/**
  * Adds a marker to the map, adding relevant events and updates the directions
  * @param {google.maps.LatLng} position The LatLng object representing the position to add the marker
+ * @param {Bool} [supress_directions] If true, the directions service will not be invoked. This is used when bulk adding markers,
+ *		such as when loading a route form database, or during unit testing. update_route() should be called manually after all markers are added.
  */
-Planner.prototype.add_marker = function(position)
+Planner.prototype.add_marker = function(position, supress_directions)
 {
 	// Allow 'this' reference through callbacks
 	var planner = this;
+
+	if (this.markers.length >= 9)
+	{
+		this.elements.map.trigger('route-changed');
+		return;
+	}
 	
 	var marker_options = {'position': position,
 						  'draggable': true};
 	
 	var marker = new google.maps.Marker(marker_options);
 	this.markers.push(marker);
-	this.update_route(planner);
 	
-	// Event to remove said waypoint
+	if (supress_directions)
+	{
+		this.elements.map.trigger('route-changed');
+	}
+	else
+	{
+		this.update_route();
+	}
+	
+	// Event to remove the marker waypoint
 	google.maps.event.addListener(marker, 'rightclick', function(ev)
 	{
 		marker.setMap();
