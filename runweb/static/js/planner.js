@@ -305,7 +305,7 @@ Planner.prototype.load = function(json)
 	var data = JSON.parse(json);
 	this.elements.controls.find('input[name="name"]').val(data.name);
 	this.round_trip = !!data.round_trip;
-	this.elements.info.find('input[name="rund_trip"]').prop('checked', this.round_trip);
+	this.elements.controls.find('input[name="round_trip"]').prop('checked', this.round_trip);
 	
 	for (var i = 0; i < data.waypoints.length; i++)
 	{

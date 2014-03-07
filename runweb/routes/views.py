@@ -29,6 +29,12 @@ def planner(request, load = None):
         if not route:
             route = Route(owner = request.user)
 
+        #Round trip
+        round_trip = request.REQUEST.get('round_trip', False)
+        if type (round_trip) is not bool:
+            round_trip = (str(round_trip) == 'on')
+
+        route.roundtrip = round_trip
         route.name = request.REQUEST['name']
         route.save()
         route.waypoint_set.all().delete()
