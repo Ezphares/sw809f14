@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dk.aau.student.runapp" >
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -25,7 +27,7 @@
                 android:value="MainActivity" />
         </activity>
         <activity
-            android:name=".MatchComp"
+            android:name="dk.aau.student.runapp.MatchComp"
             android:label="@string/title_activity_matchmake"
             android:parentActivityName="dk.aau.student.runapp.RunOptions" >
             <meta-data
@@ -33,12 +35,24 @@
                 android:value="RunOptions" />
         </activity>
         <activity
-            android:name=".MatchFriend"
+            android:name="dk.aau.student.runapp.MatchFriend"
             android:label="@string/title_activity_matchmake"
             android:parentActivityName="dk.aau.student.runapp.RunOptions" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="RunOptions" />
+        </activity>
+        <activity
+            android:name="dk.aau.student.runapp.PickRoute"
+            android:label="@string/title_activity_pick_route"
+            android:parentActivityName="dk.aau.student.runapp.MatchComp" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="MatchComp" />
+        </activity>
+        <activity
+            android:name="dk.aau.student.runapp.HTTPRequest"
+            android:label="@string/title_activity_httprequest" >
         </activity>
     </application>
 

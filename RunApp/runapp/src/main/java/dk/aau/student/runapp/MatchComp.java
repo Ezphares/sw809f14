@@ -1,5 +1,6 @@
 package dk.aau.student.runapp;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -58,6 +59,12 @@ public class MatchComp extends ActionBarActivity {
             View rootView = inflater.inflate(R.layout.fragment_match_comp, container, false);
             return rootView;
         }
+    }
+
+    public void pickroute(View view)
+    {
+        Intent intent = new Intent(this, PickRoute.class);
+        startActivity(intent);
     }
 
 }
