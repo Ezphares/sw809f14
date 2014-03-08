@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>RunOff test suite</title>
+		<link rel="stylesheet" href="qunit-1.14.0.css">
+	</head>
+	<body>
+		<div id="qunit"></div>
+		<div id="qunit-fixture"></div>
+		
+		<div style="display: none;" id="content">
+			<div id="map"></div>
+			<div id="info"></div>
+			<div id="controls"></div>
+		</div>
+		
+		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+		
+		<script src="planner.js"></script>
+		
+		<script src="qunit-1.14.0.js"></script>
+		
+		<script type="text/javascript">
+			// Supress jQuery global errors, we want to test RunOff
+			var __e3_, _xdc_;
+		</script>
+		
+		<script src="planner_tests.js"></script>
+
+	</body>
+</html>

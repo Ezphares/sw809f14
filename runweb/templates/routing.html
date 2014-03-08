@@ -9,9 +9,16 @@
 	{{ block.super }}
 	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
 	<script src="{{ STATIC_URL }}js/planner.js"></script>
+	<script type="text/javascript">
+	$(function()
+	{
+		var planner = new Planner('#route-map', '#route-controls', '#route-info', '#route-load');
+	});
+	</script>
 {% endblock %}
 
 {% block content %}
+	{% if load_route %} <div style="display: none" id="route-load">{{ load_route }}</div> {% endif %}
 	<div id="route-controls"></div>
 	<div id="route-map"></div>
 	<div id="route-info"></div>

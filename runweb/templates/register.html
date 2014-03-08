@@ -1,11 +1,13 @@
 {% extends 'master.html' %}
 
 {% block content %}
-	<form action="/login/" method="POST">
+	<form action="/register/" method="POST">
 		<div>Username</div>
 		<input type="text" name="username" />
 		<div>Password</div>
 		<input type="password" name="password" />
+		<div>Confirm Password</div>
+		<input type="password" name="password_confirm" />
 		
 		{% csrf_token %}
 		<input type="hidden" name="next" value="{{ redirect }}"/>

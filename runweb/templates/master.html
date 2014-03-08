@@ -10,6 +10,7 @@
 		{% block scripts %}
 			<script type="text/javascript">
 				var STATIC_URL = '{{ STATIC_URL }}';
+				var CSRF = "{% csrf_token %}";
 			</script>
 			<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 			<script src="{{ STATIC_URL }}js/extensions.js"></script>
@@ -26,6 +27,9 @@
 				{% endif %}
 			</div>
 			<div id="content-wrapper">
+				{% if error %}
+					<div class="error">{{ error }}</div>
+				{% endif %}
 				{% block content %}
 				{% endblock %}
 			</div>
