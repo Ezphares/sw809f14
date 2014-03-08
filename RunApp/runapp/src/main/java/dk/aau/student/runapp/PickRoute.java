@@ -40,6 +40,4 @@ public class PickRoute extends ListActivity
             return rootView;
         }
     }
-
-    }
 }
