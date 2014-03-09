@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 
+@csrf_exempt #TODO: Apps should get a csrf key as well so we can track them, later
 def session_login(request, as_json = False):
     redirect = '/routes/'
     
