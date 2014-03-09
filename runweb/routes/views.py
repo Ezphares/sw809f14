@@ -6,9 +6,9 @@ from routes.models import Route, Waypoint
 import json
 
 @login_required
-def list(request, as_json = False):
+def overview(request, as_json = False):
     if as_json:
-        return HttpResponse(json.dumps({'routes': [route.as_json() for route in Route.objects.filter(owner = request.user)]}))
+        return HttpResponse(json.dumps({'routes': [route.as_json() for route in Route.objects.filter(owner = request.user)]})) 
     else:
 	    return render(request, 'route_list.html', {'routes': Route.objects.filter(owner = request.user)})
 
@@ -27,8 +27,14 @@ def planner(request, load = None):
             data['load_route'] = json.dumps(route.as_json())
         return render(request, 'routing.html', data)
     else:
-        #TODO: Validate json
-        data = json.loads(request.REQUEST['json'])
+        #TODO: 'Invalid data' responses should be more graceful
+        try:
+            data = json.loads(request.REQUEST.get('json', '{}'))
+            if type (data) is not dict:
+                return HttpResponse('Invalid data a')
+        except:
+            return HttpResponse('Invalid data b')
+
         if not route:
             route = Route(owner = request.user)
 
@@ -38,10 +44,15 @@ def planner(request, load = None):
             round_trip = (str(round_trip) == 'on')
 
         route.roundtrip = round_trip
-        route.name = request.REQUEST['name']
+        route.name = request.REQUEST.get('name', 'Untitled')
         route.save()
         route.waypoint_set.all().delete()
-        for i in range(len(data['waypoints'])):		
-            Waypoint(route = route, index = i, latitude = data['waypoints'][i]['lat'], longitude = data['waypoints'][i]['lng']).save()
+        
+        waypoints = data.get('waypoints', [])
+        if type (waypoints) is not list:
+            return HttpResponse('Invalid data c')
+
+        for i in range(len(waypoints)):		
+            Waypoint(route = route, index = i, latitude = waypoints[i].get('lat', 0), longitude = waypoints[i].get('lng', 0)).save()
         return HttpResponseRedirect('/routes/');
 
