@@ -7,5 +7,7 @@
     <string name="title_activity_run_options">Run Options</string>
     <string name="title_activity_matchmake">Matchmaking</string>
     <string name="title_activity_match_friend">Friend Matchmaking</string>
+    <string name="title_activity_pick_route">Pick Route</string>
+    <string name="title_activity_httprequest">HTTPRequest</string>
 
 </resources>
