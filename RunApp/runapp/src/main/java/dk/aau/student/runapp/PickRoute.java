@@ -78,11 +78,8 @@ public class PickRoute extends Activity
 
     public void JsonList(JSONArray array)
     {
-        Log.d("Calling the JsonList", "");
         ListView route_list = (ListView)findViewById(R.id.list);
-        Log.d("ListView route:", route_list.toString());
         RouteListAdapter adapter = new RouteListAdapter(this, array);
-        Log.d("Adapter:", adapter.toString());
         route_list.setAdapter(adapter);
     }
 
