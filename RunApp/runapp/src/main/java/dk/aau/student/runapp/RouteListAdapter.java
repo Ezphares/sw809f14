@@ -3,6 +3,7 @@ package dk.aau.student.runapp;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -17,7 +18,7 @@ import org.json.JSONObject;
 /**
  * Created by Vixen on 10-03-14.
  */
-public class RouteListAdapter extends BaseAdapter
+public class RouteListAdapter extends BaseAdapter implements View.OnTouchListener
 {
     private JSONArray items;
     private Context context;
@@ -84,4 +85,10 @@ public class RouteListAdapter extends BaseAdapter
         return view;
     }
 
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent)
+    {
+
+        return false;
+    }
 }
