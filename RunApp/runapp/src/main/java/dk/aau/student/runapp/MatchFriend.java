@@ -1,9 +1,11 @@
 package dk.aau.student.runapp;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -59,6 +61,20 @@ public class MatchFriend extends ActionBarActivity {
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_match_friend, container, false);
             return rootView;
+        }
+    }
+
+    public void pickroute(View view)
+    {
+        Intent intent = new Intent(this, PickRoute.class);
+        startActivityForResult(intent, MatchComp.ROUTE);
+    }
+
+    protected void onActivityResult(int request_code, int result_code, Intent data)
+    {
+        if(result_code == MatchComp.ROUTE)
+        {
+            Log.d("Were in business!", data.getStringExtra("name"));
         }
     }
 
