@@ -8,13 +8,14 @@ class Route (models.Model):
     name = models.CharField(max_length = 128)
     roundtrip = models.BooleanField(default = False)
     distance = models.FloatField(default = 0.0)
-    diffieculty = models.FloatField(default = 0.0)
+    difficulty = models.FloatField(default = 0.0)
     owner = models.ForeignKey(User)
 	
     def as_json(self):
         return {'name': self.name,
                 'waypoints': [{'lat': wp.latitude, 'lng': wp.longitude} for wp in self.waypoint_set.all().order_by('index')],
 				'distance': self.distance,
+				'difficulty': self.difficulty,
 				'round_trip': self.roundtrip}
 				
     def calculate_distance(self):
