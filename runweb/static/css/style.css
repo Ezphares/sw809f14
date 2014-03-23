@@ -9,6 +9,11 @@ html, body, div, h1, h2, h3, h4, h5, h6, li, ul, ol
 	padding: 0;
 }
 
+html
+{
+    overflow-y: scroll;
+}
+
 h1, h2, h3, h4, h5, h6
 {
 	font-family: sans-serif;
@@ -46,13 +51,21 @@ body
  */
 #top-bar
 {
-	background: #4d4;
+	background: #78AB46;
 	border-radius: 2px 2px 0 0;
+	color: white;
 } 
+
+#top-bar h1
+{
+	padding: 10px;
+	text-shadow: 1px 1px black;
+}
 
 #menu
 {
 	list-style-type: none;
+	border-top: 2px groove #4A7023;
 }
 
 #menu>li
@@ -62,16 +75,19 @@ body
 
 #menu>li>a
 {
+	text-shadow: 1px 1px black;
 	display: inline-block;
 	padding: 5px;
 	font-family: Helvetica, sans-serif;
 	font-weight: bold;
-	color: blue;
+	color: white;
+	border-right: 2px groove #4A7023;
+	border-spacing: 0;
 }
 
 #menu>li>a:hover
 {
-	background: #8f8;
+	background: #9CBA7F;
 }
 
 @media screen and (-webkit-min-device-pixel-ratio:0)
