@@ -28,12 +28,16 @@ Planner = function(map, controls, info, load, mapsize)
 	this.round_trip = false;
 	/** jQuery selector of a container where the route json is placed for upload */
 	this.json_container = null;
+	/** A google maps elevation service instance */
+	this.elevation = new google.maps.ElevationService();
+	/** An array containing elevations */
+	this.elevation_profile = [];
 	
 	// Setup map size
 	this.elements.map.css({'width': mapsize[0] + 'px',
 						   'height': mapsize[1] + 'px'});
 						   
-	this.elements.info.css({'height': mapsize[1] + 'px'});
+	this.elements.info.css({'height': mapsize[1] + 'px'}).append('<span class="distance"></span>').append('<div class="elevation"></div>');
 	
 	if (this.elements.map.length > 0)
 		this.initialize_map(this.elements.map[0]);
@@ -126,16 +130,7 @@ Planner.prototype.update_route = function()
 	
 	if (this.markers.length >= 2)
 	{
-		var plan = []
-		// Extract positions. This has the nice side effect of copying the array, so markers are unaffected later on.
-		for (var i = 0; i < this.markers.length; i++)
-		{
-			plan.push(this.markers[i].getPosition());
-		}
-		
-		// If we are round-tripping, end at the last waypoint
-		if (this.round_trip)
-			plan.push(plan[0]);
+		var plan = this.get_plan();
 		
 		// Extract start and end point
 		var destination = plan.reverse().shift();
@@ -179,7 +174,7 @@ Planner.prototype.update_route = function()
 					planner.route_renderer = new google.maps.DirectionsRenderer(direction_options);
 				}
 				
-				planner.update_info();
+				planner.update_info();		
 			}
 			else
 			{
@@ -272,14 +267,17 @@ Planner.prototype.clear = function()
  */
 Planner.prototype.update_info = function()
 {
+	// Allow 'this' reference through callbacks
+	var planner = this;
+
 	if (this.elements.info.length == 0)
 		return;
 
-	this.elements.info.html('');
-	
+	this.elements.info.find('.elevation').html('');
+		
 	if (!this.route_renderer)
 	{
-		$('<span></span>').text("No route entered").appendTo(this.elements.info);
+		this.elements.info.find('.distance').text("No route entered");
 		this.json_container.val('{"waypoints":[]}');
 	}
 	else
@@ -289,7 +287,7 @@ Planner.prototype.update_info = function()
 		{
 			distance += this.route.legs[i].distance.value;
 		}
-		$('<span></span>').text("Route distance: " + distance + 'm').appendTo(this.elements.info);
+		this.elements.info.find('.distance').text("Route distance: " + distance + 'm');
 		
 		var waypoints = [];
 		for (var i = 0; i < this.markers.length; i++)
@@ -299,6 +297,36 @@ Planner.prototype.update_info = function()
 		
 		this.json_container.val(JSON.stringify({'waypoints': waypoints,
 												'distance': distance})); // TODO: Enter score here
+								
+		
+
+		this.elevation.getElevationAlongPath({'path': this.get_plan(),
+											  'samples': 50}, function(result, status) // TODO: samples should vary by route length, currently disabled because of chart
+		{
+			if (status != google.maps.ElevationStatus.OK)
+				return;
+			
+			// Chart.js wrangling, for some visualization
+			var canvas = $('<canvas width="280" height="200"></canvas>').appendTo(planner.elements.info.find('.elevation'));
+			var context = canvas[0].getContext('2d');
+			var chart = new Chart(context);
+			
+			var chartdata = {'labels': [],
+			                 'datasets': [{'fillColor': 'rgba(151, 187, 205,1)',
+										   'strokeColor': 'rgba(220,220,220,1)',
+										   'pointColor': 'rgba(0,0,0,0)',
+										   'pointStrokeColor': 'rgba(0,0,0,0)',
+										   'data': [] }]};
+			for (var i = 0; i < result.length; i++)
+			{
+				chartdata['datasets'][0]['data'].push(Math.floor(result[i].elevation));
+				chartdata['labels'].push('');
+			}
+			
+			console.log(chartdata);
+			chart.Line(chartdata);
+			
+		});
 	}
 }
 
@@ -382,3 +410,23 @@ Planner.prototype.add_marker = function(position, supress_directions)
 		planner.update_route(planner);
 	});
 };
+
+/**
+ * Creates an array of LatLng objects denoting the plan of the route
+ * @return {Array} Array of google maps LatLng objects
+ */
+Planner.prototype.get_plan = function()
+{
+	var plan = []
+	// Extract positions.
+	for (var i = 0; i < this.markers.length; i++)
+	{
+		plan.push(this.markers[i].getPosition());
+	}
+	
+	// If we are round-tripping, end at the last waypoint
+	if (this.round_trip)
+		plan.push(plan[0]);
+		
+	return plan;
+}
