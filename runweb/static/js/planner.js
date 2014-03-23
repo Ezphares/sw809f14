@@ -43,6 +43,13 @@ Planner = function(map, controls, info, load, mapsize)
 };
 
 /**
+ * This event is triggered on the element containing the map whenever an attempt to change the route has been processed.
+ * @name route-changed
+ * @event
+ * @memberof Planner
+ */
+
+/**
  * Initializes the google map. First tests whether geolocation is available,
  * and if so, centers the map on the user.
  * <br />Called automatically by constructor.
@@ -84,7 +91,7 @@ Planner.prototype.initialize_map = function(target)
 };
 
 /**
- * Sets up events for map and markers.
+ * Sets up events for the map.
  * <br />Called automatically by initialize_map.
  */
 Planner.prototype.map_events = function()
@@ -261,6 +268,7 @@ Planner.prototype.clear = function()
 
 /**
  * Updates the route information view
+ * <br /> Called automatically by when route is updated
  */
 Planner.prototype.update_info = function()
 {
@@ -320,6 +328,7 @@ Planner.prototype.load = function(json)
 
 /**
  * Adds a marker to the map, adding relevant events and updates the directions
+ * <br /> Called on the map click event, and several times while loading.
  * @param {google.maps.LatLng} position The LatLng object representing the position to add the marker
  * @param {Bool} [supress_directions] If true, the directions service will not be invoked. This is used when bulk adding markers,
  *		such as when loading a route form database, or during unit testing. update_route() should be called manually after all markers are added.
@@ -333,6 +342,7 @@ Planner.prototype.add_marker = function(position, supress_directions)
 	// Allow 'this' reference through callbacks
 	var planner = this;
 
+	// The API limits us to 10 waypoints. Since we allow the round-trip option we have to limit at 9.
 	if (this.markers.length >= 9)
 	{
 		this.elements.map.trigger('route-changed');
