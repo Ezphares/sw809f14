@@ -27,12 +27,6 @@ body
 {
 	background: #ddd;
 }
-
-table, th, td
-{
-	border: 1px inset #888;
-}
-
 #page-wrapper
 {
 	background: #fefefe;
@@ -64,9 +58,33 @@ table, th, td
 #menu>li
 {
 	display: inline-block;
-	margin: 5px;
 }
- 
+
+#menu>li>a
+{
+	display: inline-block;
+	padding: 5px;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	color: blue;
+}
+
+#menu>li>a:hover
+{
+	background: #8f8;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0)
+{
+.button-link
+{
+	-webkit-appearance: button;
+	padding: 5px;
+	color: black;
+	text-decoration: none;
+}
+}
+
 /*
  * ERRORS
  */
@@ -89,4 +107,54 @@ input[type="checkbox"]
 {
 	line-height: inherit;
 	vertical-align: middle;
+}
+/**********
+ * TABLES *
+ **********/
+
+table
+{
+	border-spacing: 0;
+	border: 1px solid #888;
+	border-radius: 4px;
+	text-align: right;
+	font-family: Helvetica, sans-serif;
+	margin: 5px 0;
+}
+ 
+tr:nth-child(even)
+{
+	background: #eee;
+}
+
+tr:nth-child(odd):not(:first-child)
+{
+	background: #fff;
+}
+ 
+tr:first-child
+{
+	background: #ccc;
+}
+
+tr:hover:not(:first-child)
+{
+	background: #bbf;
+}
+
+th, td
+{
+	border: 0;
+	padding: 4px 15px;
+}
+
+tr:first-child>th
+{
+	text-align: center;
+	border-bottom: 1px solid #888;
+}
+
+th:first-child, td:first-child
+{
+	text-align: left;
 }
