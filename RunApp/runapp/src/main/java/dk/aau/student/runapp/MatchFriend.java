@@ -77,5 +77,4 @@ public class MatchFriend extends ActionBarActivity {
             Log.d("Were in business!", data.getStringExtra("name"));
         }
     }
-
 }

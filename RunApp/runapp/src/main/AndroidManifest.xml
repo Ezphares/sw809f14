@@ -50,10 +50,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MatchComp" />
         </activity>
-        <activity
-            android:name="dk.aau.student.runapp.HTTPRequest"
-            android:label="@string/title_activity_httprequest" >
-        </activity>
-    </application>
 
+        <meta-data
+            android:name="com.google.android.maps.v2.AIzaSyAzuJ-NRDmC66xWHKcyI5_BbZb5aRC9YtI"
+            android:value="API_KEAIzaSyAzuJ-NRDmC66xWHKcyI5_BbZb5aRC9YtIY"/>
+    </application>
+    <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
 </manifest>
