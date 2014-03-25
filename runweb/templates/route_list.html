@@ -3,17 +3,21 @@
 {% block content %}
 	<table>
 		<tr>
-			<th>Route name</th><th>Distance</th><th>Difficulty</th><th>View/Edit</th>
+			<th>Route name</th><th>Distance</th><th>Difficulty</th><th>View/Edit</th><th>Delete</th>
 		</tr>
 		{% for route in routes %}
 			<tr>
-				<td>{{ route.name }}</td><td> - not saved - </td><td> - not calculated - </td><td><a href="/routes/planner/{{ route.pk }}">Click here</a></td>
+				<td>{{ route.name }}</td>
+				<td>{{ route.distance|floatformat:"0" }} m.</td>
+				<td>{{ route.difficulty }}</td>
+				<td><center><a href="/routes/planner/{{ route.pk }}"><img width="24" height="24" src="{{ STATIC_URL }}img/pencil32.png" /></a></center></td>
+				<td><center><a href="/routes/delete/{{ route.pk }}"><img width="24" height="24" src="{{ STATIC_URL }}img/stop32.png" /></a></center></td>
 			</tr>
 		{% empty %}
 			<tr>
-				<td colspan="4">You have no saved routes!</td>
+				<td colspan="5">You have no saved routes!</td>
 			</tr>
 		{% endfor %}
 	</table>
-	<a href="/routes/planner/">New route</a>
+	<a class="button-link" href="/routes/planner/">New route</a>
 {% endblock %}

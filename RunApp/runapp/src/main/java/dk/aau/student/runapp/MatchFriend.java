@@ -63,4 +63,18 @@ public class MatchFriend extends ActionBarActivity {
             return rootView;
         }
     }
+
+    public void pickroute(View view)
+    {
+        Intent intent = new Intent(this, PickRoute.class);
+        startActivityForResult(intent, MatchComp.ROUTE);
+    }
+
+    protected void onActivityResult(int request_code, int result_code, Intent data)
+    {
+        if(result_code == MatchComp.ROUTE)
+        {
+            Log.d("Were in business!", data.getStringExtra("name"));
+        }
+    }
 }

@@ -28,12 +28,16 @@ Planner = function(map, controls, info, load, mapsize)
 	this.round_trip = false;
 	/** jQuery selector of a container where the route json is placed for upload */
 	this.json_container = null;
+	/** A google maps elevation service instance */
+	this.elevation = new google.maps.ElevationService();
+	/** An array containing elevations */
+	this.elevation_profile = [];
 	
 	// Setup map size
 	this.elements.map.css({'width': mapsize[0] + 'px',
 						   'height': mapsize[1] + 'px'});
 						   
-	this.elements.info.css({'height': mapsize[1] + 'px'});
+	this.elements.info.css({'height': mapsize[1] + 'px'}).append('<span class="distance"></span>').append('<div class="elevation"></div>');
 	
 	if (this.elements.map.length > 0)
 		this.initialize_map(this.elements.map[0]);
@@ -41,6 +45,13 @@ Planner = function(map, controls, info, load, mapsize)
 	this.initialize_controls();
 	this.update_info();
 };
+
+/**
+ * This event is triggered on the element containing the map whenever an attempt to change the route has been processed.
+ * @name route-changed
+ * @event
+ * @memberof Planner
+ */
 
 /**
  * Initializes the google map. First tests whether geolocation is available,
@@ -84,7 +95,7 @@ Planner.prototype.initialize_map = function(target)
 };
 
 /**
- * Sets up events for map and markers.
+ * Sets up events for the map.
  * <br />Called automatically by initialize_map.
  */
 Planner.prototype.map_events = function()
@@ -119,16 +130,7 @@ Planner.prototype.update_route = function()
 	
 	if (this.markers.length >= 2)
 	{
-		var plan = []
-		// Extract positions. This has the nice side effect of copying the array, so markers are unaffected later on.
-		for (var i = 0; i < this.markers.length; i++)
-		{
-			plan.push(this.markers[i].getPosition());
-		}
-		
-		// If we are round-tripping, end at the last waypoint
-		if (this.round_trip)
-			plan.push(plan[0]);
+		var plan = this.get_plan();
 		
 		// Extract start and end point
 		var destination = plan.reverse().shift();
@@ -172,7 +174,7 @@ Planner.prototype.update_route = function()
 					planner.route_renderer = new google.maps.DirectionsRenderer(direction_options);
 				}
 				
-				planner.update_info();
+				planner.update_info();		
 			}
 			else
 			{
@@ -261,17 +263,21 @@ Planner.prototype.clear = function()
 
 /**
  * Updates the route information view
+ * <br /> Called automatically by when route is updated
  */
 Planner.prototype.update_info = function()
 {
+	// Allow 'this' reference through callbacks
+	var planner = this;
+
 	if (this.elements.info.length == 0)
 		return;
 
-	this.elements.info.html('');
-	
+	this.elements.info.find('.elevation').html('');
+		
 	if (!this.route_renderer)
 	{
-		$('<span></span>').text("No route entered").appendTo(this.elements.info);
+		this.elements.info.find('.distance').text("No route entered");
 		this.json_container.val('{"waypoints":[]}');
 	}
 	else
@@ -281,7 +287,7 @@ Planner.prototype.update_info = function()
 		{
 			distance += this.route.legs[i].distance.value;
 		}
-		$('<span></span>').text("Route distance: " + distance + 'm').appendTo(this.elements.info);
+		this.elements.info.find('.distance').text("Route distance: " + distance + 'm');
 		
 		var waypoints = [];
 		for (var i = 0; i < this.markers.length; i++)
@@ -291,6 +297,36 @@ Planner.prototype.update_info = function()
 		
 		this.json_container.val(JSON.stringify({'waypoints': waypoints,
 												'distance': distance})); // TODO: Enter score here
+								
+		
+
+		this.elevation.getElevationAlongPath({'path': this.get_plan(),
+											  'samples': 50}, function(result, status) // TODO: samples should vary by route length, currently disabled because of chart
+		{
+			if (status != google.maps.ElevationStatus.OK)
+				return;
+			
+			// Chart.js wrangling, for some visualization
+			var canvas = $('<canvas width="280" height="200"></canvas>').appendTo(planner.elements.info.find('.elevation'));
+			var context = canvas[0].getContext('2d');
+			var chart = new Chart(context);
+			
+			var chartdata = {'labels': [],
+			                 'datasets': [{'fillColor': 'rgba(151, 187, 205,1)',
+										   'strokeColor': 'rgba(220,220,220,1)',
+										   'pointColor': 'rgba(0,0,0,0)',
+										   'pointStrokeColor': 'rgba(0,0,0,0)',
+										   'data': [] }]};
+			for (var i = 0; i < result.length; i++)
+			{
+				chartdata['datasets'][0]['data'].push(Math.floor(result[i].elevation));
+				chartdata['labels'].push('');
+			}
+			
+			console.log(chartdata);
+			chart.Line(chartdata);
+			
+		});
 	}
 }
 
@@ -320,6 +356,7 @@ Planner.prototype.load = function(json)
 
 /**
  * Adds a marker to the map, adding relevant events and updates the directions
+ * <br /> Called on the map click event, and several times while loading.
  * @param {google.maps.LatLng} position The LatLng object representing the position to add the marker
  * @param {Bool} [supress_directions] If true, the directions service will not be invoked. This is used when bulk adding markers,
  *		such as when loading a route form database, or during unit testing. update_route() should be called manually after all markers are added.
@@ -333,6 +370,7 @@ Planner.prototype.add_marker = function(position, supress_directions)
 	// Allow 'this' reference through callbacks
 	var planner = this;
 
+	// The API limits us to 10 waypoints. Since we allow the round-trip option we have to limit at 9.
 	if (this.markers.length >= 9)
 	{
 		this.elements.map.trigger('route-changed');
@@ -372,3 +410,23 @@ Planner.prototype.add_marker = function(position, supress_directions)
 		planner.update_route(planner);
 	});
 };
+
+/**
+ * Creates an array of LatLng objects denoting the plan of the route
+ * @return {Array} Array of google maps LatLng objects
+ */
+Planner.prototype.get_plan = function()
+{
+	var plan = []
+	// Extract positions.
+	for (var i = 0; i < this.markers.length; i++)
+	{
+		plan.push(this.markers[i].getPosition());
+	}
+	
+	// If we are round-tripping, end at the last waypoint
+	if (this.round_trip)
+		plan.push(plan[0]);
+		
+	return plan;
+}
