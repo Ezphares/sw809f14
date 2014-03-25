@@ -5,4 +5,5 @@ urlpatterns = patterns('',
     url(r'^json/$', 'routes.views.overview', {'as_json': True}),
     url(r'^planner/$', 'routes.views.planner', name='planner'),
     url(r'^planner/(\d+)/$', 'routes.views.planner', name='planner_load'),
+    url(r'^delete/(\d+)/$', 'routes.views.delete'),
 )
