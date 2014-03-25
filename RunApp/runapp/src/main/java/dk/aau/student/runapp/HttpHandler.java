@@ -49,7 +49,7 @@ public class HttpHandler
         if(method == HttpMethod.GET)
         {
             request = new HttpGet(url);
-
+            //TODO: URl encode parameters
 
         }
         else if(method == HttpMethod.POST)
