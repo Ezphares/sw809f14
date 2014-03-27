@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">RunApp</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_run_options">Run Options</string>
+    <string name="title_activity_matchmake">Matchmaking</string>
+    <string name="title_activity_match_friend">Friend Matchmaking</string>
+    <string name="title_activity_pick_route">Pick Route</string>
+    <string name="title_activity_httprequest">HTTPRequest</string>
+    <string name="json_dummy">{"routes": [{"round_trip": true, "name": "Short Home", "waypoints": [{"lat": 57.02523535607132, "lng": 9.978139400482178}, {"lat": 57.02533462538658, "lng": 9.979448318481445}, {"lat": 57.02795056827062, "lng": 9.98084306716919}, {"lat": 57.02554484188537, "lng": 9.981647729873657}]}, {"round_trip": true, "name": "Medium Home", "waypoints": [{"lat": 57.02527623170388, "lng": 9.978150129318237}, {"lat": 57.025328786022556, "lng": 9.979480504989624}, {"lat": 57.02795640722305, "lng": 9.980757236480713}, {"lat": 57.01968753180136, "lng": 9.981379508972168}]}, {"round_trip": true, "name": "~5k", "waypoints": [{"lat": 57.0252820710763, "lng": 9.978150129318237}, {"lat": 57.02532294665736, "lng": 9.979480504989624}, {"lat": 57.02797392407453, "lng": 9.981014728546143}, {"lat": 57.01564585861737, "lng": 9.99133586883545}]}]}</string>
+    <string name="title_activity_run_screen">RunScreen</string>
+    <string name="title_activity_run_in_progress">Run Progress</string>
+    <string name="title_activity_run_progress">Run Progress</string>
+
+</resources>
