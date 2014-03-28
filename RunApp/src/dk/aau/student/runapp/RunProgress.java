@@ -1,63 +1,81 @@
 package dk.aau.student.runapp;
 
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.Fragment;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class RunProgress extends FragmentActivity {
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.widget.Toast;
+
+public class RunProgress extends Activity 
+{
+    private GoogleMap googleMap;
+    private String data;
+    JSONObject route;
+    JSONArray waypoints;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_run_progress);
+        setContentView(R.layout.fragment_run_progress); 
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
-        }
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+        initializeMap();
         
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.run_progress, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+        data = getIntent().getExtras().getString("route");
+        try 
+        {
+			route = new JSONObject(data);
+			waypoints = route.getJSONArray("waypoints");
+			
+			double start_lat = waypoints.getJSONObject(0).getDouble("lat");
+			double start_lng = waypoints.getJSONObject(0).getDouble("lng");
+			
+			CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(start_lat, start_lng));
+			CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
+		    googleMap.moveCamera(center);
+		    googleMap.animateCamera(zoom);
+		
+			for(int i = 0; i <route.length(); i++)
+			{
+				double lat = waypoints.getJSONObject(i).getDouble("lat");				
+				double lng = waypoints.getJSONObject(i).getDouble("lng");
+				googleMap.addMarker(new MarkerOptions()
+		        .position(new LatLng(lat, lng)));
+			}
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        
+        
         }
-        return super.onOptionsItemSelected(item);
-    }
-
+    
     /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_run_progress, container, false);
-            return rootView;
+     * function to load map. If map is not created it will create it for you
+     * */
+    private void initializeMap() 
+    {
+        if (googleMap == null) {
+        	googleMap = ((MapFragment) getFragmentManager().findFragmentById(
+                    R.id.map)).getMap();
+ 
+            // check if map is created successfully or not
+            if (googleMap == null) {
+                Toast.makeText(getApplicationContext(),
+                        "Sorry! unable to create maps", Toast.LENGTH_SHORT)
+                        .show();
+            }
         }
     }
-
+ 
 }

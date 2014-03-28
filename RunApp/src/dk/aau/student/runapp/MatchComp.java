@@ -83,7 +83,7 @@ public class MatchComp extends ActionBarActivity
         { 
             Bundle route_data = data.getExtras();
             Intent intent = new Intent (this, RunProgress.class);
-            intent.putExtra("route", route_data);
+            intent.putExtras(route_data);
             startActivity(intent);
         }        
     }

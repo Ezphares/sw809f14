@@ -19,3 +19,4 @@ Release
 *.sublime-project
 *.sublime-workspace
 *.metadata
+*/bin/*
