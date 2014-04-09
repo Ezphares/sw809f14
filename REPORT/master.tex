@@ -1,0 +1,41 @@
+\input{preamble}
+
+\begin{document}
+\input{tex/acronyms}
+
+\pagestyle{empty}
+
+\input{tex/frontpage}
+\cleardoublepage
+
+\input{tex/titlepage}
+\cleardoublepage
+
+\input{tex/preface}
+
+\cleardoublepage
+\pdfbookmark{Table of Contents}{toc}
+\tableofcontents
+\cleardoublepage
+\pagestyle{plain}
+
+\pdfbookmark{Todo List}{todo}
+\listoftodos
+
+%input main content here
+
+
+\bookmarksetup{startatroot}% dette skulle stoppe part, så conclusion får indryk. Problemet i skrivende øjeblik er at chapters har samme indryk uafhængigt af parts
+\addtocontents{toc}{\bigskip}%laver ekstra mellemrum
+
+\cleardoublepage
+\chapter{Appendices}
+\begin{appendices}
+\input{tex/gamemanual/gamemanual.tex}
+\input{tex/appendix/questionnaire.tex}
+\end{appendices}
+\cleardoublepage
+\pdfbookmark{Bibliography}{bib}
+\bibliography{bib/bibliography}
+
+\end{document}
