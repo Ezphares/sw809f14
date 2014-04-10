@@ -6,14 +6,12 @@
     tools:context="dk.aau.student.runapp.MainActivity"
     tools:ignore="MergeRootFrame" >
 
-
     <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="RunOff"
-        android:id="@+id/textView"
         android:layout_gravity="center_horizontal"
-        android:phoneNumber="false" />
+        android:text="@+string/RunOff"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </FrameLayout>
