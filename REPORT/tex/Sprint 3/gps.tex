@@ -1,0 +1,33 @@
+\begin{document}
+
+Location
+
+Tracking the location of the users in an important part of the system, this is done using the GPS technology.
+GPS stands for Global Positioning System, and uses a number of satellites to determine the users location.
+The basics behind the technology is that the device needs to have access to at least three satellites, then the unit can send a time stamp, and the delay from the response of each satellite can then be triangulated to get a location of the device.
+Another way of determining the location of the device is using network based location. This is done by using information from the network the user is connected to.
+
+
+Android Providers:
+The Android API's contain multiple providers, which can be used. The one we are using for location is the Location Service, GPS Provider, and Network Provider. These will give us access to the device location and status.
+
+
+Android Location:
+The Android framework supplies an API for working with location.
+The developer is presented with a few different options of how to work with location, and the one we choose was to work make a service, with a LocationManager.
+
+The LocationManager provides all the default functionality of working with locations in Android, such as, checking the state of the GPS connection to see if any satellites are available, and requesting location updates at a time interval or location difference threshold.
+
+
+
+The program is build as a service, so it runs in the background without blocking the UI thread, and also being able to run if the devices' screen gets turned off.
+
+
+Implementation of GPS in Android:
+For the implementation a custom class is made, GPSTracker, which extends Service, and implements LocationListener.
+In this we have declared that if the distance of the device a new update is made each 10 meters. An update is also made at least every minute.
+
+A LocationManager is initiated in the class, and it is this which retrieves the location from the GPS device in the device. The LocationManager can have multiple different providers, GPS and Network.
+If GPS connection is available and ready for use the user can request the Latitude and/or Longitude of the device, but using the getLatitude, and getLongitude respectively.
+
+\end{document}
