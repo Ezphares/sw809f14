@@ -1,0 +1,109 @@
+\section{Rating System}
+
+
+\subsection{Elo}
+\label{sec:elo}
+The Elo rating system is a method for determining the relative skill levels of players in two-player games.
+It was created in the early 1960's by Arpad Elo, and modified versions of it are still in use today by the World Chess Federation (FIDE) and the United States Chess Federation (USCF), among others.
+
+The difference in ratings between two players is used to predict the outcome of a match.
+Suppose that player A has rating $R_A$ and player B has rating $R_B$, then the expected score for player A is calculated as shown in Equation \ref{eq:exp_score}.
+The expected score for player B is calculated as $E_B = 1 - E_A$.
+
+\begin{equation} \label{eq:exp_score}
+E_A = \frac{1}{1 + 10^\frac{R_B - R_A}{400}}
+\end{equation}
+
+The updated rating $R'_A$ for player A is given by Equation \ref{eq:update}, where $S_A$ is the actual score (1 = win, 0.5 = draw, 0 = loss), $E_A$ is the expected score for player A and $K$ is the K-factor.
+The K-factor governs the volatility of changes to ratings.
+Often a high K-factor is used for new players where there is greater uncertainty about their true rating, and a low K-factor is used for experienced players.
+
+\begin{equation} \label{eq:update}
+R'_A = R_A + K \left( S_A - E_A \right)
+\end{equation}
+
+For example, suppose player A and player B both have ratings 1700 and player A defeats player B.
+The expected scores for both players are given by Equation \ref{eq:exp_score_ex}, and their updated ratings are given by Equations \ref{eq:update_ex_a} and \ref{eq:update_ex_b}, assuming a K-factor of 32.
+
+\begin{equation} \label{eq:exp_score_ex}
+E_A = E_B = \frac{1}{1 + 10^\frac{1700 - 1700}{400}} = 0.5
+\end{equation}
+
+\begin{equation} \label{eq:update_ex_a}
+R'_A = 1700 + 32 \left( 1 - 0.5 \right) = 1716
+\end{equation}
+
+\begin{equation} \label{eq:update_ex_b}
+R'_B = 1700 + 32 \left( 0 - 0.5 \right) = 1684
+\end{equation}
+
+\subsection{Glicko and Glicko2}
+The Glicko rating system was created in 1995 by Mark E. Glickman to address a deficiency that he identified in the Elo rating system \cite{glicko}.
+
+Glickman uses the same example as the one given in Section \ref{sec:elo} to illustrate the problem.
+Suppose that player A has not competed for a long period of time, and that player B competes frequently.
+This means that the rating of player A is less accurate than the rating of player B.
+He argues that:
+
+\begin{itemize}
+	\item{The rating of player A should increase by more than 16 points because it is already not accurate, and defeating a player with a fairly accurate rating of 1700 is a reasonable indication that the true rating of player A is higher than 1700.}
+	\item{The rating of player B should decrease by less than 16 points because the rating of player B is already fairly accurate, and because the rating of player A is not accurate very little can be inferred about the skill level of player B.}
+\end{itemize}
+
+To achieve this a \emph{ratings deviation} (RD) is introduced, which is a measure of the uncertainty of a rating.
+A high RD equates to a high uncertainty, and a low RD equates to a low uncertainty.
+The RD of a player is always decreased when the player competes, and increases as time passes.
+
+The Glicko rating system treats games that occurred within the same \emph{rating period} as if they occurred simultaneously.
+The length of a rating period ranges from several months to a game-by-game basis depending on the particular application.
+
+Before determining the post-period rating and RD of a player, the pre-period rating and RD of the player must be updated.
+This is shown in Equation \ref{eq:pre_rd}, where $t$ is the number of rating periods since the player last competed, and $c$ is a constant that controls the volatility of increase in uncertainty over time.
+
+\begin{equation} \label{eq:pre_rd}
+RD = \min \left( \sqrt{RD_{old}^2 + c^2t}, 350 \right)
+\end{equation}
+
+The post-period rating of a player is given by Equation \ref{eq:post_rating} and the post-period RD is given by Equation \ref{eq:post_rd}.
+
+\begin{equation} \label{eq:post_rating}
+r' = r + \frac{q}{\frac{1}{RD^2} + \frac{1}{d^2}} \sum \limits_{j=1}^m g \left( RD_j \right) \left( s_j - E \left( s | r, r_j, RD_j \right) \right)
+\end{equation}
+
+\begin{equation} \label{eq:post_rd}
+RD' = \sqrt{\left( \frac{1}{RD^2} + \frac{1}{d^2} \right)^{-1}}
+\end{equation}
+
+The value of q is $\frac{ln \left( 10 \right)}{400} = 0.0057565$ and the other variables are given by Equations \ref{eq:glicko_g}, \ref{eq:glicko_e} and \ref{eq:glicko_d2}.
+
+\begin{equation} \label{eq:glicko_g}
+g \left( RD \right) = \frac{1}{\sqrt{1 + \frac{3 q^2 RD^2}{\pi^2}}}
+\end{equation}
+
+\begin{equation} \label{eq:glicko_e}
+E \left( s | r, r_j, RD_j \right) = \frac{1}{1 + 10^{\frac{-g \left( RD_j \right) \left( r - r_j \right)}{400}}}
+\end{equation}
+
+\begin{equation} \label{eq:glicko_d2}
+d^2 = \left( q^2 \sum \limits_{j=1}^m g \left( RD_j \right)^2 E \left( s | r, r_j, RD_j \right) \left( 1 - E \left( s | r, r_j, RD_j \right) \right) \right)^{-1}
+\end{equation}
+
+In the example given in Section \ref{sec:elo} the rating of player A was 1716 and the rating of player B was 1684.
+Using the Glicko rating system instead, and assuming that player A has an RD of 200 and player B has an RD of 50, the post-period rating of player A is 1785 and the post-period rating of player B is 1694.
+This shows that the Glicko rating system has the desired effect of increasing the rating of player A by a large amount while only decreasing the rating of player B by a small amount.
+
+Glickman has also proposed an extension to the original Glicko rating system called the Glicko 2 rating system \cite{glicko2}.
+In the Glicko 2 rating system every player still has a rating and an RD, but also a rating volatility $\sigma$.
+The rating volatility for a player is high when the player performs erratically and low when the player performs at a consistent level.
+The Glicko 2 rating system is most suitable for games with extremely unpredictable outcomes.
+
+\subsection{Implementation}
+For our application we use the original Glicko rating system, in order to benefit from the improvements it provides over the Elo rating system.
+The Glicko rating system is preferred over the Glicko 2 rating system as we do not expect the games to have extremely unpredictable outcomes, 
+
+The default rating for new players is set to 1500 with an RD of 350.
+The minimum RD is set to 30 to ensure that the rating of a player can always change appreciably.
+The rating period is set to one day, and the value of the constant $c$ is 18.1.
+The value of $c$ was determined using the method proposed by Glickman \cite{glicko}, which is to determine how many ratings periods it would take for the rating of a typical player to become as uncertain as the rating of an unranked player.
+We assume that this would take 365 rating periods (one year) and that the RD of a typical player is 50.
+These numbers were then used to solve Equation \ref{eq:pre_rd} for $c$.
