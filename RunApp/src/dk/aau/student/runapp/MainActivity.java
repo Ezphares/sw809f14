@@ -1,5 +1,7 @@
 package dk.aau.student.runapp;
 
+import org.apache.http.message.BasicNameValuePair;
+
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,8 +29,10 @@ public class MainActivity extends ActionBarActivity
             {
                 public void run()
                 {
-                	Log.d("in new thread", "");
-                    if(!HttpHandler.login_request())
+                    BasicNameValuePair username = new BasicNameValuePair("username", "test");
+                    BasicNameValuePair password = new BasicNameValuePair("password", "123456");
+                    
+                    if(!HttpHandler.login_request(username, password))
                     {
                        is_authenticated = false;
                        Log.d("auth failed!", "herp");                    
@@ -36,7 +40,6 @@ public class MainActivity extends ActionBarActivity
                     else
                     {
                         PickRoute.routes = HttpHandler.route_request();
-                        Log.d("routes", PickRoute.routes.toString());
                     }
                 }
             }).start();

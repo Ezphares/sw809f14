@@ -16,8 +16,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +45,39 @@ public class HttpHandler
 
     public enum HttpMethod{GET, POST}
 
+    public static boolean is_reachable()
+    {
+    	SocketAddress sockaddr = new InetSocketAddress(IP, 8000);
+    	// Create your socket
+    	Socket socket = new Socket();
+    	boolean online = true;
+    	// Connect with 10 s timeout
+    	try 
+    	{
+    	    socket.connect(sockaddr, 10000);
+    	} 
+    	catch (IOException iOException) 
+    	{
+    	    online = false;  
+    	} 
+    	finally 
+    	{
+    	    // As the close() operation can also throw an IOException
+    	    // it must caught here
+    	    try 
+    	    {
+    	        socket.close();
+    	    } 
+    	    catch (IOException ex) 
+    	    {
+    	        // feel free to do something moderately useful here, eg log the event
+    	    }
+
+    	}
+
+    	return online;
+    }
+    
     public static ResponseData http_request(String url, HttpMethod method, List<NameValuePair> parameters)
     {
         //prep request
@@ -89,23 +129,27 @@ public class HttpHandler
         return null;
     }
 
-    public static boolean login_request()
+    public static boolean login_request(BasicNameValuePair username, BasicNameValuePair password)
     {
         boolean success = false;
-
+        
         List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(2);
-        nameValuePair.add(new BasicNameValuePair("username", "test"));
-        nameValuePair.add(new BasicNameValuePair("password", "123456"));
+        
+        //TODO: this should be dynamic
+        nameValuePair.add(username);
+        nameValuePair.add(password);
 
         HttpHandler.ResponseData response = HttpHandler.http_request("http://" + IP + ":8000/api/login/", HttpHandler.HttpMethod.POST, nameValuePair);
         JSONObject json;
         try
         {
             json = new JSONObject(response.body);
+            Log.d("login response", json.getString("status"));
             if(response.status == 200 && json.getString("status").equals("OK"))
             {
                 success = true;
             }
+            	
         }
         catch(JSONException e)
         {

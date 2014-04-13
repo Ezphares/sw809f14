@@ -1190,16 +1190,17 @@ containing a value of this type.
         public static final int action_menu_divider=0x7f050016;
         public static final int action_menu_presenter=0x7f050017;
         public static final int action_mode_close_button=0x7f050027;
-        public static final int action_settings=0x7f05004e;
+        public static final int action_settings=0x7f05004d;
         public static final int activity_chooser_view_content=0x7f050028;
         public static final int always=0x7f05000b;
         public static final int beginning=0x7f050011;
-        public static final int button=0x7f050046;
-        public static final int button2=0x7f050047;
-        public static final int button_friendlyRun=0x7f05004b;
+        public static final int button_findFriend=0x7f050048;
+        public static final int button_friendlyRun=0x7f05004a;
+        public static final int button_matchmake=0x7f050047;
+        public static final int button_pickRoute=0x7f050046;
         public static final int button_profile=0x7f050043;
         public static final int button_routes=0x7f050044;
-        public static final int button_runOff=0x7f05004a;
+        public static final int button_runOff=0x7f050049;
         public static final int button_runOptions=0x7f050041;
         public static final int button_scoreboard=0x7f050042;
         public static final int checkbox=0x7f050030;
@@ -1209,7 +1210,6 @@ containing a value of this type.
         public static final int dialog=0x7f05000e;
         public static final int disableHome=0x7f050008;
         public static final int dropdown=0x7f05000f;
-        public static final int editText=0x7f050048;
         public static final int edit_query=0x7f050033;
         public static final int end=0x7f050013;
         public static final int expand_activities_button=0x7f050029;
@@ -1222,9 +1222,8 @@ containing a value of this type.
         public static final int image=0x7f05002a;
         public static final int list=0x7f050045;
         public static final int listMode=0x7f050001;
-        public static final int listRoutes=0x7f050049;
         public static final int list_item=0x7f05002c;
-        public static final int map=0x7f05004c;
+        public static final int map=0x7f05004b;
         public static final int middle=0x7f050012;
         public static final int never=0x7f050009;
         public static final int none=0x7f050010;
@@ -1232,7 +1231,7 @@ containing a value of this type.
         public static final int progress_circular=0x7f050018;
         public static final int progress_horizontal=0x7f050019;
         public static final int radio=0x7f050032;
-        public static final int route_name=0x7f05004d;
+        public static final int route_name=0x7f05004c;
         public static final int satellite=0x7f05001a;
         public static final int search_badge=0x7f050035;
         public static final int search_bar=0x7f050034;
@@ -1319,11 +1318,10 @@ containing a value of this type.
         public static final int activity_run_screen=0x7f03001e;
         public static final int fragment_match_comp=0x7f03001f;
         public static final int fragment_match_friend=0x7f030020;
-        public static final int fragment_pick_route=0x7f030021;
-        public static final int fragment_run_options=0x7f030022;
-        public static final int fragment_run_progress=0x7f030023;
-        public static final int route_list=0x7f030024;
-        public static final int support_simple_spinner_dropdown_item=0x7f030025;
+        public static final int fragment_run_options=0x7f030021;
+        public static final int fragment_run_progress=0x7f030022;
+        public static final int route_list=0x7f030023;
+        public static final int support_simple_spinner_dropdown_item=0x7f030024;
     }
     public static final class menu {
         public static final int httprequest=0x7f0c0000;
