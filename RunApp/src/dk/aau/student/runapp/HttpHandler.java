@@ -20,11 +20,9 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -135,7 +133,6 @@ public class HttpHandler
         
         List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(2);
         
-        //TODO: this should be dynamic
         nameValuePair.add(username);
         nameValuePair.add(password);
 
