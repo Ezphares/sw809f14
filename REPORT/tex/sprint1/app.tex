@@ -50,7 +50,86 @@ If the user wishes to pick a route, they will push the "Pick Route" button which
 \end{figure}
 
 \subsection{Implementation}
+For the first sprint it was decided that the functionality for the application prototype should be a basic interface and establishing a connection to the server to retrieve the routes created and saved online. The \ac{GUI} was implemented with an activity for each screen and a class to handle the \ac{HTTP} interactions. 
 
+\subsubsection{Main Screen}
+The main screen was implemented as a class extending the \texttt{ActionBarActivity}, with an accompanying \ac{XML} file specifying the layout of the activity. The layout for this activity is shown in \autoref{fig:mainV1} 
+
+\begin{figure}[ht]
+\begin{center}
+ \caption{Main Activity Prototype}
+ \label{fig:mainV1}
+ \includegraphics[scale=0.4]{img/mainV1.png}
+\end{center}
+\end{figure}
+
+There is currently no styling on the buttons, the background or the action bar because this was not part of the focus of this sprint. 
+\vspace{10pt}
+
+The \texttt{MainActivity} class is implemented with an \texttt{onCreate} function which runs the initial setup when the activity is first started such as setting the layout of the activity to the \ac{XML}-file producing the layout shown in \autoref{fig:mainV1} and contacting the server. It utilizes another class, \texttt{HttpHandler}, to establish a connection to the server, log the user in and get their saved routes. These calls are run on separate threads created for this because network calls are not allowed on the \ac{UI} thread. 
+\vspace{10pt}
+
+The \texttt{HttpHandler} class has 4 functions: 
+\begin{itemize}
+\item  \texttt{is\_reachable} which asserts if the server is reachable by using sockets and returns a boolean value signifying if it is or not. It instantiates a new socket and attempts to connect via it to the IP and port of the server for 10 seconds. If it connects, the boolean value is set to true, if not it is set to false. The socket is then closed and the value is returned.
+
+\item \texttt{http\_request} is a generic \ac{HTTP} request function returning a custom \texttt{ResponseData} object consisting of a status code in integers and a response body, which is stored in a string. The implementation is shown in 
+
+\begin{lstlisting}[label={lst:http-request},caption={The http-request function},language=java]    
+public static ResponseData http_request(String url, HttpMethod method, List<NameValuePair> parameters)
+{
+    //prep request
+    HttpRequestBase request = null;
+
+    if(method == HttpMethod.GET)
+    {
+        request = new HttpGet(url);
+        //TODO: URl encode parameters
+
+    }
+    else if(method == HttpMethod.POST)
+    {
+        HttpPost post = new HttpPost(url);
+        try
+        {
+            post.setEntity(new UrlEncodedFormEntity(parameters));
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+
+        request = post;
+    }
+    try
+    {
+        HttpResponse response = client.execute(request);
+        HttpEntity entity = response.getEntity();
+
+        ResponseData data = new HttpHandler.ResponseData();
+        data.body = EntityUtils.toString(entity, "UTF-8");
+        data.status = response.getStatusLine().getStatusCode();
+
+        return data;
+    }
+    catch (ClientProtocolException e)
+    {
+        // writing exception to log
+        e.printStackTrace();
+   }
+   catch (IOException e)
+   {
+       // writing exception to log
+       e.printStackTrace();
+    }
+    return null;
+}
+\end{lstlisting} 
+
+
+\item \texttt{login\_request} which attempts to log the user in and
+\item \texttt{route\_request}, which retrieves their saved routes.
+\end{itemize}
 
 
 \subsection{Testing}
