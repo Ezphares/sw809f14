@@ -78,7 +78,7 @@ In this sprint, the server logic was kept quite simple, so validation features, 
 
 The primary feature of the client was the route planner. This was implemented as a javascript class and makes use of the Google Maps \ac{API}\cite{gmapsapi}. The class, \texttt{Planner} is initialized with a constructor taking five arguments. Three of these should be IDs of \ac{HTML} elements which will be used to contain the map, the map options and the route information respectively. Using parameters for this allows programmers to change the layout of the route editor simply by editing the \ac{HTML} instead of the class, and keeps design and logic separate. The last two parameters for \texttt{Planner}'s constructor is the dimensions of the map, and an optional route (encoded as \ac{JSON}) to load on the map initially.
 
-After initialization, the \texttt{Planner} instance contains a few member variables, including an array to store markers on the map and the map itself, and exposes a number of functions.
+After initialization, the \texttt{Planner} instance contains a few member variables, including an array to store markers on the map and the map itself, and exposes a number of functions. Each function is described in the list below, and an overall flow of the code can be seen in \autoref{fig:sprint1-web-flow}
 \begin{itemize}
  \item \texttt{initialize\_map(target)}. This function is called automatically upon construction, and sets up the map in the target \ac{HTML} element. If available, it will ask the user for permission to use geolocation\cite{geolocation} to center the map on the user's current location.
  \item \texttt{map\_events()}. This function is also called upon initialization, but after \texttt{initialize\_map} is done. This function sets up the various click events on the map.
@@ -117,6 +117,13 @@ var route_options = {'origin': origin,
  \item \texttt{load(json)}. This function loads an existing route, encoded in \ac{JSON}. If the load parameter is given to the constructor, this function is called on construction, but can otherwise be called at any time. The function starts by calling \texttt{clear}. After that, it updates the controls, setting the title and round trip settings to those from the desired route. It then adds each waypoint, using the \texttt{add\_marker} function with \texttt{supress\_directions} set to true, so that the directions service is not invoked for each waypoint. Finally, it calls \texttt{update\_route}.
  \item{update\_info}. This function is called every time \texttt{update\_route} has finished. Update info does two things: First it updates the info window with the total route distance, and second it encodes the route waypoints as \ac{JSON} and stores them in a hidden field in the controls form, so that it is correclty submitted when the user submits the form.
 \end{itemize}
+
+\begin{figure}[ht]
+ \caption{Sprint 1 Planner Flowchart}
+ \label{fig:sprint1-web-flow}
+ \includegraphics[width=\textwidth]{img/sprint1webflow.png}
+\end{figure}
+
 
 All in all, most of the functionality revolves around sending and retrieving data to and from the Google Maps \ac{API}, as well as ensuring that using the planner is as smooth as possible. The look of the planner at the end of the first sprint can be seen in \autoref{fig:sprint1-web-screen}.
 
