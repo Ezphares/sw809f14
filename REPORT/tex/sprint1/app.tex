@@ -50,10 +50,10 @@ If the user wishes to pick a route, they will push the "Pick Route" button which
 \end{figure}
 
 \subsection{Implementation}
-For the first sprint it was decided that the functionality for the application prototype should be a basic interface and establishing a connection to the server to retrieve the routes created and saved online. The \ac{GUI} was implemented with an activity for each screen and a class to handle the \ac{HTTP} interactions. 
+For the first sprint it was decided that the functionality for the application prototype should be a basic interface and establishing a connection to the server to retrieve the routes created and saved online. The \ac{GUI} was implemented with an activity for each screen and a class to handle the \ac{HTTP} interactions. Implementations of the screens (except the main screen) are trivial as they only handle button clicks and therefore they will not be discussed further in this chapter.
 
-\subsubsection{Main Screen}
-The main screen was implemented as a class extending the \texttt{ActionBarActivity}, with an accompanying \ac{XML} file specifying the layout of the activity. The layout for this activity is shown in \autoref{fig:mainV1} 
+\subsubsection{Main Screen and HTTP Handler}
+The main screen, as all the other screens, was implemented as a class extending the \texttt{ActionBarActivity}, with an accompanying \ac{XML} file specifying the layout of the activity. The layout for this activity is shown in \autoref{fig:mainV1} 
 
 \begin{figure}[ht]
 \begin{center}
@@ -63,17 +63,17 @@ The main screen was implemented as a class extending the \texttt{ActionBarActivi
 \end{center}
 \end{figure}
 
-There is currently no styling on the buttons, the background or the action bar because this was not part of the focus of this sprint. 
+There is currently no styling of the buttons, the background or the action bar because this was not part of the focus for this sprint. 
 \vspace{10pt}
 
-The \texttt{MainActivity} class is implemented with an \texttt{onCreate} function which runs the initial setup when the activity is first started such as setting the layout of the activity to the \ac{XML}-file producing the layout shown in \autoref{fig:mainV1} and contacting the server. It utilizes another class, \texttt{HttpHandler}, to establish a connection to the server, log the user in and get their saved routes. These calls are run on separate threads created for this because network calls are not allowed on the \ac{UI} thread. 
+The \texttt{MainActivity} class is implemented with an \texttt{onCreate} function which runs the initial setup when the activity is first started such as setting the layout of the activity to the \ac{XML}-file producing the layout shown in \autoref{fig:mainV1} and contacting the server. The implementation of the \ac{GUI}, with handling of button clicks, is trivial and will not be explained in further detail, however the \texttt{onCreate} utilizes another class, \texttt{HttpHandler}, to establish a connection to the server, log the user in and get their saved routes. These calls are run on separate threads because network calls are not allowed on the \ac{UI} thread on Android. 
 \vspace{10pt}
 
 The \texttt{HttpHandler} class has 4 functions: 
 \begin{itemize}
-\item  \texttt{is\_reachable} which asserts if the server is reachable by using sockets and returns a boolean value signifying if it is or not. It instantiates a new socket and attempts to connect via it to the IP and port of the server for 10 seconds. If it connects, the boolean value is set to true, if not it is set to false. The socket is then closed and the value is returned.
+\item  \texttt{is\_reachable} which asserts if the server is reachable and returns a boolean value signifying if it is or not. It instantiates a new socket and attempts to connect via it to the IP and port of the server for 10 seconds. If it connects, the boolean value is set to true, if not it is set to false. The socket is then closed and the value is returned.
 
-\item \texttt{http\_request} is a generic \ac{HTTP} request function returning a custom \texttt{ResponseData} object consisting of a status code in integers and a response body, which is stored in a string. The implementation is shown in 
+\item \texttt{http\_request} is a generic \ac{HTTP} request function returning a custom \texttt{ResponseData} object consisting of a status code in integers and a response body, which is stored in a string. The implementation is shown in \autoref{lst:http-request}
 
 \begin{lstlisting}[label={lst:http-request},caption={The http-request function},language=java]    
 public static ResponseData http_request(String url, HttpMethod method, List<NameValuePair> parameters)
@@ -84,7 +84,7 @@ public static ResponseData http_request(String url, HttpMethod method, List<Name
     if(method == HttpMethod.GET)
     {
         request = new HttpGet(url);
-        //TODO: URl encode parameters
+        //TODO: URL encode parameters
 
     }
     else if(method == HttpMethod.POST)
@@ -101,6 +101,7 @@ public static ResponseData http_request(String url, HttpMethod method, List<Name
 
         request = post;
     }
+    
     try
     {
         HttpResponse response = client.execute(request);
@@ -126,10 +127,11 @@ public static ResponseData http_request(String url, HttpMethod method, List<Name
 }
 \end{lstlisting} 
 
+The function works by creating an \texttt{HttpRequestBase} called \texttt{request} in line 4. It then checks what request method (defined in an enumerate on the class) is needed: If the request method in the parameters is of type \texttt{GET} the function will set \texttt{request} to an \texttt{HttpGet} request with the provided URL, done in lines 6-11. If the request method is of type \texttt{POST} the function will try to add the post-parameters provided to a post request and set \texttt{request} to that request, seen in lines 12-25. When the type of request has been decided and the request is ready an \texttt{HttpResponse} is created to catch the response from the server when the request is executed in line 28. Seeing as we are only interested in the content of the response, not the headers, the content is transferred to an instance of the custom \texttt{ResponseData} class in lines 29-33. The data object is then returned in line 35. Lines 37-48 contain exception handling.
+ 
+\item \texttt{login\_request} is a function taking a username and password as parameters and returning a boolean signifying if the login was successful or not. It adds its received parameters to a list of \texttt{NameValuePair}s and calls \texttt{http\_request} with a \texttt{POST} request and the list as parameters. The \texttt{ResponseData} object is then checked to see that the response has status code 200 and text "OK" which means the login was successful.
 
-\item \texttt{login\_request} which attempts to log the user in and
-\item \texttt{route\_request}, which retrieves their saved routes.
+\item \texttt{route\_request} takes no parameters and returns a \texttt{JSONArray} with the routes the user has saved. It sends a \texttt{GET} request using \texttt{http\_request}. If the response status code is 200, signifying that the response is OK, the array of routes in the \texttt{ResponseData} object resulting from the function call is then saved in a \texttt{JSONArray} object, which is returned. 
 \end{itemize}
-
 
 \subsection{Testing}
