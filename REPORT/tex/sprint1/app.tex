@@ -1,12 +1,56 @@
 \section{RunOff Application}
 For the first sprint it was decided the focus should be on creating a very basic application prototype which could showcase the envisioned \ac{GUI} functionality and be able to interface with the server. 
 
-\subsection{Tools}
-For development Android Studio, an \ac{IDE} developed by Google Inc. which is specifically designed to support Android application development, was chosen. Android Studio is currently in "early preview" mode, which means it is still under heavy development, however the group decided that it should be the first choice for development, given that it is developed by Google Inc. specifically with the Android OS in mind.  
-
 \subsection{User Interface}
-At its core the application is intended to be quick and easy to use - the user should open the application, choose a running mode (against friends or against an unknown opponent) and start searching for a match. 
+At its core the application is intended to be quick and easy to use - the user should open the application, choose a running mode (against friends or against an unknown opponent), pick a route and be ready to go. For the first sprint a rough mock-up of the interface for the application was designed, outlined below. The focus was on keeping the navigation level as low as possible, i.e. having as much information on each screen as possible to avoid the user having to go through five screens to find the wanted functionality.
+\vspace{10pt}
 
-\subsection{Connection to Web Server}
+When the user opens the application the first screen should show four buttons, encompassing the basic functionality of the application, illustrated in \autoref{fig:mainMock}
+
+
+\begin{figure}[ht]
+\begin{center}
+ \caption{Main User Interface Mock-up}
+ \label{fig:mainMock}
+ \includegraphics[scale=0.4]{img/mainMockV1.png}
+\end{center}
+\end{figure}
+
+The first option is the most vital: start an exercise session. Because this is the main focus of the application this button is larger than the others and the text is written in all caps. The second button takes the user to the Scoreboard where they will be able to see how they compare on a global scale and against friends. This is set as the second option to emphasize the focus on competition to motivate the user to keep running and using the application. The third button shows the user their profile. Here they will be able to see and edit general information such as name, age etc. which will be visible to others, as well as seeing personal records and previously completed runs and their friend list. The last option takes the user to a list of their saved routes showing their distance, difficulty rating, personal best time on the route etc. The user will not be able to edit the routes on the application, for this they need to use the website.
+\vspace{10pt}
+
+Choosing to start an exercise session will take the user to an options menu shown in \autoref{fig:optionsMock}
+
+\begin{figure}[ht]
+\begin{center}
+ \caption{Options Menu Mock-up}
+ \label{fig:optionsMock}
+ \includegraphics[scale=0.4]{img/optionsMock.png}
+\end{center}
+\end{figure}
+
+The user can either choose to start a RunOff, i.e. a ranked game against an unknown opponent, or a Friendly Run against a person on the user's friend list. Choosing either of the two will take the user to very similar screens with the options to pick a route or start looking for a random opponent/choose a friend from the friend list to run against. These screens are illustrated in \autoref{fig:matchMock}
+
+\begin{figure}[ht]
+\begin{center}
+ \caption{Matchmaking Screen Mock-up}
+ \label{fig:matchMock}
+ \includegraphics[scale=0.4]{img/matchMock.png}
+\end{center}
+\end{figure}
+
+If the user wishes to pick a route, they will push the "Pick Route" button which will take them to a list of their saved routes, showing name, distance and difficulty, seen in \autoref{fig:pickRouteMock}
+
+\begin{figure}[ht]
+\begin{center}
+ \caption{Pick Route Mock-up}
+ \label{fig:pickRouteMock}
+ \includegraphics[scale=0.4]{img/pickRouteMock.png}
+\end{center}
+\end{figure}
+
+\subsection{Implementation}
+
+
 
 \subsection{Testing}
