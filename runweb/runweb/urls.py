@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     url(r'^register/$', 'runweb.views.register', name='register'),
     url(r'^logout/$', 'runweb.views.session_logout', name='logout'),
     url(r'^routes/', include('routes.urls')),
+    url(r'^social/', include('social.urls')),
     url(r'^api/', include('api.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

@@ -12,6 +12,18 @@ def overview(request, as_json = False):
     else:
 	    return render(request, 'route_list.html', {'routes': Route.objects.filter(owner = request.user)})
 
+		
+@login_required
+def delete(request, load):
+    if (load):
+        try:
+            route = Route.objects.get(owner = request.user, pk = int(load))
+        except:
+            return render(request, 'route_list.html', {'error': 'Attempt to access invalid route', 'routes': Route.objects.filter(owner = request.user)})
+			
+    route.delete()
+    return HttpResponseRedirect('/')
+
 @login_required
 def planner(request, load = None):
     route = None
@@ -54,5 +66,7 @@ def planner(request, load = None):
 
         for i in range(len(waypoints)):		
             Waypoint(route = route, index = i, latitude = waypoints[i].get('lat', 0), longitude = waypoints[i].get('lng', 0)).save()
+			
+        route.calculate_distance()
         return HttpResponseRedirect('/routes/');
 

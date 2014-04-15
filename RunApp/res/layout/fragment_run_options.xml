@@ -1,0 +1,25 @@
+<RelativeLayout
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Button
+        android:layout_width="127dp"
+        android:layout_height="wrap_content"
+        android:text="RunOff "
+        android:id="@+id/button_runOff"
+        android:layout_marginTop="144dp"
+        android:onClick="matchcomp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="127dp"
+        android:layout_height="wrap_content"
+        android:text="Friendly Run"
+        android:id="@+id/button_friendlyRun"
+        android:layout_marginTop="70dp"
+        android:layout_below="@+id/button_runOff"
+        android:layout_alignLeft="@+id/button_runOff"
+        android:onClick="matchfriend" />
+</RelativeLayout>

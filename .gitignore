@@ -18,4 +18,5 @@ Release
 *.fdb_latexmk
 *.sublime-project
 *.sublime-workspace
-
+*.metadata
+*/bin/*
