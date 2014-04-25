@@ -13,7 +13,7 @@
         android:layout_width="127dp"
         android:layout_height="wrap_content"
         android:text="Pick Route"
-        android:id="@+id/button"
+        android:id="@+id/button_pickRoute"
         android:layout_marginTop="144dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
@@ -23,9 +23,9 @@
         android:layout_width="127dp"
         android:layout_height="wrap_content"
         android:text="Matchmake"
-        android:id="@+id/button2"
-        android:layout_below="@+id/button"
-        android:layout_alignRight="@+id/button"
+        android:id="@+id/button_matchmake"
+        android:layout_below="@+id/button_pickRoute"
+        android:layout_alignRight="@+id/button_pickRoute"
         android:layout_marginTop="70dp" />
 
 </RelativeLayout>

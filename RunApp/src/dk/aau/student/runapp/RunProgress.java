@@ -21,6 +21,7 @@ public class RunProgress extends Activity
     private String data;
     JSONObject route;
     JSONArray waypoints;
+    GPSTracker gps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +29,7 @@ public class RunProgress extends Activity
         setContentView(R.layout.fragment_run_progress); 
 
         initializeMap();
+        initializeGPS();
         
         data = getIntent().getExtras().getString("route");
         try 
@@ -43,7 +45,7 @@ public class RunProgress extends Activity
 		    googleMap.moveCamera(center);
 		    googleMap.animateCamera(zoom);
 		
-			for(int i = 0; i <route.length(); i++)
+			for(int i = 0; i <waypoints.length(); i++)
 			{
 				double lat = waypoints.getJSONObject(i).getDouble("lat");				
 				double lng = waypoints.getJSONObject(i).getDouble("lng");
@@ -76,6 +78,11 @@ public class RunProgress extends Activity
                         .show();
             }
         }
+    }
+    
+    private void initializeGPS()
+    {
+        gps = new GPSTracker(this.getApplication(), this.googleMap);
     }
  
 }

@@ -1,43 +1,59 @@
 package dk.aau.student.runapp;
 
+import org.apache.http.message.BasicNameValuePair;
+
 import android.support.v7.app.ActionBarActivity;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.Toast;
 import android.content.Intent;
 
 public class MainActivity extends ActionBarActivity
 {
     private static boolean is_authenticated = false;
+    private boolean is_reachable = true;
+    private static Handler hm;
     
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d("Debug 1", "");
-
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
-        }
+        hm = new Handler() 
+        {
+            public void handleMessage(Message m) 
+            {
+            	Toast.makeText(getApplicationContext(), "Server is offline, routes unavailable", Toast.LENGTH_LONG).show();                         
+            }
+        };
+        new Thread(new Runnable()
+        {
+            public void run()
+            {
+                is_reachable = HttpHandler.is_reachable();
+                if(is_reachable == false)
+                {
+                	MainActivity.get_handler().sendEmptyMessage(0);
+                }
+            }
+        }).start();
         
         if(!MainActivity.is_authenticated)
         {
-        	Log.d("In authentication phase", "");
             is_authenticated = true;
             new Thread(new Runnable()
             {
                 public void run()
                 {
-                	Log.d("in new thread", "");
-                    if(!HttpHandler.login_request())
+                    BasicNameValuePair username = new BasicNameValuePair("username", "test");
+                    BasicNameValuePair password = new BasicNameValuePair("password", "123456");
+                    
+                    if(!HttpHandler.login_request(username, password))
                     {
                        is_authenticated = false;
                        Log.d("auth failed!", "herp");                    
@@ -45,7 +61,6 @@ public class MainActivity extends ActionBarActivity
                     else
                     {
                         PickRoute.routes = HttpHandler.route_request();
-                        Log.d("routes", PickRoute.routes.toString());
                     }
                 }
             }).start();
@@ -75,24 +90,21 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment
-    {
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
-        }
-    }
-
     /* Called when the user presses the RUN button */
     public void runOptions (View view)
     {
         Intent intent = new Intent(this, RunOptions.class);
         startActivity(intent);
     }
-
+    
+    public boolean is_authenticated()
+    {
+    	return is_authenticated;
+    }
+    
+    public static Handler get_handler()
+    {
+        return hm;
+    }
+    
 }

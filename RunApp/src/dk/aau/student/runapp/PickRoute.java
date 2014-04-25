@@ -1,18 +1,21 @@
 package dk.aau.student.runapp;
 
-import android.app.Activity;
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class PickRoute extends Activity
+public class PickRoute extends ActionBarActivity
 {
     public static JSONArray routes;
+    public static ListView route_list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -22,7 +25,7 @@ public class PickRoute extends Activity
 
         JsonList(routes);
 
-        final ListView route_list = (ListView)findViewById(R.id.list);
+        route_list = (ListView)findViewById(R.id.list);
         AdapterView.OnItemClickListener listener = new AdapterView.OnItemClickListener()
         {
             @Override
@@ -39,7 +42,7 @@ public class PickRoute extends Activity
                     Intent resultIntent = new Intent();
                     resultIntent.putExtras(result_bundle);
                     
-                    setResult(MatchComp.ROUTE, resultIntent);
+                    setResult(MatchComp.RESULT_OK, resultIntent);
                     finish();
 
                 }

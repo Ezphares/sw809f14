@@ -1,5 +1,6 @@
 package dk.aau.student.runapp;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,8 @@ import android.view.ViewGroup;
 public class MatchComp extends ActionBarActivity
 {
     public static final int ROUTE = 1;
+    private boolean activityResultIsReturned = false;
+    private String activityResult = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -79,13 +82,28 @@ public class MatchComp extends ActionBarActivity
 
     protected void onActivityResult(int request_code, int result_code, Intent data)
     {
-        if(result_code == MatchComp.ROUTE)
-        { 
+    	//For testing purposes
+    	activityResultIsReturned = true;
+    	activityResult = data.getExtras().get("route").toString();
+    	
+        if(result_code == MatchComp.RESULT_OK)
+        {        	
+        	//Forward route data to the RunProgress activity
             Bundle route_data = data.getExtras();
             Intent intent = new Intent (this, RunProgress.class);
             intent.putExtras(route_data);
             startActivity(intent);
         }        
+    }
+    
+    public String getActivityResult()
+    {
+    	return activityResult;
+    }
+    
+    public boolean getActivityResultIsReturned()
+    {
+    	return activityResultIsReturned;
     }
 
 }

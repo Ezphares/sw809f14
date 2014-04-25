@@ -55,7 +55,6 @@ public class RouteListAdapter extends BaseAdapter implements View.OnTouchListene
         {
             LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = vi.inflate(R.layout.route_list, null);
-            Log.d("We're in getView", "");
         }
 
         String itemText = "";

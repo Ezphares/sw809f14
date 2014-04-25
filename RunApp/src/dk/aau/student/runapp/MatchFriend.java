@@ -11,7 +11,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class MatchFriend extends ActionBarActivity {
+public class MatchFriend extends ActionBarActivity 
+{
+    public static final int ROUTE = 1;
+    private boolean activityResultIsReturned = false;
+    private String activityResult = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,14 +70,32 @@ public class MatchFriend extends ActionBarActivity {
     public void pickroute(View view)
     {
         Intent intent = new Intent(this, PickRoute.class);
-        startActivityForResult(intent, MatchComp.ROUTE);
+        startActivityForResult(intent, MatchFriend.ROUTE);
     }
 
     protected void onActivityResult(int request_code, int result_code, Intent data)
     {
-        if(result_code == MatchComp.ROUTE)
-        {
-            Log.d("Were in business!", data.getStringExtra("name"));
-        }
+    	//For testing purposes
+    	activityResultIsReturned = true;
+    	activityResult = data.getExtras().get("route").toString();
+    	
+        if(result_code == MatchFriend.RESULT_OK)
+        {        	
+        	//Forward route data to the RunProgress activity
+            Bundle route_data = data.getExtras();
+            Intent intent = new Intent (this, RunProgress.class);
+            intent.putExtras(route_data);
+            startActivity(intent);
+        }        
+    }
+    
+    public String getActivityResult()
+    {
+    	return activityResult;
+    }
+    
+    public boolean getActivityResultIsReturned()
+    {
+    	return activityResultIsReturned;
     }
 }
