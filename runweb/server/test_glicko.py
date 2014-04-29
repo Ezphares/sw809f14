@@ -1,5 +1,5 @@
+import server.glicko
 import unittest
-import glicko
 
 class TestGlicko(unittest.TestCase):
 

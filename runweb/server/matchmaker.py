@@ -1,6 +1,6 @@
 import logging
 import time
-from player import Player
+from server.player import Player
 
 class Matchmaker:
 

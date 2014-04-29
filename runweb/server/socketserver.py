@@ -3,8 +3,8 @@ import logging
 import queue
 import select
 import socket
-from matchmaker import Matchmaker
-from player import Player
+from server.matchmaker import Matchmaker
+from server.player import Player
 
 class SocketServer:
 
@@ -22,9 +22,7 @@ class SocketServer:
 
 	def run(self):
 		while True:
-			(readable, writable, in_error) = select.select(self.readers,
-														   self.writers,
-														   self.readers)
+			(readable, writable, in_error) = select.select(self.readers, self.writers, self.readers)
 			self._handle_inputs(readable)
 			self._handle_outputs(writable)
 			self._handle_errors(in_error)
