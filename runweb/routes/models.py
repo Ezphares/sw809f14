@@ -11,13 +11,15 @@ class Route (models.Model):
     distance = models.FloatField(default = 0.0)
     difficulty = models.FloatField(default = 0.0)
     owner = models.ForeignKey(User)
+    polyline = models.CharField(max_length = 4096, default = '')
     
     def as_json(self):
         return {'name': self.name,
                 'waypoints': [{'lat': wp.latitude, 'lng': wp.longitude} for wp in self.waypoint_set.all().order_by('index')],
                 'distance': self.distance,
                 'difficulty': self.difficulty,
-                'round_trip': self.roundtrip}
+                'round_trip': self.roundtrip,
+				'polyline': self.polyline}
                 
     def get_directions(self):
         waypoints = list(self.waypoint_set.all().order_by('index')) # TODO: This might be inefficient, look into it later
@@ -51,12 +53,14 @@ class Route (models.Model):
         data = self.get_directions()
         if data == None:
             self.distance = 0.0
+            self.polyline = ''
         else:
             route = data['routes'][0]
             dist = 0.0
             for leg in route['legs']:
                 dist += leg['distance']['value']
             self.distance = dist
+            self.polyline = data['routes'][0]['overview_polyline']['points']
         self.save()
 		
     def get_polyline(self):
@@ -64,7 +68,7 @@ class Route (models.Model):
         if data == None:
             return None
         else:
-            return Polyline(data['routes'][0]['overview_polyline']['points'])
+            return Polyline(self.polyline)
         
 
 class Waypoint (models.Model):
