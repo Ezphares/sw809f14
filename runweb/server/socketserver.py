@@ -1,88 +1,124 @@
 import json
 import logging
 import queue
-import select
 import socket
+import struct
+import threading
+
 from server.matchmaker import Matchmaker
-from server.player import Player
+
 
 class SocketServer:
 
-	def __init__(self, host, port, matchmaker):
+	def __init__(self, host, port):
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.server.setblocking(0)
 		self.server.bind((host, port))
 		self.server.listen(socket.SOMAXCONN)
-		logging.info('Server listening on port ' + str(port))
+		logging.info('Server listening on ' + str((host, port)))
 
-		self.matchmaker = matchmaker
-		self.readers = [self.server]
-		self.writers = []
-		self.msg_queues = {}
+		self.matchmaking_q = queue.Queue()
+		self.reply_q = {}
+
+		matchmaker = Matchmaker(self.matchmaking_q, self.reply_q)
+		threading.Thread(target=matchmaker.run).start()
 
 	def run(self):
 		while True:
-			(readable, writable, in_error) = select.select(self.readers, self.writers, self.readers)
-			self._handle_inputs(readable)
-			self._handle_outputs(writable)
-			self._handle_errors(in_error)
+			(clientsocket, address) = self.server.accept()
+			logging.info('Client connected from {0}'.format(address))
+			clientthread = ClientThread(clientsocket, address, self.matchmaking_q, self.reply_q)
+			threading.Thread(target=clientthread.run).start()
 
-	def send_msg(self, s, msg):
-		self.msg_queues[s].put(msg)
 
-	def _handle_inputs(self, readable):
-		for s in readable:
-			if s is self.server: # Server socket is readble => client is connecting.
-				(client, address) = self.server.accept()
-				client.setblocking(0)
-				logging.info('New connection from ' + str(client.getpeername()))
-				self.readers.append(client)
-				self.msg_queues[client] = queue.Queue()
-			else: # Client socket is readable.
-				data = s.recv(1024)
-				if data:
-					logging.info(str(len(data)) + ' bytes received from ' + str(s.getpeername()))
-					self._parse_msg(data)
-					if s not in self.writers:
-						self.writers.append(s)
-				else: # Client socket is readble but no data => client has disconnected.
-					self._close_socket(s)
+class ServerCommand:
 
-	def _handle_outputs(self, writable):
-		for s in writable:
-			if s in self.msg_queues:
+	FOUND, = range(1)
+
+	def __init__(self, type):
+		self.type = type
+
+	def serialize(self):
+		return '{{"cmd":{0}}}'.format(self.type)
+
+
+class ClientCommand:
+
+	QUEUE, ACCEPT, POSITION = range(3)
+
+	def __init__(self, type, id, data, socket):
+		self.type = type
+		self.id = id
+		self.data = data
+		self.socket = socket
+
+
+class ClientThread:
+
+	def __init__(self, socket, address, matchmaking_q, reply_q):
+		self.socket = socket
+		self.address = address
+		self.matchmaking_q = matchmaking_q
+		self.reply_q = reply_q
+		self.handlers = {
+			ClientCommand.QUEUE: self._handle_queue,
+			ClientCommand.ACCEPT: self._handle_accept
+		}
+
+	def run(self):
+		while True:
+			try:
+				header = self._recv_n(4, False)
+				msg_len = struct.unpack('<I', header)[0]
+				data = self._recv_n(msg_len)
+			except RuntimeError:
+				pass
+			else:
 				try:
-					msg = self.msg_queues[s].get_nowait()
-				except queue.Empty:
-					self.writers.remove(s)
+					data = json.loads(data)
+				except ValueError:
+					pass
 				else:
-					s.send(msg)
+					try:
+						cmd = ClientCommand(data['cmd'], data['id'], data['data'], self.socket)
+					except KeyError:
+						pass
+					else:
+						self.handlers[cmd.type](cmd)
+						while True:
+							try:
+								cmd = self.reply_q[self.socket]
+							except KeyError:
+								pass
+							else:
+								self._send(cmd.serialize())
+								del self.reply_q[self.socket]
+								break
 
-	def _handle_errors(self, in_error):
-		for s in in_error:
-			self._close_socket(s)
 
-	def _close_socket(self, s):
-		logging.info(str(s.getpeername()) + ' disconnected')
-		s.close()
-		if s in self.writers:
-			self.writers.remove(s)
-		if s in self.readers:
-			self.readers.remove(s)
-		del self.msg_queues[s]
+	def _handle_queue(self, cmd): # Example: {\"cmd\":0,\"id\":1,\"data\":null}
+		self.matchmaking_q.put_nowait(cmd)
 
-	def _parse_msg(self, data):
-		msg = json.loads(data.decode('utf-8'))
-		try:
-			cmd = msg['cmd']
-		except KeyError:
-			return # Error
+	def _handle_accept(self, cmd): # Example: {\"cmd\":1,\"id\":1,\"data\":null}
+		pass
 
-		if cmd == 'queue':
-			pass
-		elif cmd == 'accept':
-			pass
-		elif cmd == 'position':
-			pass
-		else:
-			pass # Error
+	def _send(self, msg):
+		msg = struct.pack('<I', len(msg)) + msg.encode('utf-8')
+		totalsent = 0
+		while totalsent < len(msg):
+			sent = self.socket.send(msg[totalsent:])
+			if sent == 0:
+				raise RuntimeError("Error while sending.")
+			totalsent += sent
+		logging.info('Sent {0} bytes to {1}'.format(len(msg), self.address))
+
+	def _recv_n(self, n, decode=True):
+		data = b''
+		while len(data) < n:
+			chunk = self.socket.recv(n - len(data))
+			if chunk == b'':
+				raise RuntimeError("Error while receiving.")
+			data += chunk
+		logging.info('Received {0} bytes from {1}'.format(n, self.address))
+		if decode:
+			return data.decode('utf-8')
+		return data

@@ -1,17 +1,55 @@
 import logging
 import time
-from server.player import Player
+
+from competitive.models import Profile
+
+import server.socketserver
+
+class Player:
+
+	def __init__(self, profile, socket):
+		self.profile = profile
+		self.socket = socket
+		self.search_width = 1
+		self.last_increment = int(time.time())
+
+	def __str__(self):
+		return '(id: {0}, rating: {1}, rd: {2})'.format(self.profile.user.id, self.profile.rating, self.profile.rd)
+
+	@property
+	def id(self):
+		return self.profile.id
+
+	@property
+	def rating(self):
+		return self.profile.rating
+
+	@property
+	def rd(self):
+		return self.profile.rd
+
+	def max_rating_diff(self):
+		return self.search_width * self.profile.rd
+
 
 class Matchmaker:
 
-	def __init__(self):
+	def __init__(self, matchmaking_q, reply_q):
+		self.matchmaking_q = matchmaking_q
+		self.reply_q = reply_q
 		self.players = []
 		self.increment_time = 30
 		self.increment = 0.1
+		logging.info('Matchmaker started')
 
 	def run(self):
 		index = 0
 		while True:
+			while not self.matchmaking_q.empty():
+				cmd = self.matchmaking_q.get_nowait()
+				player = Player(Profile.objects.get(pk=cmd.id), cmd.socket)
+				self._add_player(player)
+
 			if len(self.players) >= 2: # Need at least two players.
 				self._update_players()
 				player = self.players[index]
@@ -23,7 +61,8 @@ class Matchmaker:
 				pass
 				# Yield thread.
 
-	def add_player(self, player):
+	def _add_player(self, player):
+		logging.info('Player queued {0}'.format(str(player)))
 		high = len(self.players)
 		low = 0
 		while low < high:
@@ -33,19 +72,23 @@ class Matchmaker:
 			else:
 				low = mid+1
 		self.players.insert(low, player)
+		logging.info('Players in queue {0}'.format(str(len(self.players))))
 
 	def _update_players(self):
 		now = int(time.time())
-
 		for player in self.players:
 			if now - player.last_increment >= self.increment_time:
 				player.search_width += self.increment
 				player.last_increment = now
 
 	def _match(self, player1, player2):
-		logging.info('Matched player ' + str(player1.id) + ' with player ' + str(player2.id))
+		logging.info('Matched player {0} against player {1}'.format(str(player1), str(player2)))
+		cmd = server.socketserver.ServerCommand(server.socketserver.ServerCommand.FOUND)
+		self.reply_q[player1.socket] = cmd
+		self.reply_q[player2.socket] = cmd
 		self.players.remove(player1)
 		self.players.remove(player2)
+		logging.info('Players in queue {0}'.format(str(len(self.players))))
 
 	def _rating_diff(self, player1, player2):
 		return abs(player1.rating-player2.rating)

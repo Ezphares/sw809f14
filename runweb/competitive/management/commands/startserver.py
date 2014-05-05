@@ -1,8 +1,9 @@
 import logging
 import threading
+
 from django.core.management.base import BaseCommand, CommandError
-from server.socketserver import SocketServer
-from server.matchmaker import Matchmaker
+
+import server.socketserver
 
 class Command(BaseCommand):
 	help = 'Starts the matchmaking server. Usage: manage.py startserver <host> <port>'
@@ -25,8 +26,5 @@ class Command(BaseCommand):
 
 		logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S')
 
-		matchmaker = Matchmaker()
-		threading.Thread(target=matchmaker.run).start()
-
-		server = SocketServer(host, port, matchmaker)
-		threading.Thread(target=server.run).start()
+		socketserver = server.socketserver.SocketServer(host, port)
+		threading.Thread(target=socketserver.run).start()
