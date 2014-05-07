@@ -77,6 +77,7 @@ class Matchmaker:
 				if best_match and self._get_best_match(best_match) is player:
 					self._match(player, best_match)
 				index = (index + 1) % len(self.players) if len(self.players) != 0 else 0
+			time.sleep(0.01)
 
 	# TODO: Make sure that a player can only queue once.
 	def _handle_queue(self, client_cmd):
