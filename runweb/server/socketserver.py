@@ -79,7 +79,7 @@ class ClientThread:
 		while True:
 			try:
 				header = self._recv_n(4, False)
-				msg_len = struct.unpack('<I', header)[0]
+				msg_len = struct.unpack('!I', header)[0]
 				data = self._recv_n(msg_len)
 			except IOError:
 				continue
@@ -111,7 +111,7 @@ class ClientThread:
 		pass
 
 	def _send(self, msg):
-		msg = struct.pack('<I', len(msg)) + msg.encode('utf-8')
+		msg = struct.pack('!I', len(msg)) + msg.encode('utf-8')
 		totalsent = 0
 		while totalsent < len(msg):
 			sent = self.socket.send(msg[totalsent:])
