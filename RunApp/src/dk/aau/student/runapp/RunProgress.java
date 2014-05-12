@@ -1,5 +1,8 @@
 package dk.aau.student.runapp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,8 +13,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -21,6 +28,7 @@ public class RunProgress extends Activity
     private String data;
     JSONObject route;
     JSONArray waypoints;
+    String polyline;
     GPSTracker gps;
 
     @Override
@@ -36,6 +44,8 @@ public class RunProgress extends Activity
         {
 			route = new JSONObject(data);
 			waypoints = route.getJSONArray("waypoints");
+			polyline = route.getString("polyline");
+			
 			
 			double start_lat = waypoints.getJSONObject(0).getDouble("lat");
 			double start_lng = waypoints.getJSONObject(0).getDouble("lng");
@@ -44,14 +54,16 @@ public class RunProgress extends Activity
 			CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
 		    googleMap.moveCamera(center);
 		    googleMap.animateCamera(zoom);
-		
+		    
+		    		
 			for(int i = 0; i <waypoints.length(); i++)
 			{
 				double lat = waypoints.getJSONObject(i).getDouble("lat");				
 				double lng = waypoints.getJSONObject(i).getDouble("lng");
-				googleMap.addMarker(new MarkerOptions()
-		        .position(new LatLng(lat, lng)));
 			}
+					
+			List<LatLng> decodedRoute = PolyUtil.decode(polyline);
+			googleMap.addPolyline(new PolylineOptions().addAll(decodedRoute).color(Color.argb(255, 101, 169, 234)));
 			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -84,5 +96,5 @@ public class RunProgress extends Activity
     {
         gps = new GPSTracker(this.getApplication(), this.googleMap);
     }
- 
+     
 }

@@ -1,8 +1,8 @@
 """
-An implementation of the Glicko system.
+An implementation of the Glicko rating system.
 
 Calculates Glicko ratings and RDs for single-game rating periods.
-The technical details of the Glicko system are described in:
+The technical details of the Glicko rating system are described in:
 http://www.glicko.net/glicko/glicko.pdf
 """
 
@@ -11,13 +11,13 @@ import math
 class Glicko:
 
     """
-    unranked_rd - The default RD assigned to unranked players (default 350).
+    max_rd - The default RD assigned to unranked players (default 350).
     min_rd - The lowest possible RD of a player (default 30).
     c - Constant which governs the increase in uncertainty over time.
     """
 
-    def __init__(self, c, unranked_rd=350, min_rd=30):
-        self.unranked_rd = unranked_rd
+    def __init__(self, c, max_rd=350, min_rd=30):
+        self.max_rd = max_rd
         self.min_rd = min_rd
         self.c = c
         self.q = math.log(10) / 400
@@ -33,7 +33,7 @@ class Glicko:
         return 1 / (self.q**2 * self._g(rd_opp)**2 * valE * (1 - valE))
 
     def _update_rd(self, rd_old, t):
-        return min(math.sqrt(rd_old**2 + self.c**2 * t), self.unranked_rd)
+        return min(math.sqrt(rd_old**2 + self.c**2 * t), self.max_rd)
 
     def update_player(self, rating, rd, rating_opp, rd_opp, t, outcome):
         """Return the updated rating and RD of a player."""

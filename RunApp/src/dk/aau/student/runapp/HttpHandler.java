@@ -33,7 +33,7 @@ import java.util.List;
 public class HttpHandler
 {
     private static HttpClient client = new DefaultHttpClient();
-    private static String IP = "192.168.1.36";
+    private static String IP = "192.168.0.100";
     private static String test = "10.0.2.2";
     public static class ResponseData
     {
