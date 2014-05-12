@@ -39,10 +39,10 @@ public class GPSTracker extends Service implements LocationListener {
     double longitude; // longitude
 
     // The minimum distance to change Updates in meters
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0; // As fast as possible
 
     // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+    private static final long MIN_TIME_BW_UPDATES = 0; // As fast as possible
 
     // Declaring a Location Manager
     protected LocationManager locationManager;
@@ -115,19 +115,18 @@ public class GPSTracker extends Service implements LocationListener {
     //Default overrides.
     @Override
     public void onLocationChanged(Location location) {
-            //CODE HERE!
-            Log.d("GPS", Double.toString(getLatitude()) + "      " + Double.toString(getLongitude()));
-            if(getLatitude() == 0.0 || getLongitude() == 0.0)
-                    return;
-            
-            if(currentLocation == null) {
-                        currentLocation = googleMap.addMarker(new MarkerOptions().position(new LatLng(getLatitude(), getLongitude())));
-                        currentLocation.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-            }
-            else {
-                    currentLocation.setPosition(new LatLng(getLatitude(),getLongitude()));
-            }
-            
+    	//CODE HERE!
+    	Log.d("GPS", Double.toString(getLatitude()) + "      " + Double.toString(getLongitude()));
+    	if(getLatitude() == 0.0 || getLongitude() == 0.0)
+    		return;
+    	
+    	if(currentLocation == null) {
+			currentLocation = googleMap.addMarker(new MarkerOptions().position(new LatLng(getLatitude(), getLongitude())));
+			currentLocation.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+    	}
+    	else {
+    		currentLocation.setPosition(new LatLng(getLatitude(),getLongitude()));
+    	}
     }
 
     @Override
