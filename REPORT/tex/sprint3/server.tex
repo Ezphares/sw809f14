@@ -1,0 +1,122 @@
+\tikzstyle{decision} = [diamond, draw, fill=blue!20, text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse, fill=red!20, node distance=3cm, minimum height=2em]
+
+\begin{center}
+\begin{tikzpicture}[node distance=2.5cm, auto]
+	% Place nodes
+	\node [block] (notqueued) {not queued};
+	\node [block, right of=notqueued, node distance=5cm] (queued) {queued};
+	\node [block, below of=queued] (found) {match found};
+	\node [block, below of=found] (accepted) {match accepted};
+	\node [block, below of=accepted] (started) {match started};
+	% Draw edges
+	\path [line] (notqueued) -- node[] {queue [client]} (queued);
+	\path [line] (queued) -- node[] {cancel [client]} (notqueued);
+	\path [line] (queued) -- node[] {found [server]} (found);
+	\path [line] (found) -- node[] {accept [client]} (accepted);
+	\path [line] (found) -| node[] {decline [client]} (notqueued);
+	\path [line] (accepted) -- node[] {start [server]} (started);
+\end{tikzpicture}
+\end{center}
+
+\begin{description}
+\item[Description] \hfill \\
+	Places the client in the matchmaking queue.
+\item[Direction] \hfill \\
+	Client $\rightarrow$ Server.
+\item[Format] \hfill
+\begin{lstlisting}[language=JavaScript]
+{
+	"cmd": "queue",
+	"id": $id,
+	"data": null
+}
+\end{lstlisting}
+\end{description}
+
+\hrule
+
+\begin{description}
+\item[Description] \hfill \\
+	Removes the client from the matchmaking queue.
+\item[Direction] \hfill \\
+	Client $\rightarrow$ Server.
+\item[Format] \hfill
+\begin{lstlisting}[language=JavaScript]
+{
+	"cmd": "cancel",
+	"id": $id,
+	"data": null
+}
+\end{lstlisting}
+\end{description}
+
+\hrule
+
+\begin{description}
+\item[Description] \hfill \\
+	Informs the client that an opponent has been found.
+\item[Direction] \hfill \\
+	Server $\rightarrow$ Client.
+\item[Format] \hfill
+\begin{lstlisting}[language=JavaScript]
+{
+	"cmd": "found",
+	"id": $id,
+	"data": null
+}
+\end{lstlisting}
+\end{description}
+
+\hrule
+
+\begin{description}
+\item[Description] \hfill \\
+	Informs the server that the client accepts the match.
+\item[Direction] \hfill \\
+	Client $\rightarrow$ Server.
+\item[Format] \hfill
+\begin{lstlisting}[language=JavaScript]
+{
+	"cmd": "accept",
+	"id": $id,
+	"data": null
+}
+\end{lstlisting}
+\end{description}
+
+\hrule
+
+\begin{description}
+\item[Description] \hfill \\
+	Informs the server that the client declines the match.
+\item[Direction] \hfill \\
+	Client $\rightarrow$ Server.
+\item[Format] \hfill
+\begin{lstlisting}[language=JavaScript]
+{
+	"cmd": "decline",
+	"id": $id,
+	"data": null
+}
+\end{lstlisting}
+\end{description}
+
+\hrule
+
+\begin{description}
+\item[Description] \hfill \\
+	Informs the client that the match starts in 10 seconds.
+\item[Direction] \hfill \\
+	Server $\rightarrow$ Client.
+\item[Format] \hfill
+\begin{lstlisting}[language=JavaScript]
+{
+	"cmd": "start",
+	"id": $id,
+	"data": null
+}
+\end{lstlisting}
+\end{description}
