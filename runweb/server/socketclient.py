@@ -10,7 +10,7 @@ class SocketClient:
 		self.socket.connect((host, port))
 
 	def send(self, msg):
-		msg = struct.pack('!I', len(msg)) + msg.encode('utf-8')
+		msg = struct.pack('!h', len(msg)) + msg.encode('utf-8')
 		totalsent = 0
 		while totalsent < len(msg):
 			sent = self.socket.send(msg[totalsent:])
@@ -43,8 +43,8 @@ def main():
 	for cmd in args.cmds:
 		msg = '{{"cmd": "{0}", "id": {1}, "data": null}}'.format(cmd, args.id)	
 		client.send(msg)
-		header = client.recv_n(4, False)
-		msg_len = struct.unpack('!I', header)[0]
+		header = client.recv_n(2, False)
+		msg_len = struct.unpack('!h', header)[0]
 		print(client.recv_n(msg_len))
 
 if __name__ == "__main__":

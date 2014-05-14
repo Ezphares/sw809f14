@@ -35,6 +35,8 @@ class ServerCommand:
 	FOUND = 'found'
 	START = 'start'
 	POSITION = 'position'
+	WINNER = 'winner'
+	LOSER = 'loser'
 
 	def __init__(self, cmd, data=None):
 		self.cmd = cmd
@@ -63,6 +65,7 @@ class ClientThread:
 
 	def __init__(self, socket, address, client_cmd_q, server_cmd_q):
 		self.socket = socket
+		self.socket.settimeout(5.0)
 		self.address = address
 		self.client_cmd_q = client_cmd_q
 		self.server_cmd_q = server_cmd_q
@@ -78,31 +81,28 @@ class ClientThread:
 	def run(self):
 		while True:
 			try:
-				header = self._recv_n(4, False)
-				msg_len = struct.unpack('!I', header)[0]
+				header = self._recv_n(2, False)
+				msg_len = struct.unpack('!h', header)[0]
 				data = self._recv_n(msg_len)
 			except IOError:
-				continue
+				pass # Error while receiving.
 			else:
 				try:
 					data = json.loads(data)
-				except ValueError:
-					continue
+					client_cmd = ClientCommand(data['cmd'], data['id'], data['data'], self.socket)
+					self.handlers[client_cmd.cmd](client_cmd)
+				except (ValueError, KeyError):
+					pass # Ill-formed message (Invalid JSON/missing data/unknown command).
 				else:
-					try:
-						client_cmd = ClientCommand(data['cmd'], data['id'], data['data'], self.socket)
-						self.handlers[client_cmd.cmd](client_cmd)
-					except KeyError:
-						continue
-					else:
-						logging.info('Received command {0} from {1}'.format(client_cmd.cmd.upper(), self.address))
-						server_cmd = self.server_cmd_q[self.socket].get() # Might need to add a timeout here.
-						try:
-							self._send(server_cmd.serialize())
-						except IOError:
-							continue
-						else:
-							logging.info('Sent command {0} to {1}'.format(server_cmd.cmd.upper(), self.address))
+					logging.info('Received command {0} from {1}'.format(client_cmd.cmd.upper(), self.address))
+				
+			try:
+				server_cmd = self.server_cmd_q[self.socket].get(timeout=1.0) # Might need to add a timeout here.
+			except queue.Empty:
+				pass
+			else:
+				self._send(server_cmd.serialize())
+				logging.info('Sent command {0} to {1}'.format(server_cmd.cmd.upper(), self.address))
 
 	def _handle(self, client_cmd):
 		self.client_cmd_q.put(client_cmd)
@@ -111,7 +111,7 @@ class ClientThread:
 		pass
 
 	def _send(self, msg):
-		msg = struct.pack('!I', len(msg)) + msg.encode('utf-8')
+		msg = struct.pack('!h', len(msg)) + msg.encode('utf-8')
 		totalsent = 0
 		while totalsent < len(msg):
 			sent = self.socket.send(msg[totalsent:])
