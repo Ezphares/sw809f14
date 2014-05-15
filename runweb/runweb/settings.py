@@ -1,6 +1,6 @@
 # Django settings for runweb project.
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -162,6 +162,6 @@ LOGGING = {
 LOGIN_URL = '/login/'
 
 try:
-    from local_settings import *
+    from runweb.local_settings import *
 except:
     pass
