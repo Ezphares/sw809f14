@@ -18,7 +18,7 @@ def session_login(request, as_json = False):
         if not as_json:
             return HttpResponseRedirect(redirect)
         else:
-            return HttpResponse('{"status": "OK", "id": ' + request.user.pk + '}')
+            return HttpResponse('{"status": "OK", "id": ' + str(request.user.pk) + '}')
 
     # Get requests get the form
     if request.method == 'GET':
@@ -41,7 +41,7 @@ def session_login(request, as_json = False):
             if not as_json:
                 return HttpResponseRedirect(redirect)
             else:
-                return HttpResponse('{"status": "OK", "id": ' + user.pk + '}')
+                return HttpResponse('{"status": "OK", "id": ' + str(user.pk) + '}')
         else:
             if not as_json:
                 return render(request, 'login.html', {'error': 'Invalid username or password', 'redirect': redirect})
