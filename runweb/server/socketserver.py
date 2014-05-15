@@ -51,7 +51,6 @@ class ClientCommand:
 	QUEUE = 'queue'
 	CANCEL = 'cancel'
 	ACCEPT = 'accept'
-	DECLINE = 'decline'
 	POSITION = 'position'
 
 	def __init__(self, cmd, id, data, socket):
@@ -74,7 +73,6 @@ class ClientThread:
 			ClientCommand.QUEUE: self._handle,
 			ClientCommand.CANCEL: self._handle,
 			ClientCommand.ACCEPT: self._handle,
-			ClientCommand.DECLINE: self._handle,
 			ClientCommand.POSITION: self._handle_position
 		}
 
