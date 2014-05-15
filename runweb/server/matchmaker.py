@@ -43,6 +43,9 @@ class Match:
 		self.player1_accept = False
 		self.player2_accept = False
 
+	def __str__(self):
+		return '({0} vs. {1})'.format(self.player1, self.player2)
+
 
 class PlayerQueue(list):
 
@@ -73,7 +76,7 @@ class Matchmaker:
 	def __init__(self, client_cmd_q, server_cmd_q):
 		self.increment_time = 30
 		self.increment = 0.1
-		self.accept_time = 10
+		self.accept_time = 20
 
 		self.client_cmd_q = client_cmd_q
 		self.server_cmd_q = server_cmd_q
@@ -82,8 +85,7 @@ class Matchmaker:
 		self.handlers = {
 			server.socketserver.ClientCommand.QUEUE: self._handle_queue,
 			server.socketserver.ClientCommand.CANCEL: self._handle_cancel,
-			server.socketserver.ClientCommand.ACCEPT: self._handle_accept,
-			server.socketserver.ClientCommand.DECLINE: self._handle_decline
+			server.socketserver.ClientCommand.ACCEPT: self._handle_accept
 		}
 		logging.info('Matchmaker started')
 
@@ -135,23 +137,22 @@ class Matchmaker:
 				self.matches.remove(match)
 			break
 
-	def _handle_decline(self, client_cmd):
-		for match in self.matches:
-			if match.player1.id == client_cmd.id:
-				self.players.dequeue(match.player1.id)
-				self.players.enqueue(match.player2)
-			elif match.player2.id == client_cmd.id:
-				self.players.dequeue(match.player2.id)
-				self.players.enqueue(match.player1)
-			else:
-				continue
-			self.matches.remove(match)
-			break
+	def _match(self, player1, player2):
+		match = Match(player1, player2)
+		self.matches.append(match)
+		server_cmd = server.socketserver.ServerCommand(server.socketserver.ServerCommand.FOUND)
+		self.server_cmd_q[player1.socket].put(server_cmd)
+		self.server_cmd_q[player2.socket].put(server_cmd)
+		self.players.dequeue(player1.id)
+		self.players.dequeue(player2.id)
+		logging.info('Match found {0}'.format(str(match)))
 
-	def _get_player(self, id):
-		for player in self.players:
-			if player.id == id:
-				return player
+	def _check_matches(self):
+		now = int(time.time())
+		for match in self.matches:
+			if now - match.found_time >= self.accept_time:
+				self.matches.remove(match)
+				logging.info('Match not accepted in time {0}'.format(str(match)))
 
 	def _update_players(self):
 		now = int(time.time())
@@ -160,25 +161,10 @@ class Matchmaker:
 				player.search_width += self.increment
 				player.last_increment = now
 
-	def _check_matches(self):
-		now = int(time.time())
-		for match in self.matches:
-			if now - match.found_time >= self.accept_time:
-				if match.player1_accept:
-					self.players.enqueue(match.player1)
-				if match.player2_accept:
-					self.players.enqueue(match.player2)
-				self.matches.remove(match)
-
-	def _match(self, player1, player2):
-		logging.info('Matched player {0} against player {1}'.format(str(player1), str(player2)))
-		match = Match(player1, player2)
-		self.matches.append(match)
-		server_cmd = server.socketserver.ServerCommand(server.socketserver.ServerCommand.FOUND)
-		self.server_cmd_q[player1.socket].put(server_cmd)
-		self.server_cmd_q[player2.socket].put(server_cmd)
-		self.players.dequeue(player1.id)
-		self.players.dequeue(player2.id)
+	def _get_player(self, id):
+		for player in self.players:
+			if player.id == id:
+				return player
 
 	def _rating_diff(self, player1, player2):
 		return abs(player1.rating-player2.rating)
