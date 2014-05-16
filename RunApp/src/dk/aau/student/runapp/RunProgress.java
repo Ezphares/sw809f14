@@ -66,7 +66,6 @@ public class RunProgress extends Activity
 		    googleMap.moveCamera(center);
 		    googleMap.animateCamera(zoom);
 		    
-		    		
 			for(int i = 0; i <waypoints.length(); i++)
 			{
 				double lat = waypoints.getJSONObject(i).getDouble("lat");				

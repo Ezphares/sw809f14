@@ -140,8 +140,8 @@ public class GPSTracker extends Service implements LocationListener {
     	this.matchmaker.add_message(msg);
    	
     	if(currentLocation == null) {
-			currentLocation = googleMap.addMarker(new MarkerOptions().position(new LatLng(getLatitude(), getLongitude())));
-			currentLocation.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+    		currentLocation = googleMap.addMarker(new MarkerOptions().position(new LatLng(getLatitude(), getLongitude())));
+			currentLocation.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
     	}
     	else {
     		currentLocation.setPosition(new LatLng(getLatitude(),getLongitude()));
