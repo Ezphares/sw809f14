@@ -127,6 +127,8 @@ public class MainActivity extends ActionBarActivity
                         
                         BasicNameValuePair user = new BasicNameValuePair("username", username.getText().toString());
                         BasicNameValuePair pass = new BasicNameValuePair("password", password.getText().toString());
+                        UserInfo.get_instance().set_username(username.getText().toString());
+                        UserInfo.get_instance().set_password(password.getText().toString());
                         
                         if(!HttpHandler.login_request(user, pass))
                         {

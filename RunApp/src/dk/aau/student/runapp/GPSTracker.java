@@ -136,7 +136,7 @@ public class GPSTracker extends Service implements LocationListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	Message msg = new Message("position", UserInfo.get_id(), data);
+    	Message msg = new Message("position", UserInfo.get_instance().get_id(), data);
     	this.matchmaker.add_message(msg);
    	
     	if(currentLocation == null) {

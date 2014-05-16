@@ -2,9 +2,9 @@ package dk.aau.student.runapp;
 
 public class UserInfo 
 {
-	static String username = null;
-	static String password = null;
-	static int id;
+	public String username = null;
+	public String password = null;
+	public int id;
 	private static UserInfo userinfo = null;
 	
 	private UserInfo()
@@ -14,19 +14,19 @@ public class UserInfo
 		this.id = -1;		
 	}
 	
-	static String get_username()
+	public String get_username()
 	{
-		return username;
+		return this.username;
 	}
 	
-	static String get_password()
+	public String get_password()
 	{
-		return password;
+		return this.password;
 	}
 	
-	static int get_id()
+	public int get_id()
 	{
-		return id;
+		return this.id;
 	}
 	
 	public void set_username(String username)

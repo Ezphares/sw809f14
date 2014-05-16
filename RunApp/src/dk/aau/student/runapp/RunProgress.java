@@ -83,7 +83,7 @@ public class RunProgress extends Activity
         
         //Start matchmaking
         matchmaker = new Matchmaker();
-        Message enqueue = new Message("queue", UserInfo.get_id(), null);
+        Message enqueue = new Message("queue", UserInfo.get_instance().get_id(), null);
         matchmaker.add_message(enqueue);
         
         gps = new GPSTracker(this.getApplication(), this.googleMap, this.matchmaker);
@@ -151,11 +151,11 @@ public class RunProgress extends Activity
               	 	}
               	 	else if(input.get_cmd().equals("winner"))
               	 	{
-              	 		if(input.get_id() != UserInfo.get_id())
+              	 		if(input.get_id() != UserInfo.get_instance().get_id())
               	 		{
               	 			Toast.makeText(getBaseContext(), "Your opponent won the race", Toast.LENGTH_LONG).show();
               	 		}
-              	 		else if(input.get_id() == UserInfo.get_id())
+              	 		else
               	 		{
               	 			Toast.makeText(getBaseContext(), "YOU WON THE RACE!", Toast.LENGTH_LONG).show();
               	 		}
@@ -209,7 +209,7 @@ public class RunProgress extends Activity
 	               {
 	                   public void onClick(DialogInterface dialog, int id) 
 	                   {
-	                	   Message accept = new Message("accept", UserInfo.get_id(), null);
+	                	   Message accept = new Message("accept", UserInfo.get_instance().get_id(), null);
 	                	   matchmaker.add_message(accept);
 	                   }
 	               })
