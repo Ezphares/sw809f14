@@ -24,6 +24,7 @@ public class MainActivity extends ActionBarActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
         hm = new Handler() 
         {
             public void handleMessage(Message m) 
@@ -31,6 +32,7 @@ public class MainActivity extends ActionBarActivity
             	Toast.makeText(getApplicationContext(), "Server is offline, routes unavailable", Toast.LENGTH_LONG).show();                         
             }
         };
+        
         new Thread(new Runnable()
         {
             public void run()
@@ -50,8 +52,8 @@ public class MainActivity extends ActionBarActivity
             {
                 public void run()
                 {
-                    BasicNameValuePair username = new BasicNameValuePair("username", "test");
-                    BasicNameValuePair password = new BasicNameValuePair("password", "123456");
+                    BasicNameValuePair username = new BasicNameValuePair("username", UserInfo.get_username());
+                    BasicNameValuePair password = new BasicNameValuePair("password", UserInfo.get_password());
                     
                     if(!HttpHandler.login_request(username, password))
                     {

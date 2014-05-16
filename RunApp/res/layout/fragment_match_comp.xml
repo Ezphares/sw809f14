@@ -20,12 +20,13 @@
         android:onClick="pickroute" />
 
     <Button
+        android:id="@+id/button_matchmake"
         android:layout_width="127dp"
         android:layout_height="wrap_content"
-        android:text="Matchmake"
-        android:id="@+id/button_matchmake"
-        android:layout_below="@+id/button_pickRoute"
         android:layout_alignRight="@+id/button_pickRoute"
-        android:layout_marginTop="70dp" />
+        android:layout_below="@+id/button_pickRoute"
+        android:layout_marginTop="70dp"
+        android:onClick="matchmake"
+        android:text="Matchmake" />
 
 </RelativeLayout>
