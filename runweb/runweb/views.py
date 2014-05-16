@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from competitive.models import Player
 
 @csrf_exempt #TODO: Apps should get a csrf key as well so we can track them, later
 def session_login(request, as_json = False):
@@ -18,7 +19,7 @@ def session_login(request, as_json = False):
         if not as_json:
             return HttpResponseRedirect(redirect)
         else:
-            return HttpResponse('{"status": "OK"}')
+            return HttpResponse('{"status": "OK", "id": ' + str(request.user.pk) + '}')
 
     # Get requests get the form
     if request.method == 'GET':
@@ -41,7 +42,7 @@ def session_login(request, as_json = False):
             if not as_json:
                 return HttpResponseRedirect(redirect)
             else:
-                return HttpResponse('{"status": "OK"}')
+                return HttpResponse('{"status": "OK", "id": ' + str(user.pk) + '}')
         else:
             if not as_json:
                 return render(request, 'login.html', {'error': 'Invalid username or password', 'redirect': redirect})
@@ -71,6 +72,7 @@ def register(request):
         try:
             user = User.objects.create_user(request.REQUEST['username'], '', request.REQUEST['password'])
             user.save()
+            Player(user = user).save()
             user = authenticate(username = request.REQUEST['username'], password = request.REQUEST['password'])
             login(request, user)
             return HttpResponseRedirect('/')

@@ -33,8 +33,7 @@ import java.util.List;
 public class HttpHandler
 {
     private static HttpClient client = new DefaultHttpClient();
-    private static String IP = "192.168.0.100";
-    private static String test = "10.0.2.2";
+    private static String IP = "192.168.0.102";
     public static class ResponseData
     {
         public String body;
@@ -180,4 +179,5 @@ public class HttpHandler
 
         return null;
     }
+    
 }

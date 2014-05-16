@@ -1,22 +1,25 @@
 package dk.aau.student.runapp;
 
-import android.app.Activity;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 public class MatchComp extends ActionBarActivity
 {
     public static final int ROUTE = 1;
     private boolean activityResultIsReturned = false;
     private String activityResult = null;
+    Bundle route_data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -80,19 +83,37 @@ public class MatchComp extends ActionBarActivity
         startActivityForResult(intent, MatchComp.ROUTE);
     }
 
+    public void matchmake(View view)
+    {
+    	Intent intent = new Intent(this, RunProgress.class);
+    	intent.putExtras(route_data);
+    	startActivity(intent);
+    }
     protected void onActivityResult(int request_code, int result_code, Intent data)
     {
+    	String name = null;
+    	String r_data = (String) data.getExtras().get("route");
+    	JSONObject route = null;
+		try {
+			route = new JSONObject(r_data);
+    		name = route.getString("name");
+		} 
+		catch (JSONException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
     	//For testing purposes
     	activityResultIsReturned = true;
-    	activityResult = data.getExtras().get("route").toString();
+    	activityResult = route.toString();
+
     	
         if(result_code == MatchComp.RESULT_OK)
         {        	
-        	//Forward route data to the RunProgress activity
-            Bundle route_data = data.getExtras();
-            Intent intent = new Intent (this, RunProgress.class);
-            intent.putExtras(route_data);
-            startActivity(intent);
+        	//Forward route data to the Matchmaking activity
+            route_data = data.getExtras();
+            Toast.makeText(getApplicationContext(), "Chosen route: " + name, Toast.LENGTH_LONG).show();
         }        
     }
     
