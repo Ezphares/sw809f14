@@ -22,6 +22,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -84,14 +86,54 @@ public class RunProgress extends Activity
         Message enqueue = new Message("queue", UserInfo.get_id(), null);
         matchmaker.add_message(enqueue);
         
-        Message input = matchmaker.get_next_message();
-        
-        while(input != null)
+        final Handler handler = new Handler();
+        handler.post(new Runnable()
         {
-        	Log.d("runprogress", input.get_encoded());
-        }
+        	@Override
+        	public void run()
+        	{      
+        		Message input = matchmaker.get_next_message();
+        		
+                while(input != null)
+                {               						
+                    if(input.get_cmd().equals("found"))
+              	 	{
+              	 		AcceptMatchFragment frag = new AcceptMatchFragment();
+              	 		frag.show(getFragmentManager(), "match found");
+              	 	}
+              	 	else if(input.get_cmd().equals("start"))
+              	 	{
+              	 		 new CountDownTimer(10000, 1000) 
+              	 		 {
+              	 		     public void onTick(long millisUntilFinished) 
+              	 		     {
+              	 		         Toast.makeText(getBaseContext(),"seconds remaining: " + millisUntilFinished / 1000, Toast.LENGTH_LONG).show();
+              			     }
+
+              			     public void onFinish() 
+              			     {
+              			         Toast.makeText(getBaseContext(),"GO!", Toast.LENGTH_LONG).show();
+              			     }
+              			  }.start();
+              		}
+                    
+                    input = matchmaker.get_next_message();
+                }
+                
+                handler.postDelayed(this, 1000);
+        	}
+        });
+        
+
              
     }
+   
+    /*
+    protected void onDestroy()
+    {
+    	matchmaker.close_socket();
+    }
+    */
     
     /**
      * function to load map. If map is not created it will create it for you
@@ -116,29 +158,6 @@ public class RunProgress extends Activity
         gps = new GPSTracker(this.getApplication(), this.googleMap);
     }
     
-    
-    /*						
-      if(cmd_type.equals("found"))
-	 	{
-	 		AcceptMatchFragment frag = new AcceptMatchFragment();
-	 		frag.show(getFragmentManager(), "match found");
-	 	}
-	 	else if(cmd_type.equals("start"))
-	 	{
-	 		 new CountDownTimer(10000, 1000) 
-	 		 {
-	 		     public void onTick(long millisUntilFinished) 
-	 		     {
-	 		         Toast.makeText(getBaseContext(),"seconds remaining: " + millisUntilFinished / 1000, Toast.LENGTH_LONG).show();
-			     }
-
-			     public void onFinish() 
-			     {
-			         Toast.makeText(getBaseContext(),"GO!", Toast.LENGTH_LONG).show();
-			     }
-			  }.start();
-		}
-	*/
 	public class AcceptMatchFragment extends DialogFragment {
 	    @Override
 	    public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -149,10 +168,8 @@ public class RunProgress extends Activity
 	               {
 	                   public void onClick(DialogInterface dialog, int id) 
 	                   {
-	                	   Bundle route = route_intent.getExtras();
-	                	   Intent intent = new Intent(getBaseContext(), RunProgress.class);
-	                	   intent.putExtras(route);
-	                	   startActivity(intent);               	   
+	                	   Message accept = new Message("accept", UserInfo.get_id(), null);
+	                	   matchmaker.add_message(accept);
 	                   }
 	               })
 	               .setNegativeButton(R.string.decline, new DialogInterface.OnClickListener() 
