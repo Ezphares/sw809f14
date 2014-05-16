@@ -28,7 +28,7 @@ def distToSegmentSquared(point, start, end):
         return dist2(point, end)
     else:
         return dist2(point, (start[0] + t * (end[0] - start[0]),
-		                     start[1] + t * (end[1] - start[1])) )
+                             start[1] + t * (end[1] - start[1])) )
 '''
 And some from wikipedia http://en.wikipedia.org/wiki/Decimal_degrees
 '''
@@ -50,7 +50,7 @@ class Segment(object):
 class Polyline(object):
     def __init__(self, encoded):
         self.points = depoly(encoded)
-		
+        
     def point_distance(self, point):
         distance = float('inf')
         for segment in self.get_segments():
@@ -58,12 +58,31 @@ class Polyline(object):
             if (d < distance):
                 distance = d
         return distance
-		
+        
     def get_segments(self):
         segments = []
         for i in range(len(self.points) - 1):
             segments.append(Segment(self.points[i], self.points[i + 1]))
         return segments
-		
+        
     def on_route(self, point, threshold = 50):
         return self.point_distance(point) <= metersToDecimalDegrees(threshold, point)
+        
+    '''
+    Current is index of current point, 0 at start of run
+    Returns (<new point index>, <total points>, <finish reached>)
+    '''
+    def advance(self, current, point, threshold = 50):
+        advancing = True
+        while advancing:
+            next = current + 1
+            if next >= len(self.points):
+                return (next, next, True)
+            
+            if sqrt(dist2(point, self.points[next])) <= metersToDecimalDegrees(threshold, point):
+                current = next
+            else:
+                advancing = False
+        
+        return (current, len(self.points), False)
+                
