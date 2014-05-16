@@ -17,49 +17,53 @@
         android:phoneNumber="false" />
 
         <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingTop="15dp"
-        android:paddingBottom="15dp"
-        android:showDividers="none"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true">
+            android:layout_width="match_parent"
+            android:layout_height="442dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:showDividers="none" >
 
-        <Button
-            android:layout_width="127dp"
-            android:layout_height="68dp"
-            android:text="GO RUN"
-            android:id="@+id/button_runOptions"
-            android:singleLine="false"
-            android:onClick="runOptions"
-            />
+            <Button
+                android:id="@+id/button_runOptions"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="0.15"
+                android:onClick="runOptions"
+                android:singleLine="false"
+                android:text="GO RUN" />
 
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="127dp"
-            android:layout_height="wrap_content"
-            android:text="Scoreboard"
-            android:id="@+id/button_scoreboard"
-            android:layout_marginTop="25dp" />
+            <Button
+                android:id="@+id/button_scoreboard"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:layout_weight="0.05"
+                android:text="Scoreboard" />
 
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="127dp"
-            android:layout_height="wrap_content"
-            android:text="Profile"
-            android:id="@+id/button_profile"
-            android:layout_marginTop="25dp" />
+            <Button
+                android:id="@+id/button_profile"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:layout_weight="0.03"
+                android:text="Profile" />
 
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="127dp"
-            android:layout_height="wrap_content"
-            android:text="My Routes"
-            android:id="@+id/button_routes"
-            android:layout_marginTop="25dp"
-            android:singleLine="false" />
-    </LinearLayout>
+            <Button
+                android:id="@+id/button_routes"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:layout_weight="0.03"
+                android:singleLine="false"
+                android:text="My Routes" />
+
+        </LinearLayout>
     
 </FrameLayout>

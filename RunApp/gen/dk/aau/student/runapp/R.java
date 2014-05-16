@@ -947,10 +947,12 @@ containing a value of this type.
         public static final int abc_split_action_bar_is_narrow=0x7f060002;
     }
     public static final class color {
-        public static final int abc_search_url_text_holo=0x7f07000d;
+        public static final int abc_search_url_text_holo=0x7f070010;
         public static final int abc_search_url_text_normal=0x7f070000;
         public static final int abc_search_url_text_pressed=0x7f070002;
         public static final int abc_search_url_text_selected=0x7f070001;
+        public static final int background=0x7f07000f;
+        public static final int buttonColor=0x7f07000e;
         public static final int common_action_bar_splitter=0x7f07000c;
         /**  Sign-in Button Colors 
          */
@@ -963,8 +965,9 @@ containing a value of this type.
         public static final int common_signin_btn_light_text_disabled=0x7f070009;
         public static final int common_signin_btn_light_text_focused=0x7f07000a;
         public static final int common_signin_btn_light_text_pressed=0x7f070008;
-        public static final int common_signin_btn_text_dark=0x7f07000e;
-        public static final int common_signin_btn_text_light=0x7f07000f;
+        public static final int common_signin_btn_text_dark=0x7f070011;
+        public static final int common_signin_btn_text_light=0x7f070012;
+        public static final int white=0x7f07000d;
     }
     public static final class dimen {
         /**  Default height of an action bar. 
@@ -1178,11 +1181,12 @@ containing a value of this type.
         public static final int common_signin_btn_text_normal_light=0x7f020072;
         public static final int common_signin_btn_text_pressed_dark=0x7f020073;
         public static final int common_signin_btn_text_pressed_light=0x7f020074;
-        public static final int ic_launcher=0x7f020075;
-        public static final int ic_plusone_medium_off_client=0x7f020076;
-        public static final int ic_plusone_small_off_client=0x7f020077;
-        public static final int ic_plusone_standard_off_client=0x7f020078;
-        public static final int ic_plusone_tall_off_client=0x7f020079;
+        public static final int gradient=0x7f020075;
+        public static final int ic_launcher=0x7f020076;
+        public static final int ic_plusone_medium_off_client=0x7f020077;
+        public static final int ic_plusone_small_off_client=0x7f020078;
+        public static final int ic_plusone_standard_off_client=0x7f020079;
+        public static final int ic_plusone_tall_off_client=0x7f02007a;
     }
     public static final class id {
         public static final int action_bar=0x7f050020;
@@ -1202,8 +1206,8 @@ containing a value of this type.
         public static final int beginning=0x7f050011;
         public static final int button_findFriend=0x7f050049;
         public static final int button_friendlyRun=0x7f05004b;
-        public static final int button_matchmake=0x7f050048;
-        public static final int button_pickRoute=0x7f050047;
+        public static final int button_matchmake=0x7f050047;
+        public static final int button_pickRoute=0x7f050048;
         public static final int button_profile=0x7f050044;
         public static final int button_routes=0x7f050045;
         public static final int button_runOff=0x7f05004a;
@@ -1517,9 +1521,8 @@ containing a value of this type.
          */
         public static final int AppBaseTheme=0x7f0b0086;
         /**  Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f0b0087;
+        public static final int AppTheme=0x7f0b0088;
         public static final int Bubble_TextAppearance_Dark=0x7f0b0083;
         public static final int Bubble_TextAppearance_Light=0x7f0b0084;
         public static final int ClusterIcon_TextAppearance=0x7f0b0085;
@@ -1710,6 +1713,7 @@ containing a value of this type.
         public static final int Widget_AppCompat_ProgressBar=0x7f0b000a;
         public static final int Widget_AppCompat_ProgressBar_Horizontal=0x7f0b0009;
         public static final int Widget_AppCompat_Spinner_DropDown_ActionBar=0x7f0b0022;
+        public static final int newBtn=0x7f0b0087;
     }
     public static final class styleable {
         /**  ============================================ 
