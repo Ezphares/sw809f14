@@ -120,6 +120,7 @@ public class RunProgress extends Activity
               		}
               	 	else if(input.get_cmd().equals("position"))
               	 	{
+
               	 		JSONObject data = input.get_data();
               	 		try 
               	 		{
@@ -127,6 +128,7 @@ public class RunProgress extends Activity
 	             	 		LatLng opponent_coord = decodedRoute.get((int)(decodedRoute.size() * fraction)); 
 	             	 		if(opponent_position == null)
 	             	 		{
+	                  	 		Log.d("runprogress", "opponent position");
 	             	 			opponent_position = googleMap.addMarker(new MarkerOptions().position(opponent_coord));
 		             	 		opponent_position.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 	             	 		}

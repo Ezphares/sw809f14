@@ -51,7 +51,7 @@ public class MainActivity extends ActionBarActivity
                 is_reachable = HttpHandler.is_reachable();
                 if(is_reachable == false)
                 {
-                	MainActivity.get_handler().sendEmptyMessage(0);
+                	hm.sendEmptyMessage(0);
                 }
             }
         }).start();
@@ -97,12 +97,6 @@ public class MainActivity extends ActionBarActivity
     	return is_authenticated;
     }
     
-    public static Handler get_handler()
-    {
-        return hm;
-    }
-    
-
 	private void callLoginDialog() 
     {
         myDialog = new Dialog(this);
@@ -119,6 +113,14 @@ public class MainActivity extends ActionBarActivity
            @Override
            public void onClick(View v)
            {
+               final Handler handle_fail = new Handler() 
+               {
+                   public void handleMessage(Message m) 
+                   {
+                   	Toast.makeText(getApplicationContext(), "Login failed", Toast.LENGTH_LONG).show();                         
+                   }
+               };
+
               	is_authenticated = true;
                 new Thread(new Runnable()
                 {
@@ -132,7 +134,16 @@ public class MainActivity extends ActionBarActivity
                         
                         if(!HttpHandler.login_request(user, pass))
                         {
-                           is_authenticated = false;                    
+                        	handle_fail.sendEmptyMessage(0);
+                            is_authenticated = false; 
+                            runOnUiThread(new Runnable()
+                            {
+                            	@Override
+                            	public void run()
+                            	{
+                            		myDialog.show();
+                            	}
+                            });
                         }
                         else
                         {
@@ -140,7 +151,7 @@ public class MainActivity extends ActionBarActivity
                         }
                     }
                 }).start();      
-                myDialog.hide();
+                myDialog.dismiss();
            }
 
                    
