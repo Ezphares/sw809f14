@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
@@ -11,10 +11,20 @@
             backward-compatibility can go here.
         -->
     </style>
+    
+    <style name="newBtn" parent="android:style/Widget.Button">
+        <item name="android:textColor">
+            @color/white
+        </item>
+        <item name="android:background">@color/background</item>
+    </style>
 
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:buttonStyle">@style/newBtn</item>
+        
     </style>
 
 </resources>
