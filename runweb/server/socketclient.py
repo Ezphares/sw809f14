@@ -46,6 +46,8 @@ def main():
 		header = client.recv_n(2, False)
 		msg_len = struct.unpack('!h', header)[0]
 		print(client.recv_n(msg_len))
+	client.socket.shutdown(socket.SHUT_RDWR)
+	client.socket.close()
 
 if __name__ == "__main__":
     main()
