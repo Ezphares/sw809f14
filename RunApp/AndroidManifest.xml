@@ -84,7 +84,7 @@
             android:label="@string/title_activity_run_progress" >
         </activity>
         <activity
-            android:name="dk.aau.student.runapp.Matchmake"
+            android:name="dk.aau.student.runapp.Matchmaker"
             android:label="@string/title_activity_matchmake"
             android:parentActivityName="dk.aau.student.runapp.MatchComp" >
             <meta-data

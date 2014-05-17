@@ -143,6 +143,7 @@ public class HttpHandler
             Log.d("login response", json.getString("status"));
             if(response.status == 200 && json.getString("status").equals("OK"))
             {
+            	UserInfo.get_instance().set_id(json.getInt("id"));
                 success = true;
             }
             	

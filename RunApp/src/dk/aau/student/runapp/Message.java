@@ -21,8 +21,22 @@ public class Message
 		try 
 		{
 			this.cmd = obj.getString("cmd");
-			this.id = Integer.parseInt(obj.getString("id"));
-			this.data = (JSONObject) obj.get("data");
+			
+			if(obj.has("id"))
+			{
+				this.id = obj.getInt("id");
+			}
+			else
+				obj.put("id", 1);
+
+			if(obj.get("data") == JSONObject.NULL)
+			{
+				this.data = null;
+			}
+			else
+			{
+				this.data = obj.getJSONObject("data");
+			}
 		} 
 		catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -58,6 +72,21 @@ public class Message
 	String get_encoded()
 	{	
 		return compile().toString();		
+	}
+	
+	String get_cmd()
+	{
+		return cmd;
+	}
+	
+	int get_id()
+	{
+		return id;
+	}
+	
+	JSONObject get_data()
+	{
+		return data;
 	}
 
 }

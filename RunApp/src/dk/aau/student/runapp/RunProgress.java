@@ -10,7 +10,10 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
 
@@ -22,6 +25,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -30,14 +35,12 @@ public class RunProgress extends Activity
 	private Matchmaker matchmaker;
     private GoogleMap googleMap;
     private String data;
-    JSONObject route;
-    JSONArray waypoints;
-    String polyline;
-    GPSTracker gps;
-
-	private Intent route_intent;
-
-
+    private JSONObject route;
+    private JSONArray waypoints;
+    private String polyline;
+    private GPSTracker gps;
+    private List<LatLng> decodedRoute;
+    private Marker opponent_position = null;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) 
@@ -46,7 +49,6 @@ public class RunProgress extends Activity
         setContentView(R.layout.fragment_run_progress); 
 
         initializeMap();
-        initializeGPS();
         
         data = getIntent().getExtras().getString("route");
         try 
@@ -64,14 +66,13 @@ public class RunProgress extends Activity
 		    googleMap.moveCamera(center);
 		    googleMap.animateCamera(zoom);
 		    
-		    		
 			for(int i = 0; i <waypoints.length(); i++)
 			{
 				double lat = waypoints.getJSONObject(i).getDouble("lat");				
 				double lng = waypoints.getJSONObject(i).getDouble("lng");
 			}
 					
-			List<LatLng> decodedRoute = PolyUtil.decode(polyline);
+			decodedRoute = PolyUtil.decode(polyline);
 			googleMap.addPolyline(new PolylineOptions().addAll(decodedRoute).color(Color.argb(255, 101, 169, 234)));
 			
 		} catch (JSONException e) {
@@ -81,16 +82,103 @@ public class RunProgress extends Activity
         
         //Start matchmaking
         matchmaker = new Matchmaker();
-        Message enqueue = new Message("queue", UserInfo.get_id(), null);
+        Message enqueue = new Message("queue", UserInfo.get_instance().get_id(), null);
         matchmaker.add_message(enqueue);
         
-        Message input = matchmaker.get_next_message();
+        gps = new GPSTracker(this.getApplication(), this.googleMap, this.matchmaker);
         
-        while(input != null)
+        //Get received messages. Called once every second
+        final Handler read = new Handler();
+        read.post(new Runnable()
         {
-        	Log.d("runprogress", input.get_encoded());
-        }
-             
+        	@Override
+        	public void run()
+        	{      
+        		Message input = matchmaker.get_next_message();
+        		
+                while(input != null)
+                {               						
+                    if(input.get_cmd().equals("found"))
+              	 	{
+              	 		AcceptMatchFragment frag = new AcceptMatchFragment();
+              	 		frag.show(getFragmentManager(), "match found");
+              	 	}
+              	 	else if(input.get_cmd().equals("start"))
+              	 	{
+              	 		 new CountDownTimer(10000, 1000) 
+              	 		 {
+              	 		     public void onTick(long millisUntilFinished) 
+              	 		     {
+              	 		         Toast.makeText(getBaseContext(),"seconds remaining: " + millisUntilFinished / 1000, Toast.LENGTH_SHORT).show();
+              			     }
+
+              			     public void onFinish() 
+              			     {
+              			         Toast.makeText(getBaseContext(),"GO!", Toast.LENGTH_LONG).show();
+              			     }
+              			  }.start();
+              		}
+              	 	else if(input.get_cmd().equals("position"))
+              	 	{
+
+              	 		JSONObject data = input.get_data();
+              	 		try 
+              	 		{
+							Double fraction = Double.parseDouble(data.get("completion").toString());
+	             	 		LatLng opponent_coord = decodedRoute.get((int)(decodedRoute.size() * fraction)); 
+	             	 		if(opponent_position == null)
+	             	 		{
+	                  	 		Log.d("runprogress", "opponent position");
+	             	 			opponent_position = googleMap.addMarker(new MarkerOptions().position(opponent_coord));
+		             	 		opponent_position.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+	             	 		}
+	             	 		else
+	             	 		{
+	             	 			opponent_position.setPosition(opponent_coord);
+	             	 		}
+	             	 		
+						} 
+              	 		catch (NumberFormatException e) 
+              	 		{
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} 
+              	 		catch (JSONException e) 
+              	 		{
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+              	 		
+              	 	}
+              	 	else if(input.get_cmd().equals("winner"))
+              	 	{
+              	 		if(input.get_id() != UserInfo.get_instance().get_id())
+              	 		{
+              	 			Toast.makeText(getBaseContext(), "Your opponent won the race", Toast.LENGTH_LONG).show();
+              	 		}
+              	 		else
+              	 		{
+              	 			Toast.makeText(getBaseContext(), "YOU WON THE RACE!", Toast.LENGTH_LONG).show();
+              	 		}
+              	 		
+              	        Intent intent = new Intent(getBaseContext(), MainActivity.class);
+              	        startActivity(intent);
+              	        
+              	        finish();
+              	 	}
+                    
+                    input = matchmaker.get_next_message();
+                }
+                
+                read.postDelayed(this, 1000);
+        	}
+        });
+              
+    }
+   
+    protected void onDestroy()
+    {
+    	matchmaker.close_socket();
     }
     
     /**
@@ -110,35 +198,8 @@ public class RunProgress extends Activity
             }
         }
     }
-    
-    private void initializeGPS()
-    {
-        gps = new GPSTracker(this.getApplication(), this.googleMap);
-    }
-    
-    
-    /*						
-      if(cmd_type.equals("found"))
-	 	{
-	 		AcceptMatchFragment frag = new AcceptMatchFragment();
-	 		frag.show(getFragmentManager(), "match found");
-	 	}
-	 	else if(cmd_type.equals("start"))
-	 	{
-	 		 new CountDownTimer(10000, 1000) 
-	 		 {
-	 		     public void onTick(long millisUntilFinished) 
-	 		     {
-	 		         Toast.makeText(getBaseContext(),"seconds remaining: " + millisUntilFinished / 1000, Toast.LENGTH_LONG).show();
-			     }
 
-			     public void onFinish() 
-			     {
-			         Toast.makeText(getBaseContext(),"GO!", Toast.LENGTH_LONG).show();
-			     }
-			  }.start();
-		}
-	*/
+    //Pop-up to allow user to accept or decline a match
 	public class AcceptMatchFragment extends DialogFragment {
 	    @Override
 	    public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -149,10 +210,8 @@ public class RunProgress extends Activity
 	               {
 	                   public void onClick(DialogInterface dialog, int id) 
 	                   {
-	                	   Bundle route = route_intent.getExtras();
-	                	   Intent intent = new Intent(getBaseContext(), RunProgress.class);
-	                	   intent.putExtras(route);
-	                	   startActivity(intent);               	   
+	                	   Message accept = new Message("accept", UserInfo.get_instance().get_id(), null);
+	                	   matchmaker.add_message(accept);
 	                   }
 	               })
 	               .setNegativeButton(R.string.decline, new DialogInterface.OnClickListener() 

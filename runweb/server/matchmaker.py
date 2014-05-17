@@ -85,7 +85,8 @@ class Matchmaker:
 		self.handlers = {
 			server.socketserver.ClientCommand.QUEUE: self._handle_queue,
 			server.socketserver.ClientCommand.CANCEL: self._handle_cancel,
-			server.socketserver.ClientCommand.ACCEPT: self._handle_accept
+			server.socketserver.ClientCommand.ACCEPT: self._handle_accept,
+			server.socketserver.ClientCommand.DISCONNECT: self._handle_disconnect
 		}
 		logging.info('Matchmaker started')
 
@@ -111,9 +112,7 @@ class Matchmaker:
 			time.sleep(0.01)
 
 	def _handle_queue(self, client_cmd):
-		if self._get_player(client_cmd.id): # Player already queued.
-			pass # Could send an error msg here.
-		else:
+		if not self._get_player(client_cmd.id): # Player not already queued.
 			player = Player(competitive.models.Player.objects.get(pk=client_cmd.id), client_cmd.socket)
 			self.players.enqueue(player)
 
@@ -136,6 +135,11 @@ class Matchmaker:
 				self.server_cmd_q[match.player2.socket].put(server_cmd)
 				self.matches.remove(match)
 			break
+
+	def _handle_disconnect(self, client_cmd):
+		for player in self.players:
+			if player.socket is client_cmd.socket:
+				self.players.dequeue(player.id)
 
 	def _match(self, player1, player2):
 		match = Match(player1, player2)

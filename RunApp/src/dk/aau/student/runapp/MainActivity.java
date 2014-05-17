@@ -3,6 +3,7 @@ package dk.aau.student.runapp;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.support.v7.app.ActionBarActivity;
+import android.text.Editable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -10,7 +11,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 
 public class MainActivity extends ActionBarActivity
@@ -18,6 +25,10 @@ public class MainActivity extends ActionBarActivity
     private static boolean is_authenticated = false;
     private boolean is_reachable = true;
     private static Handler hm;
+    private Dialog myDialog;
+    private Button login;
+    private EditText username = null;
+    private EditText password = null;
     
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -40,34 +51,16 @@ public class MainActivity extends ActionBarActivity
                 is_reachable = HttpHandler.is_reachable();
                 if(is_reachable == false)
                 {
-                	MainActivity.get_handler().sendEmptyMessage(0);
+                	hm.sendEmptyMessage(0);
                 }
             }
         }).start();
         
+        
         if(!MainActivity.is_authenticated)
         {
-            is_authenticated = true;
-            new Thread(new Runnable()
-            {
-                public void run()
-                {
-                    BasicNameValuePair username = new BasicNameValuePair("username", UserInfo.get_username());
-                    BasicNameValuePair password = new BasicNameValuePair("password", UserInfo.get_password());
-                    
-                    if(!HttpHandler.login_request(username, password))
-                    {
-                       is_authenticated = false;
-                       Log.d("auth failed!", "herp");                    
-                    }
-                    else
-                    {
-                        PickRoute.routes = HttpHandler.route_request();
-                    }
-                }
-            }).start();
+        	callLoginDialog();
         }
-
     }
 
     @Override
@@ -104,9 +97,65 @@ public class MainActivity extends ActionBarActivity
     	return is_authenticated;
     }
     
-    public static Handler get_handler()
+	private void callLoginDialog() 
     {
-        return hm;
-    }
-    
+        myDialog = new Dialog(this);
+        myDialog.setContentView(R.layout.login_form);
+        myDialog.setCancelable(false);
+        Button login = (Button) myDialog.findViewById(R.id.loginButton);
+
+        username = (EditText) myDialog.findViewById(R.id.et_username);
+        password = (EditText) myDialog.findViewById(R.id.et_password);
+        myDialog.show();
+
+        login.setOnClickListener(new OnClickListener()
+        {
+           @Override
+           public void onClick(View v)
+           {
+               final Handler handle_fail = new Handler() 
+               {
+                   public void handleMessage(Message m) 
+                   {
+                   	Toast.makeText(getApplicationContext(), "Login failed", Toast.LENGTH_LONG).show();                         
+                   }
+               };
+
+              	is_authenticated = true;
+                new Thread(new Runnable()
+                {
+                	public void run()
+                    {
+                        
+                        BasicNameValuePair user = new BasicNameValuePair("username", username.getText().toString());
+                        BasicNameValuePair pass = new BasicNameValuePair("password", password.getText().toString());
+                        UserInfo.get_instance().set_username(username.getText().toString());
+                        UserInfo.get_instance().set_password(password.getText().toString());
+                        
+                        if(!HttpHandler.login_request(user, pass))
+                        {
+                        	handle_fail.sendEmptyMessage(0);
+                            is_authenticated = false; 
+                            runOnUiThread(new Runnable()
+                            {
+                            	@Override
+                            	public void run()
+                            	{
+                            		myDialog.show();
+                            	}
+                            });
+                        }
+                        else
+                        {
+                            PickRoute.routes = HttpHandler.route_request();
+                        }
+                    }
+                }).start();      
+                myDialog.dismiss();
+           }
+
+                   
+        });
+
+    }   
 }

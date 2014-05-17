@@ -1,5 +1,8 @@
 package dk.aau.student.runapp;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -25,6 +28,7 @@ public class GPSTracker extends Service implements LocationListener {
     private final Context mContext;
     private GoogleMap googleMap;
     private Marker currentLocation;
+    public Matchmaker matchmaker;
 
     // flag for GPS status
     boolean isGPSEnabled = false;
@@ -47,7 +51,8 @@ public class GPSTracker extends Service implements LocationListener {
     // Declaring a Location Manager
     protected LocationManager locationManager;
 
-    public GPSTracker(Context context, GoogleMap map) {
+    public GPSTracker(Context context, GoogleMap map, Matchmaker matchmaker) {
+    	this.matchmaker = matchmaker;
         this.mContext = context;
         this.googleMap = map;
         getLocation();
@@ -119,10 +124,24 @@ public class GPSTracker extends Service implements LocationListener {
     	Log.d("GPS", Double.toString(getLatitude()) + "      " + Double.toString(getLongitude()));
     	if(getLatitude() == 0.0 || getLongitude() == 0.0)
     		return;
-    	
+
+    	JSONObject data = new JSONObject();
+    	try 
+    	{
+			data.put("lat", getLatitude());
+	    	data.put("lng", getLongitude());
+		} 
+    	catch (JSONException e) 
+    	{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	Message msg = new Message("position", UserInfo.get_instance().get_id(), data);
+    	this.matchmaker.add_message(msg);
+   	
     	if(currentLocation == null) {
-			currentLocation = googleMap.addMarker(new MarkerOptions().position(new LatLng(getLatitude(), getLongitude())));
-			currentLocation.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+    		currentLocation = googleMap.addMarker(new MarkerOptions().position(new LatLng(getLatitude(), getLongitude())));
+			currentLocation.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
     	}
     	else {
     		currentLocation.setPosition(new LatLng(getLatitude(),getLongitude()));
@@ -179,4 +198,5 @@ public class GPSTracker extends Service implements LocationListener {
             locationManager.removeUpdates(GPSTracker.this);
         }
     }
+    
 }

@@ -41,7 +41,7 @@ public class Matchmaker
 	        	try 
 	        	{	      		
 					socket.connect(sockaddr);
-					socket.setSoTimeout(3000);
+					socket.setSoTimeout(1000);
 					
 					input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					output = new DataOutputStream(socket.getOutputStream());
@@ -88,14 +88,12 @@ public class Matchmaker
 				} 
 				catch (IOException e) 
 				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 					break;
 				}
 			}
 			if(header.length() == 2)
 			{
-				remaining = Integer.parseInt(header, 256);
+				remaining = ((int)header.charAt(0))*256 + ((int)header.charAt(1));
 				message = "";
 			}
 		}
@@ -145,7 +143,6 @@ public class Matchmaker
 	
 	private void send_message()
 	{
-		Log.d("matchmaker", "send message");
 		Message msg = outbound_queue.poll();
 		
 		try 
