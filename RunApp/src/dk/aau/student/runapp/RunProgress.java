@@ -82,7 +82,19 @@ public class RunProgress extends Activity
         
         //Start matchmaking
         matchmaker = new Matchmaker();
-        Message enqueue = new Message("queue", UserInfo.get_instance().get_id(), null);
+        int route_id;
+        JSONObject queue_data = null;
+		try {
+			route_id = route.getInt("id");
+	        queue_data = new JSONObject();
+	        queue_data.put("id", route_id);
+		} 
+		catch (JSONException e1) 
+		{
+			finish();
+		}
+
+        Message enqueue = new Message("queue", UserInfo.get_instance().get_id(), queue_data);
         matchmaker.add_message(enqueue);
         
         gps = new GPSTracker(this.getApplication(), this.googleMap, this.matchmaker);
