@@ -14,7 +14,8 @@ class Route (models.Model):
     polyline = models.CharField(max_length = 4096, default = '')
     
     def as_json(self):
-        return {'name': self.name,
+        return {'id': self.pk,
+                'name': self.name,
                 'waypoints': [{'lat': wp.latitude, 'lng': wp.longitude} for wp in self.waypoint_set.all().order_by('index')],
                 'distance': self.distance,
                 'difficulty': self.difficulty,
