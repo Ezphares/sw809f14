@@ -53,7 +53,7 @@ Implementing the web page was done in two parts, the server and client.
 
 \subsubsection{Server Implementation}
 
-The server was implemented in the Django\cite{djangoproject}, a web framework for the Python programming language. We made use of several of the features of Django, to ease the implementation of the previously mentioned design. An example of this, is Django's \ac{ORM}, which was used to implement the database, removing any need to write database code directly. As such, the \texttt{Route} table seen in \autoref{fig:sprint1-db-model} was implemented as a Django model with the code seen in \autoref{lst:sprint1-route-model}. From this code, Django is able to generate code for several different database engines, chosen simply by changing the django settings file.
+The server was implemented in Django\cite{djangoproject}, a web framework for the Python programming language. We made use of several of the features of Django, to ease the implementation of the previously mentioned design. An example of this, is Django's \ac{ORM}, which was used to implement the database, removing any need to write database code directly. As such, the \texttt{Route} table seen in \autoref{fig:sprint1-db-model} was implemented as a Django model with the code seen in \autoref{lst:sprint1-route-model}. From this code, Django is able to generate code for several different database engines, chosen simply by changing the django settings file.
 
 \begin{lstlisting}[language=Python,label={lst:sprint1-route-model},caption={Sprint 1 "Route" Model}]
 from django.db import models
