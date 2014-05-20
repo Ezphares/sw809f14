@@ -41,7 +41,13 @@ def main():
 
 	client = SocketClient(args.host, args.port)
 	for cmd in args.cmds:
-		msg = '{{"cmd": "{0}", "id": {1}, "data": null}}'.format(cmd, args.id)	
+		if cmd == 'queue':
+			msg = '{{"cmd": "{0}", "id": {1}, "data": {{"route_id": 1}}}}'.format(cmd, args.id)
+		elif cmd == 'position':
+			msg = '{{"cmd": "{0}", "id": {1}, "data": {{"lat": 10.0, "lng": 10.0}}}}'.format(cmd, args.id)
+		else:
+			msg = '{{"cmd": "{0}", "id": {1}, "data": null}}'.format(cmd, args.id)
+		print(msg)
 		client.send(msg)
 		header = client.recv_n(2, False)
 		msg_len = struct.unpack('!h', header)[0]

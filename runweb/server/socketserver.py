@@ -19,8 +19,9 @@ class SocketServer:
 
 		self.client_cmd_q = queue.Queue()
 		self.server_cmd_q = {}
+		self.matches = []
 
-		matchmaker = server.matchmaker.Matchmaker(self.client_cmd_q, self.server_cmd_q)
+		matchmaker = server.matchmaker.Matchmaker(self.client_cmd_q, self.server_cmd_q, self.matches)
 		threading.Thread(target=matchmaker.run).start()
 
 	def run(self):
@@ -28,7 +29,7 @@ class SocketServer:
 			(clientsocket, address) = self.server.accept()
 			clientsocket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 			logging.info('Client connected from {0}'.format(address))
-			clientthread = ClientThread(clientsocket, address, self.client_cmd_q, self.server_cmd_q)
+			clientthread = ClientThread(clientsocket, address, self.client_cmd_q, self.server_cmd_q, self.matches)
 			threading.Thread(target=clientthread.run).start()
 
 
@@ -65,11 +66,12 @@ class ClientCommand:
 
 class ClientThread:
 
-	def __init__(self, socket, address, client_cmd_q, server_cmd_q):
+	def __init__(self, socket, address, client_cmd_q, server_cmd_q, matches):
 		self.socket = socket
 		self.address = address
 		self.client_cmd_q = client_cmd_q
 		self.server_cmd_q = server_cmd_q
+		self.matches = matches
 		self.server_cmd_q[self.socket] = queue.Queue()
 		self.handlers = {
 			ClientCommand.QUEUE: self._handle,
@@ -83,7 +85,7 @@ class ClientThread:
 			header = self._recv_n(2, False) # Get message length as 2 bytes.
 			if header is False: # Clean disconnect from client detected.
 				self._close()
-				break;
+				break
 			elif header is not None:
 				msg_len = struct.unpack('!h', header)[0] # Convert message length to 16 bit integer.
 				data = self._recv_n(msg_len)
@@ -113,7 +115,23 @@ class ClientThread:
 		self.client_cmd_q.put(client_cmd)
 
 	def _handle_position(self, client_cmd):
-		pass
+		for match in self.matches:
+			if match.player1.id == client_cmd.id:
+				player = match.player1
+				opponent = match.player2
+				break
+			elif match.player2.id == client_cmd.id:
+				player = match.player2
+				opponent = match.player1
+				break
+		polyline = player.route.get_polyline()
+		(current, total, completed) = polyline.advance(player.position, (client_cmd.data['lat'], client_cmd.data['lng']))
+		player.completion = current/total
+		server_cmd = ServerCommand(ServerCommand.POSITION, {'completion': opponent.completion})
+		self.server_cmd_q[player.socket].put(server_cmd)
+		if completed:
+			self.server_cmd_q[player.socket].put(ServerCommand(ServerCommand.WINNER))
+			self.server_cmd_q[opponent.socket].put(ServerCommand(ServerCommand.LOSER))
 
 	def _send(self, msg):
 		msg = struct.pack('!h', len(msg)) + msg.encode('utf-8')
