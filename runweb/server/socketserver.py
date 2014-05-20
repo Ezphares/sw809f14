@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import queue
@@ -5,6 +6,7 @@ import socket
 import struct
 import threading
 
+import server.glicko
 import server.matchmaker
 
 
@@ -18,7 +20,7 @@ class SocketServer:
 		logging.info('Server listening on ' + str((host, port)))
 
 		self.client_cmd_q = queue.Queue()
-		self.server_cmd_q = {}
+		self.server_cmd_q = {} # One entry for each client thread containing a Queue.
 		self.matches = []
 
 		matchmaker = server.matchmaker.Matchmaker(self.client_cmd_q, self.server_cmd_q, self.matches)
@@ -72,6 +74,7 @@ class ClientThread:
 		self.client_cmd_q = client_cmd_q
 		self.server_cmd_q = server_cmd_q
 		self.matches = matches
+		self.glicko = server.glicko.Glicko(18)
 		self.server_cmd_q[self.socket] = queue.Queue()
 		self.handlers = {
 			ClientCommand.QUEUE: self._handle,
@@ -102,10 +105,10 @@ class ClientThread:
 					logging.info('Received command {0} from {1}'.format(client_cmd.cmd.upper(), self.address))
 
 			try:
-				server_cmd = self.server_cmd_q[self.socket].get_nowait()
-			except queue.Empty:
+				server_cmd = self.server_cmd_q[self.socket].get_nowait() # Try to a get a command.
+			except queue.Empty: # No commands available.
 				pass
-			else:
+			else: # If there was a command, try to send it.
 				if self._send(server_cmd.serialize()) == None: # Message not sent.
 					self.server_cmd_q[self.socket].put(server.cmd) # Put the message back in the queue.
 				else:
@@ -124,6 +127,8 @@ class ClientThread:
 				player = match.player2
 				opponent = match.player1
 				break
+		else: # Match not found.
+			return
 		polyline = player.route.get_polyline()
 		(current, total, completed) = polyline.advance(player.position, (client_cmd.data['lat'], client_cmd.data['lng']))
 		player.position = current
@@ -133,6 +138,7 @@ class ClientThread:
 		if completed:
 			self.server_cmd_q[player.socket].put(ServerCommand(ServerCommand.WINNER))
 			self.server_cmd_q[opponent.socket].put(ServerCommand(ServerCommand.LOSER))
+
 
 	def _send(self, msg):
 		msg = struct.pack('!h', len(msg)) + msg.encode('utf-8')
