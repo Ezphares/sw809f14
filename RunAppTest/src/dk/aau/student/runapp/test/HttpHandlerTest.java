@@ -37,15 +37,13 @@ public class HttpHandlerTest extends TestCase
 	}
 	
 	/*
-	 * Currently untestable because no log out functionality
-	 * 
 	public void test_wrong_password_login()
 	{
 		boolean fail = HttpHandler.login_request(username, password_wrong);
 		
 		assertFalse(fail);
-	}
-	*/
+	}*/
+
 	
 	public void test_route_request()
 	{

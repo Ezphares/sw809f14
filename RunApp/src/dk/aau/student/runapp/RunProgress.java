@@ -87,7 +87,7 @@ public class RunProgress extends Activity
 		try {
 			route_id = route.getInt("id");
 	        queue_data = new JSONObject();
-	        queue_data.put("id", route_id);
+	        queue_data.put("route_id", route_id);
 		} 
 		catch (JSONException e1) 
 		{
@@ -166,7 +166,7 @@ public class RunProgress extends Activity
               	 	{
               	 		if(input.get_id() != UserInfo.get_instance().get_id())
               	 		{
-              	 			Toast.makeText(getBaseContext(), "Your opponent won the race", Toast.LENGTH_LONG).show();
+              	 			Toast.makeText(getBaseContext(), "You lost the race", Toast.LENGTH_LONG).show();
               	 		}
               	 		else
               	 		{
@@ -190,6 +190,7 @@ public class RunProgress extends Activity
    
     protected void onDestroy()
     {
+    	super.onDestroy();
     	matchmaker.close_socket();
     }
     

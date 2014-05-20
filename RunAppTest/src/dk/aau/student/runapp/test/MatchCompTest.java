@@ -43,13 +43,12 @@ public class MatchCompTest extends ActivityInstrumentationTestCase2<MatchComp>
 		//Mock up of pick route result
 		Intent returnIntent = new Intent();
 		Bundle returnData = new Bundle();
-		returnData.putString("route", "this is a route");
+		returnData.putString("route", "{\"name\":\"Short home\"}");
 		returnIntent.putExtras(returnData);
 		ActivityResult activityResult = new ActivityResult(MatchComp.RESULT_OK, returnIntent);
 		
 		// register next activities that need to be monitored.
 		ActivityMonitor pickRouteMonitor = getInstrumentation().addMonitor(PickRoute.class.getName(), activityResult, true);
-		ActivityMonitor runProgressMonitor = getInstrumentation().addMonitor(RunProgress.class.getName(), null, false);
 						
 		matchComp.runOnUiThread(new Runnable() 
 		{
@@ -63,14 +62,9 @@ public class MatchCompTest extends ActivityInstrumentationTestCase2<MatchComp>
 				
 		// PickRoute is opened and captured.
 		Activity pickRoute = getInstrumentation().waitForMonitorWithTimeout(pickRouteMonitor, 1000);
-		//RunProgress is opened and captured
-		Activity runProgress = getInstrumentation().waitForMonitorWithTimeout(runProgressMonitor, 5000);
 		
 		//Check that the results are handled appropriately
 		assertTrue(matchComp.getActivityResultIsReturned());
-		assertEquals(matchComp.getActivityResult(), "this is a route");
-		//Check that RunProgress is started
-		assertNotNull(runProgress);
-		runProgress.finish();
+		assertEquals(matchComp.getActivityResult(), "{\"name\":\"Short home\"}");
 	}
 }

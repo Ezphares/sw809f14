@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -96,7 +97,7 @@ public class MatchComp extends ActionBarActivity
     	JSONObject route = null;
 		try {
 			route = new JSONObject(r_data);
-    		name = route.getString("name");
+			name = route.getString("name");
 		} 
 		catch (JSONException e) 
 		{

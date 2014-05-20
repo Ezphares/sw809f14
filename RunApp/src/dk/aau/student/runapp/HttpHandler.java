@@ -140,10 +140,11 @@ public class HttpHandler
         try
         {
             json = new JSONObject(response.body);
-            Log.d("login response", json.getString("status"));
-            if(response.status == 200 && json.getString("status").equals("OK"))
+            String status = json.getString("status");
+            if(response.status == 200 && status.equals("OK"))
             {
             	UserInfo.get_instance().set_id(json.getInt("id"));
+            	Log.d("id: ", Integer.toString(UserInfo.get_instance().get_id()));
                 success = true;
             }
             	

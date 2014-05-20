@@ -41,7 +41,7 @@ public class MatchFriendTest extends ActivityInstrumentationTestCase2<MatchFrien
 		//Mock up of pick route result
 		Intent returnIntent = new Intent();
 		Bundle returnData = new Bundle();
-		returnData.putString("route", "this is a route");
+		returnData.putString("route", "{\"name\":\"Short home\"}");
 		returnIntent.putExtras(returnData);
 		ActivityResult activityResult = new ActivityResult(MatchFriend.RESULT_OK, returnIntent);
 		
@@ -66,7 +66,7 @@ public class MatchFriendTest extends ActivityInstrumentationTestCase2<MatchFrien
 		
 		//Check that the results are handled appropriately
 		assertTrue(matchFriend.getActivityResultIsReturned());
-		assertEquals(matchFriend.getActivityResult(), "this is a route");
+		assertEquals(matchFriend.getActivityResult(), "{\"name\":\"Short home\"}");
 		//Check that RunProgress is started
 		assertNotNull(runProgress);
 		runProgress.finish();

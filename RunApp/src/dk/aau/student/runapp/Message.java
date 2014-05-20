@@ -27,7 +27,7 @@ public class Message
 				this.id = obj.getInt("id");
 			}
 			else
-				obj.put("id", 1);
+				obj.put("id", UserInfo.get_instance().get_id());
 
 			if(obj.get("data") == JSONObject.NULL)
 			{
@@ -44,7 +44,7 @@ public class Message
 		}
 	}
 	
-	JSONObject compile()
+	private JSONObject compile()
 	{
 		JSONObject obj = new JSONObject();	
 		try 
@@ -69,22 +69,22 @@ public class Message
 		return obj;
 	}
 	
-	String get_encoded()
+	public String get_encoded()
 	{	
 		return compile().toString();		
 	}
 	
-	String get_cmd()
+	public String get_cmd()
 	{
 		return cmd;
 	}
 	
-	int get_id()
+	public int get_id()
 	{
 		return id;
 	}
 	
-	JSONObject get_data()
+	public JSONObject get_data()
 	{
 		return data;
 	}
