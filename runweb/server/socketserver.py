@@ -126,6 +126,7 @@ class ClientThread:
 				break
 		polyline = player.route.get_polyline()
 		(current, total, completed) = polyline.advance(player.position, (client_cmd.data['lat'], client_cmd.data['lng']))
+		player.position = current
 		player.completion = current/total
 		server_cmd = ServerCommand(ServerCommand.POSITION, {'completion': opponent.completion})
 		self.server_cmd_q[player.socket].put(server_cmd)
