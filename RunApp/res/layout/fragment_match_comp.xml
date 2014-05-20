@@ -14,6 +14,7 @@
         android:layout_height="220dp"
         android:layout_alignParentBottom="true"
         android:layout_below="@+id/button_pickRoute"
+        android:onClick="matchmake"
         android:text="Matchmake" />
 
     <Button

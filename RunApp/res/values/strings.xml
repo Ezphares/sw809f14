@@ -14,5 +14,10 @@
     <string name="dialog_accept_match">Match found!</string>
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
+    <string name="username">Username</string>
+    <string name="enter_username">Enter Username</string>
+    <string name="password">Password</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="login">Login</string>
 
 </resources>
