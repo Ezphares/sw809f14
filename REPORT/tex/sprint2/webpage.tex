@@ -52,7 +52,7 @@ On the server, two separate parts were implemented: The route validation as well
    \item Remove established friends.
    \item Retrieve a list of friends and requests.
   \end{itemize}
-  The main challenge of this was having the server consider a \texttt{Friend} database entry equal regardless of which user is the \texttt{to} and \texttt{from} user after the request has been accepted, but different while still pending. That is, an accepted friend request makes users mutual friends, while a pending friend request require action from a specific user. This was solved by creating a function that retrieves all of a users accepted friends, which can be seen in \autoref{lst:sprint2-get-friends}, while retrieving pending requests was done by filtering requests where the involved user is the \texttt{to} user, as well as \texttt{accepted} set to false.
+  The main challenge of this was having the server consider entries in the \texttt{Friend} table equal regardless of which user is the \texttt{to} and \texttt{from} user after the request has been accepted, but different while still pending. That is, an accepted friend request makes users mutual friends, while a pending friend request require action from a specific user. This was solved by creating a function that retrieves all of a users accepted friends, which can be seen in \autoref{lst:sprint2-get-friends}, while retrieving pending requests was done by filtering requests where the involved user is the \texttt{to} user, as well as \texttt{accepted} set to false.
 \end{itemize}
 
 \begin{lstlisting}[label={lst:sprint2-get-friends},caption={'Friend List' function},language={Python}]
