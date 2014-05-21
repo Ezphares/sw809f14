@@ -6,6 +6,7 @@ import socket
 import struct
 import threading
 
+import competitive.models
 import server.glicko
 import server.matchmaker
 
@@ -87,13 +88,11 @@ class ClientThread:
 		while True:
 			header = self._recv_n(2, False) # Get message length as 2 bytes.
 			if header is False: # Clean disconnect from client detected.
-				self._close()
 				break
 			elif header is not None:
 				msg_len = struct.unpack('!h', header)[0] # Convert message length to 16 bit integer.
 				data = self._recv_n(msg_len)
 				if data == False: # Clean disconnect from client detected.
-					self._close()
 					break
 				try:
 					data = json.loads(data)
@@ -113,6 +112,7 @@ class ClientThread:
 					self.server_cmd_q[self.socket].put(server.cmd) # Put the message back in the queue.
 				else:
 					logging.info('Sent command {0} to {1}'.format(server_cmd.cmd.upper(), self.address))
+		self._close()
 
 	def _handle(self, client_cmd):
 		self.client_cmd_q.put(client_cmd)
@@ -122,15 +122,18 @@ class ClientThread:
 			if match.player1.id == client_cmd.id:
 				player = match.player1
 				opponent = match.player2
-				break
 			elif match.player2.id == client_cmd.id:
 				player = match.player2
 				opponent = match.player1
-				break
+			else:
+				continue
+			self.matches.remove(match)
+			break
 		else: # Match not found.
 			return
 		polyline = player.route.get_polyline()
-		(current, total, completed) = polyline.advance(player.position, (client_cmd.data['lat'], client_cmd.data['lng']))
+		(current, total, completed) = polyline.advance(player.position,
+													   (client_cmd.data['lat'], client_cmd.data['lng']))
 		player.position = current
 		player.completion = current/total
 		server_cmd = ServerCommand(ServerCommand.POSITION, {'completion': opponent.completion})
@@ -138,7 +141,24 @@ class ClientThread:
 		if completed:
 			self.server_cmd_q[player.socket].put(ServerCommand(ServerCommand.WINNER))
 			self.server_cmd_q[opponent.socket].put(ServerCommand(ServerCommand.LOSER))
+			self._update_player(player, opponent, 1)
+			self._update_player(opponent, player, 0)
+			competitive.models.Match(player.model, opponent.model).save
 
+	def _update_player(self, player, opponent, outcome):
+		last_match = player.last_match
+		today = datetime.date.today()
+		days_since_last_match = (today-last_match).days if last_match is not None else 0
+		(rating, rd) = self.glicko.update_player(player.rating,
+												 player.rd,
+												 opponent.rating,
+												 opponent.rd,
+												 days_since_last_match,
+												 outcome)
+		player.rating = rating
+		player.rd = rd
+		player.last_match = today
+		player.model.save()
 
 	def _send(self, msg):
 		msg = struct.pack('!h', len(msg)) + msg.encode('utf-8')

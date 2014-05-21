@@ -29,9 +29,25 @@ class Player:
 	def rating(self):
 		return self.model.rating
 
+	@rating.setter
+	def rating(self, value):
+		self.model.rating = value
+
 	@property
 	def rd(self):
 		return self.model.rd
+
+	@rd.setter
+	def rd(self, value):
+		self.model.rd = value
+
+	@property
+	def last_match(self):
+		return self.model.last_match
+
+	@last_match.setter
+	def last_match(self, value):
+		self.model.last_match = value
 
 	@property
 	def distance(self):
@@ -81,7 +97,7 @@ class PlayerQueue(list):
 class Matchmaker:
 
 	def __init__(self, client_cmd_q, server_cmd_q, matches):
-		self.distance_threshold = 10
+		self.distance_threshold = 0.1
 		self.increment_time = 30
 		self.increment = 0.1
 		self.accept_time = 20
