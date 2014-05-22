@@ -1,0 +1,18 @@
+\section{Game Server Features}
+
+In addition to matchmaking, some features needed by the server during a match was also planned. In particular, we would like to be able to check whether or not a person is staying on his route. There are several interesting problems in performing such a check, including routes that are not straight lines, and geometry using latitude and longitude. The solution for these problems are described in this section.
+
+\subsection{Decimal Degree Geometry}
+
+When working with coordinates in the Google Maps \ac{API}, a position is denoted as a set of \texttt{(Longitude, Latitude)}, also known as decimal degrees, upon the surface of the earth. This poses two problems when calculating distances between two arbitrary points.
+
+The first problem is that the earth is a sphere, which means that conventional Euclidean geometry will not be correct. However, since the server will have to do a lot of computations, we decided that 100\% precision was not required for this (for example, whether you are 22 meters or 23 meters off route does not really matter), we decided to convert points to an offset in meters from \texttt{(Longitude, Latitude)} = \texttt{(0, 0)}, and then use Euclidean geometry on the resulting points.
+
+That leads to the second problem. One degree of longitude's length in meters varies depending on the latitude\cite{wikidecimaldegrees}. This meant a function, seen in \autoref{lst:sprint3-coord-offset}, had to be created to convert from coordinates in \texttt{(Longitude, Latitude)} to an \texttt{(x, y)} offset in meters. This approach resulted in very small imprecisions (on a scale of centimeters), though imprecisions grow as you get further from the equator.
+
+\begin{lstlisting}[label={lst:sprint3-coord-offset},caption={Convert Decimal Degrees to Offset in Meters},language={Python}]
+def metric_offset(self, coord):
+	return (coord[0] * 111319.9 * cos(radians(coord[1])) , coord[1] * 111319.9)
+\end{lstlisting}
+
+\subsection{Segmented Routes}
