@@ -29,12 +29,6 @@ def distToSegmentSquared(point, start, end):
     else:
         return dist2(point, (start[0] + t * (end[0] - start[0]),
                              start[1] + t * (end[1] - start[1])) )
-'''
-And some from wikipedia http://en.wikipedia.org/wiki/Decimal_degrees
-'''
-def metersToDecimalDegrees(meters, point):
-    degsize = 111319.9 * cos(radians(point[1]))
-    return meters / degsize
 
 class Segment(object):
     def __init__(self, start, end):
@@ -49,37 +43,46 @@ class Segment(object):
 
 class Polyline(object):
     def __init__(self, encoded):
-        self.points = depoly(encoded)
+        coords = depoly(encoded)
+        self.points = [self.metric_offset(c) for c in coords]
+
+    '''
+    Convert long, lat to x, y meters offset. http://en.wikipedia.org/wiki/Decimal_degrees
+    '''
+    def metric_offset(self, coord):
+        return (coord[0] * 111319.9 * cos(radians(coord[1])) , coord[1] * 111319.9)
         
-    def point_distance(self, point):
+    def point_distance(self, coord):
+        point = self.metric_offset(coord)
         distance = float('inf')
         for segment in self.get_segments():
             d = segment.point_distance(point)
             if (d < distance):
                 distance = d
         return distance
-        
+
     def get_segments(self):
         segments = []
         for i in range(len(self.points) - 1):
             segments.append(Segment(self.points[i], self.points[i + 1]))
         return segments
         
-    def on_route(self, point, threshold = 50):
-        return self.point_distance(point) <= metersToDecimalDegrees(threshold, point)
+    def on_route(self, coord, threshold = 50):
+        return self.point_distance(coord) <= threshold
         
     '''
     Current is index of current point, 0 at start of run
     Returns (<new point index>, <total points>, <finish reached>)
     '''
-    def advance(self, current, point, threshold = 50):
+    def advance(self, current, coord, threshold = 50):
+        point = self.metric_offset(coord)
         advancing = True
         while advancing:
             next = current + 1
             if next >= len(self.points):
                 return (next, next, True)
             
-            if sqrt(dist2(point, self.points[next])) <= metersToDecimalDegrees(threshold, point):
+            if sqrt(dist2(point, self.points[next])) <= threshold:
                 current = next
             else:
                 advancing = False
