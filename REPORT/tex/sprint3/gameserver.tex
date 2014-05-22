@@ -15,4 +15,18 @@ def metric_offset(self, coord):
 	return (coord[0] * 111319.9 * cos(radians(coord[1])) , coord[1] * 111319.9)
 \end{lstlisting}
 
-\subsection{Segmented Routes}
+\subsection{Distance Between Point and Route}
+
+Finding the distance between two points is not enough to determine whether a point is close to a route. The first problem with this, is that there might be quite far between two waypoints on a route, that is a user might have a 5 kilometre long route with just two waypoints. The natural solution to this is to project the point onto the line between the points and find the distance between those. However, as seen in \autoref{fig:sprint3-bad-route} using the line between the waypoints is often not indicative of the actual route.
+
+\begin{figure}[ht]
+ \caption{Non-linear Route}
+ \label{fig:sprint3-bad-route}
+ \includegraphics[scale=0.5]{img/sprint3br.png}
+\end{figure}
+
+\subsubsection{Decoding The Route}
+
+The solution chosen to that problem, was to use drawn line from the Google Maps Directions Service as the route, instead of the waypoints. This line is known as a polyline, and is returned with every successful request to the directions service. As mentioned in \autoref{sec:sprint2-web}, the web server already sends a directions request for each route, so even though it is not being drawn anywhere, the server has access to this polyline. 
+
+Additionally, the polyline retrieved from the map API is encoded as a string, which can easily be stored in the database, giving the game server access to the line without sending requests to the Google Maps \ac{API}. It is possible to decode this line into a series of points. We decided to do this using an existing piece of open source Python2 code\cite{decodepolyline}, which was ported to Python3. This function takes an encoded polyline and returns a list of \texttt{(Longitude, Latitude)} coordinates, which conveniently can be converted to the offsets we decided to work with, using the function seen in \autoref{lst:sprint3-coord-offset}.
