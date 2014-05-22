@@ -51,7 +51,7 @@ public class HttpHandler
     	// Connect with 10 s timeout
     	try 
     	{
-    	    socket.connect(sockaddr, 10000);
+    	    socket.connect(sockaddr, 2000);
     	} 
     	catch (IOException iOException) 
     	{

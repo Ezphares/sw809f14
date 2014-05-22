@@ -20,7 +20,7 @@ public class MatchComp extends ActionBarActivity
     public static final int ROUTE = 1;
     private boolean activityResultIsReturned = false;
     private String activityResult = null;
-    Bundle route_data;
+    private Bundle route_data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

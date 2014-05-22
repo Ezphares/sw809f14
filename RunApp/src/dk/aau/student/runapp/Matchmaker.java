@@ -153,6 +153,7 @@ public class Matchmaker
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			close_socket();
 		}
 		
 	}

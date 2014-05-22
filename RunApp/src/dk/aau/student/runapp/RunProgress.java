@@ -41,6 +41,7 @@ public class RunProgress extends Activity
     private GPSTracker gps;
     private List<LatLng> decodedRoute;
     private Marker opponent_position = null;
+    private Handler read;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) 
@@ -51,6 +52,62 @@ public class RunProgress extends Activity
         initializeMap();
         
         data = getIntent().getExtras().getString("route");
+        
+        drawMap();
+        
+        //Start matchmaking
+        matchmaker = new Matchmaker();
+        int route_id;
+        JSONObject queue_data = null;
+		try 
+		{
+			route_id = route.getInt("id");
+	        queue_data = new JSONObject();
+	        queue_data.put("route_id", route_id);
+		} 
+		catch (JSONException e1) 
+		{
+			matchmaker.close_socket();
+			finish();
+		}
+
+        Message enqueue = new Message("queue", UserInfo.get_instance().get_id(), queue_data);
+        matchmaker.add_message(enqueue);
+        
+        gps = new GPSTracker(this.getApplication(), this.googleMap, this.matchmaker);
+        
+        //Get received messages. Called once every second
+        read = new Handler();
+        read.post(create_input_listener());
+              
+    }
+   
+    protected void onDestroy()
+    {
+    	super.onDestroy();
+    	matchmaker.close_socket();
+    }
+    
+    /**
+     * function to load map. If map is not created it will create it for you
+     * */
+    private void initializeMap() 
+    {
+        if (googleMap == null) {
+        	googleMap = ((MapFragment) getFragmentManager().findFragmentById(
+                    R.id.map)).getMap();
+ 
+            // check if map is created successfully or not
+            if (googleMap == null) {
+                Toast.makeText(getApplicationContext(),
+                        "Sorry! unable to create maps", Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }
+    }
+    
+    private void drawMap()
+    {
         try 
         {
 			route = new JSONObject(data);
@@ -79,29 +136,39 @@ public class RunProgress extends Activity
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        
-        //Start matchmaking
-        matchmaker = new Matchmaker();
-        int route_id;
-        JSONObject queue_data = null;
-		try {
-			route_id = route.getInt("id");
-	        queue_data = new JSONObject();
-	        queue_data.put("route_id", route_id);
-		} 
-		catch (JSONException e1) 
-		{
-			finish();
-		}
+    }
 
-        Message enqueue = new Message("queue", UserInfo.get_instance().get_id(), queue_data);
-        matchmaker.add_message(enqueue);
-        
-        gps = new GPSTracker(this.getApplication(), this.googleMap, this.matchmaker);
-        
-        //Get received messages. Called once every second
-        final Handler read = new Handler();
-        read.post(new Runnable()
+    //Pop-up to allow user to accept or decline a match
+	public class AcceptMatchFragment extends DialogFragment {
+	    @Override
+	    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	        // Use the Builder class for convenient dialog construction
+	        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+	        builder.setMessage(R.string.dialog_accept_match)
+	               .setPositiveButton(R.string.accept, new DialogInterface.OnClickListener() 
+	               {
+	                   public void onClick(DialogInterface dialog, int id) 
+	                   {
+	                	   Message accept = new Message("accept", UserInfo.get_instance().get_id(), null);
+	                	   matchmaker.add_message(accept);
+	                   }
+	               })
+	               .setNegativeButton(R.string.decline, new DialogInterface.OnClickListener() 
+	               {
+	                   public void onClick(DialogInterface dialog, int id) 
+	                   {
+	                	   Intent intent = new Intent(getBaseContext(), MatchComp.class);
+	                	   startActivity(intent);
+	                   }
+	               });
+	        // Create the AlertDialog object and return it
+	        return builder.create();
+	    }
+	}
+	
+	private Runnable create_input_listener()
+	{
+		Runnable input_listener = new Runnable()
         {
         	@Override
         	public void run()
@@ -184,61 +251,21 @@ public class RunProgress extends Activity
                 
                 read.postDelayed(this, 1000);
         	}
-        });
-              
-    }
-   
-    protected void onDestroy()
-    {
-    	super.onDestroy();
-    	matchmaker.close_socket();
-    }
-    
-    /**
-     * function to load map. If map is not created it will create it for you
-     * */
-    private void initializeMap() 
-    {
-        if (googleMap == null) {
-        	googleMap = ((MapFragment) getFragmentManager().findFragmentById(
-                    R.id.map)).getMap();
- 
-            // check if map is created successfully or not
-            if (googleMap == null) {
-                Toast.makeText(getApplicationContext(),
-                        "Sorry! unable to create maps", Toast.LENGTH_SHORT)
-                        .show();
-            }
-        }
-    }
-
-    //Pop-up to allow user to accept or decline a match
-	public class AcceptMatchFragment extends DialogFragment {
-	    @Override
-	    public Dialog onCreateDialog(Bundle savedInstanceState) {
-	        // Use the Builder class for convenient dialog construction
-	        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	        builder.setMessage(R.string.dialog_accept_match)
-	               .setPositiveButton(R.string.accept, new DialogInterface.OnClickListener() 
-	               {
-	                   public void onClick(DialogInterface dialog, int id) 
-	                   {
-	                	   Message accept = new Message("accept", UserInfo.get_instance().get_id(), null);
-	                	   matchmaker.add_message(accept);
-	                   }
-	               })
-	               .setNegativeButton(R.string.decline, new DialogInterface.OnClickListener() 
-	               {
-	                   public void onClick(DialogInterface dialog, int id) 
-	                   {
-	                	   Intent intent = new Intent(getBaseContext(), MatchComp.class);
-	                	   startActivity(intent);
-	                   }
-	               });
-	        // Create the AlertDialog object and return it
-	        return builder.create();
-	    }
+        };
+        
+        return input_listener;
 	}
 
+	//for testing purposes
+	public GoogleMap get_map()
+	{
+		return googleMap;
+	}
+	
+	//for testing purposes
+	public List<LatLng> get_decoded_route()
+	{
+		return decodedRoute;
+	}
     
 }
