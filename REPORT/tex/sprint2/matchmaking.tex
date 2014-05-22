@@ -1,7 +1,99 @@
-\begin{tabular}{l r r}
-	Player		& Rating & RD \\
-	\hline
-	A			& 1500 & 75 \\
-	B			& 1575 & 100 \\
-	C			& 1600 & 50 \\
-\end{tabular}
+\section{Matchmaker}
+The matchmaker automatically matches users of similar skill levels against each other.
+While doing so the matchmaker must balance the trade-off of generating fair matchups and doing so in a timely fashion.
+A beginner should not be matched against a seasoned runner, but on the other hand a user should also not have to wait more than a few minutes before being matched against another user.
+
+In the following sections the design, implementation and testing of the matchmaker is described.
+
+
+\subsection{Design}
+In order for two players A and B to be matched against each other there are three criteria that must be satisfied:
+
+\begin{enumerate}
+	\item{The rating difference $\Delta R_{AB} = \left|R_A-R_B\right|$ for two ratings $R_A$ and $R_B$ must satisfy the following conditions:}
+		\begin{itemize}
+			\item{$\Delta R_{AB} \leq RD_A$}
+			\item{$\Delta R_{AB} \leq RD_B$}
+		\end{itemize}
+	\item{The lengths $L_A$ and $L_B$ of the routes selected by player A and player B, respectively, must satisfy the following condition:}
+		\begin{itemize}
+			\item{$\frac{\left|L_A-L_B\right|}{\mathrm{min}\left(L_A,\:	L_B\right)} \leq \alpha$, where $\alpha$ is a constant.	}
+		\end{itemize}
+	\item{Player B must be the best possible matchup for player A and vice versa. The best possible matchup for a particular player is defined as the one where $\Delta R$ is minimized.}
+\end{enumerate}
+
+The first criterion ensures that the two players have similar skill levels.
+The larger RD a player has, the larger the search range for that player will be.
+In other words, the greater uncertainty there is about the true rating of a player, the larger the search range for that player will be (see Section \ref{sec:glicko} for an explanation of the RD value).
+
+The second criterion ensures that the difference in length between the two routes is within a certain percentage of the length of the shortest route.
+The value of $\alpha$ must be set when the matchmaker is configured.
+
+The third criterion ensures that when there are multiple possible matchups only the best are generated.
+To illustrate this scenario, suppose we have four players A, B, C and D as shown in Table \ref{tab:matchmaker_ex}.
+The lengths of the routes are omitted and assumed to be equal since they are not relevant for this example.
+The only possible matchup for player B is player C, since that is the only matchup where both the first and second criteria are satisfied.
+However, matching player C with player D is preferred over matching player C with player B, since $\Delta R_{BC} = 75$ and $\Delta R_{CD} = 25$.
+The third criterion ensures that this matchup will be generated.
+
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{l c c c}
+			& R		& RD	& L \\
+		\hline
+		A	& 1450	& 25	& - \\
+		B	& 1500	& 75	& - \\
+		C	& 1575	& 100	& - \\
+		D	& 1600	& 50	& -
+	\end{tabular}
+	\caption{Four players along with their ratings and RDs.}
+	\label{tab:matchmaker_ex}
+\end{table}
+
+Intuitively, matching player A against player B is a fair matchup, but the condition $\Delta R_{AB} \leq RD_A$ is not satisfied since $\Delta R_{AB} = 50$ and $RD_A = 25$.
+To solve this problem, a variable $\beta$ is introduced.
+Initially $\beta = 1$, but is incremented by a constant amount whenever a set amount of time has passed.
+The first criterion now becomes $\Delta R_{AB} \leq RD_A\beta$ and $\Delta R_{AB} \leq RD_B\beta$ instead.
+As an example, suppose that $\beta$ is incremented by 0.25 every 30 seconds.
+Now player A and player B will be matched after 120 seconds since the condition $50 \leq 25\left(1+0.25\cdot4\right)$ is satisfied.
+
+
+\subsection{Implementation}
+The matchmaker is written in Python because it needs to access the database to retrieve player ratings and RDs, which it does using the ORM provided by the Django web server.
+The actual code of the matchmaker follows the concepts described in the previous section very closely, and is therefore not included here.
+
+The matchmaker is designed to run indefinitely in its own thread, where it continually attempts to generate matches from its internal list of queued players.
+It communicates with the socket server by passing messages using two thread-safe queues.
+One queue is for receiving messages from the server, such as ``add player A to the queue'' and ``remove player A from the queue'', and the other is for informing the server of the matches that it generates.
+
+
+\subsection{Testing}
+The matchmaker was tested by simulating 10 runs lasting 2 minutes each with 100 randomly generated players.
+Each player was given a random rating between 1000 and 2000, a random RD between 30 and 350 (the lower and upper bound for RD) and a random length between 5000 m and 10000 m.
+The runs were performed with $\alpha = 0.15$ and $\beta$ was incremented by 0.25 every 30 seconds.
+Table \ref{tab:test_results} shows the results of the test.
+
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{c | c c c c}
+		\textbf{Run}	& \textbf{Match \%}		& \textbf{Avg. $\Delta R$}		& \textbf{Avg. $\Delta L$ (m)}		& \textbf{Avg. queue time (s)} \\
+		\hline
+		1				& 96					& 16.7							& 265.4								& 4.4 \\
+		2				& 94					& 13.2							& 240.6								& 0.7 \\
+		3				& 92					& 12.2							& 271.0								& 3.3 \\
+		4				& 96					& 16.3							& 248.4								& 1.9 \\
+		5				& 96					& 12.8							& 217.8								& 1.3 \\
+		6				& 94					& 13.3							& 262.7								& 1.9 \\
+		7				& 96					& 12.0							& 248.5								& 1.9 \\
+		8				& 92					& 10.4							& 252.8								& 0.0 \\
+		9				& 96					& 12.4							& 257.2								& 1.3 \\
+		10				& 92					& 10.4							& 241.1								& 2.0 \\
+		\hline\hline
+		\textbf{Avg.}	& \textbf{94.4}			& \textbf{13.0}					& \textbf{250.5}					& \textbf{1.9}
+	\end{tabular}
+	\caption{Test results.}
+	\label{tab:test_results}
+\end{table}
+
+This is in no way an exhaustive test, but it provides reasonable evidence that the matchmaker produces an acceptable output for these values of $\alpha$ and $\beta$.
+Additional tests could be performed to further fine-tune the matchmaker, but for the purposes of this project the matchmaker will be configured with $\alpha = 0.15$ and $\beta$ will be incremented by 0.25 every 30 seconds.
