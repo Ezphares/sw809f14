@@ -13,7 +13,7 @@ The interface for the majority of the application remained largely unchanged in 
 \end{figure}
 
 \section{Implementation}
-The implementation of the map functionality was done by creating a new activity, called \texttt{RunProgress}, to display the route and in the future the progress of the race. This activity was started when the user selected a route from the list of available routes in the \texttt{PickRoute} activity. The \texttt{PickRoute} forwards the chosen route's information to the \texttt{RunProgress} activity. The chosen route, among other things, contains an encoded polyline which is decoded and added to the map. As well, the coordinates of the starting waypoint of the route is utilized in centring the map's camera on the starting point of the route. This implementation is fairly trivial and will not be discussed further. In \ref{fig:runProgressV1} the resulting map, with a quite small route drawn, is shown.
+The implementation of the map functionality was done by creating a new activity, called \texttt{RunProgress}, to display the route and in the future the progress of the race. This activity was started when the user selected a route from the list of available routes in the \texttt{PickRoute} activity. The \texttt{PickRoute} forwards the chosen route's information to the \texttt{RunProgress} activity. The chosen route, among other things, contains an encoded polyline which is decoded and added to the map. As well, the coordinates of the starting waypoint of the route is utilized in centring the map's camera on the starting point of the route. The implementation is fairly trivial code-wise and will not be discussed further. In \ref{fig:runProgressV1} the resulting map, with a small route drawn, is shown.
 
 \begin{figure}[ht]
 \begin{center}
@@ -32,7 +32,7 @@ As all the activity does at the moment is create a map and draw a polyline based
 \begin{tabular}{| c | c | c | c | c |}
 \hline
 class & method & block & line & name \\ \hline
-100\% (16/16) & 80\% (50/62) & 80\% (677/847) & 77\% (188/245) & all classes \\
+100\% (16/16) & 80\% (50/62) & 70\% (900/1287) & 75\% (219/292) & all classes \\
 \hline
 \end{tabular}
 \vspace{10pt}
@@ -43,8 +43,8 @@ OVERALL STATS SUMMARY: & \\ \hline
 total packages: & 1 \\
 total classes: & 16 \\
 total methods: & 62 \\
-total executable files: & 6 \\
-total executable lines: & 235 \\
+total executable files: & 8 \\
+total executable lines: & 292 \\
 \hline
 \end{tabular}
 \end{figure}
