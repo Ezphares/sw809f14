@@ -1,3 +1,17 @@
+\section{Server}
+
+\subsection{Communication Format}
+The messages exchanged between the server and the clients are encoded as JSON and share a common format.
+Every command has a \texttt{cmd} field indicating the type of command and a \texttt{data} field containing the data needed to process the command.
+For some command types the \texttt{data} field may be \texttt{null} if no data is needed to process the command of that particular type.
+All commands sent from a client to the server also contain an \texttt{id} field containing a unique identifier for the user.
+
+All commands are prefixed with two bytes in network byte order (big endian) indicating the number of characters in the command.
+
+
+\subsubsection{Matchmaking Commands}
+
+
 \tikzstyle{decision} = [diamond, draw, fill=blue!20, text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
 \tikzstyle{block} = [rectangle, draw, fill=blue!20, text width=5em, text centered, rounded corners, minimum height=4em]
 \tikzstyle{line} = [draw, -latex']
@@ -21,20 +35,30 @@
 \end{tikzpicture}
 \end{center}
 
-\begin{description}
-\item[Description] \hfill \\
-	Places the client in the matchmaking queue.
-\item[Direction] \hfill \\
-	Client $\rightarrow$ Server.
-\item[Format] \hfill
-\begin{lstlisting}[language=JavaScript]
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{| r | p{3in} |}
+		\hline
+		\textbf{Description} & Places the client in the matchmaking queue. \\ \hline
+		\textbf{Direction} & Client $\rightarrow$ Server. \\ \hline
+		\textbf{Format} &
+			\begin{verbatim}{
+			"cmd": "cancel",
+			"id": $id,
+			"data": null
+			}\end{verbatim} \\ \hline
+	\end{tabular}
+	\caption{}
+	\label{}
+\end{table}
+
+\begin{verbatim}
 {
-	"cmd": "queue",
+	"cmd": "cancel",
 	"id": $id,
 	"data": null
 }
-\end{lstlisting}
-\end{description}
+\end{verbatim}
 
 \hrule
 
