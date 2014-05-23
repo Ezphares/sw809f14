@@ -1,4 +1,5 @@
 \section{In-match Server Features}
+\label{sec:sprint3-gameserver}
 
 In addition to matchmaking, some features needed by the server during a match was also planned. In particular, we would like to be able to check whether or not a person is staying on his route. There are several interesting problems in performing such a check, including routes that are not straight lines, and geometry using latitude and longitude. The solution for these problems are described in this section.
 
@@ -11,7 +12,7 @@ The first problem is that the earth is a sphere, which means that conventional E
 That leads to the second problem. One degree of longitude's length in meters varies depending on the latitude\cite{wikidecimaldegrees}. This meant a function, seen in \autoref{lst:sprint3-coord-offset}, had to be created to convert from coordinates in \texttt{(Longitude, Latitude)} to an \texttt{(x, y)} offset in meters. This approach resulted in very small imprecisions (on a scale of centimeters), though imprecisions grow as you get further from the equator.
 
 \begin{lstlisting}[label={lst:sprint3-coord-offset},caption={Convert Decimal Degrees to Offset in Meters},language={Python}]
-def metric_offset(self, coord):
+def metric_offset(coord):
 	return (coord[0] * 111319.9 * cos(radians(coord[1])) , coord[1] * 111319.9)
 \end{lstlisting}
 
@@ -29,7 +30,7 @@ Finding the distance between two points is not enough to determine whether a poi
 
 The solution we chose for that problem, was to use drawn line from the Google Maps Directions Service as the route, instead of the waypoints. This line is known as a polyline, and is returned with every successful request to the directions service. As mentioned in \autoref{sec:sprint2-web}, the web server already sends a directions request for each route, so even though it is not being drawn anywhere, the server has access to this polyline. 
 
-Additionally, the polyline retrieved from the map API is encoded as a string, which can easily be stored in the database, giving the match server access to the line without sending requests to the Google Maps \ac{API}. It is possible to decode this line into a series of points. We decided to do this using an existing piece of open source Python2 code\cite{decodepolyline}, which was ported to Python3. This function takes an encoded polyline and returns a list of \texttt{(Longitude, Latitude)} coordinates, which conveniently can be converted to the offsets we decided to work with, using the function seen in \autoref{lst:sprint3-coord-offset}. We denote these offsets for a given route ``checkpoints''.
+Additionally, the polyline retrieved from the map API is encoded as a string, which can easily be stored in the database, giving the match server access to the line without sending requests to the Google Maps \ac{API}. It is possible to decode this line into a series of points. We decided to do this using an existing piece of open source Python2 code\cite{decodepolyline}, which was ported to Python3. This function takes an encoded polyline and returns a list of \texttt{(Longitude, Latitude)} coordinates, which conveniently can be converted to the offsets we decided to work with, using the function seen in \autoref{lst:sprint3-coord-offset}. We denote these offsets for a given route ``checkpoints'', and store them in a class called \texttt{Polyline}.
 
 \subsubsection{Distance to a Point}
 
@@ -82,4 +83,36 @@ class Segment(object):
 		return sqrt(distToSegmentSquared(point, self.start, self.end))
 \end{lstlisting}
 
-With this, it was possible to implement a function that given a route, a point and a threshold in meters is able to return whether or not the point is within threshold distance of the route. This can be used by the server to ensure that each participant in a match stays on their chosen route. This in itself is not enough to check whether a participant is reaching checkpoints in the correct order, but is still an important part of the anti cheating systems needed for the project.
+With this, it was possible to implement a function for the \texttt{Polyline} class that given a route, a point and a threshold in meters is able to return whether or not the point is within threshold distance of the route. This can be used by the server to ensure that each participant in a match stays on their chosen route. The final implementation of the \texttt{Polyline} class can be seen in \autoref{lst:sprint3-polyline}. This in itself is not enough to check whether a participant is reaching checkpoints in the correct order, but is still an important part of the anti-cheating systems needed for the project.
+
+\begin{lstlisting}[label={lst:sprint3-polyline},caption={The Polyline Class.},language={Python}]
+class Polyline(object):
+	def __init__(self, encoded):
+		# 'depoly' is the function to decode polyline strings.
+		coords = depoly(encoded)
+		self.points = [self.metric_offset(c) for c in coords]
+
+	def metric_offset(self, coord):
+		return (coord[0] * 111319.9 * cos(radians(coord[1])) , coord[1] * 111319.9)
+        
+	def point_distance(self, coord):
+		point = self.metric_offset(coord)
+		distance = float('inf')
+		for segment in self.get_segments():
+			d = segment.point_distance(point)
+			if (d < distance):
+			distance = d
+		return distance
+
+	def get_segments(self):
+		segments = []
+		for i in range(len(self.points) - 1):
+			segments.append(Segment(self.points[i], self.points[i + 1]))
+		return segments
+       
+    '''
+    Checks whether a coordinate in (longitude, latitude) is within threshold in meters of the polyline.
+    '''
+	def on_route(self, coord, threshold = 50):
+		return self.point_distance(coord) <= threshold
+\end{lstlisting}
