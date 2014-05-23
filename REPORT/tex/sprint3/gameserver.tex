@@ -1,4 +1,4 @@
-\section{Game Server Features}
+\section{In-match Server Features}
 
 In addition to matchmaking, some features needed by the server during a match was also planned. In particular, we would like to be able to check whether or not a person is staying on his route. There are several interesting problems in performing such a check, including routes that are not straight lines, and geometry using latitude and longitude. The solution for these problems are described in this section.
 
@@ -25,8 +25,61 @@ Finding the distance between two points is not enough to determine whether a poi
  \includegraphics[scale=0.5]{img/sprint3br.png}
 \end{figure}
 
-\subsubsection{Decoding The Route}
+\subsubsection{Decoding the Route}
 
-The solution chosen to that problem, was to use drawn line from the Google Maps Directions Service as the route, instead of the waypoints. This line is known as a polyline, and is returned with every successful request to the directions service. As mentioned in \autoref{sec:sprint2-web}, the web server already sends a directions request for each route, so even though it is not being drawn anywhere, the server has access to this polyline. 
+The solution we chose for that problem, was to use drawn line from the Google Maps Directions Service as the route, instead of the waypoints. This line is known as a polyline, and is returned with every successful request to the directions service. As mentioned in \autoref{sec:sprint2-web}, the web server already sends a directions request for each route, so even though it is not being drawn anywhere, the server has access to this polyline. 
 
-Additionally, the polyline retrieved from the map API is encoded as a string, which can easily be stored in the database, giving the game server access to the line without sending requests to the Google Maps \ac{API}. It is possible to decode this line into a series of points. We decided to do this using an existing piece of open source Python2 code\cite{decodepolyline}, which was ported to Python3. This function takes an encoded polyline and returns a list of \texttt{(Longitude, Latitude)} coordinates, which conveniently can be converted to the offsets we decided to work with, using the function seen in \autoref{lst:sprint3-coord-offset}.
+Additionally, the polyline retrieved from the map API is encoded as a string, which can easily be stored in the database, giving the match server access to the line without sending requests to the Google Maps \ac{API}. It is possible to decode this line into a series of points. We decided to do this using an existing piece of open source Python2 code\cite{decodepolyline}, which was ported to Python3. This function takes an encoded polyline and returns a list of \texttt{(Longitude, Latitude)} coordinates, which conveniently can be converted to the offsets we decided to work with, using the function seen in \autoref{lst:sprint3-coord-offset}. We denote these offsets for a given route ``checkpoints''.
+
+\subsubsection{Distance to a Point}
+
+A route's checkpoints represent the interval between each section of the route that can be represented as a straight line. That is, while the route in \autoref{fig:sprint3-bad-route} only has two waypoints, it has at least 4 checkpoints: The start, the end, and the two sharp turns. That means that as long as a users position is within some threshold of the lines between the checkpoints, he is on the correct route. To find out whether this is the case for a given position, several steps were implemented:
+
+\begin{enumerate}
+ \item Convert the position to an offset in meters, called \texttt{point}.
+ \item For each pair of consecutive waypoints on the route, define a \texttt{segment} starting at one of them and ending at the other.
+ \item For each \texttt{segment}, find the shortest \texttt{distance} to \texttt{point}. The method chosen for this is described in more detail below.
+ \item The shortest \texttt{distance} found is the distance from the point to the route.
+\end{enumerate}
+
+When finding the distance between a line segment and a point, the method is as follows: Find out if the point is between the ends of the segments. If it is, project the point onto the line and take that distance. If it isn't, take the distance to the closest of the start and end points. This is illustrated in \autoref{fig:sprint3-linesegment}. This is not a new problem, and there were a lot of inspiration for efficient implementations of this to be found\cite{point2line1}\cite{point2line2}, and we ended up with the functions seen in \autoref{lst:sprint3-dist}.
+
+\begin{figure}[ht]
+ \caption{Shortest Distance to Line Segment}
+ \label{fig:sprint3-linesegment}
+ \includegraphics[scale=0.85]{img/sprint3linesegment.png}
+\end{figure}
+
+\begin{lstlisting}[label={lst:sprint3-dist},caption={Distance Between Point and Line Segment.},language={Python}]
+def dist2(p1, p2):
+	return sqr(p1[0] - p2[0]) + sqr(p1[1] - p2[1])
+
+def distToSegmentSquared(point, start, end):
+	l2 = dist2(start, end)
+	if l2 == 0:
+		return 0
+
+	'''
+	t is position between start and end.
+	Between 0 and 1 means the point is between start and end,
+	less than 0 means before start and more than 1 means after end.
+	'''
+	t = ((point[0] - start[0]) * (end[0] - start[0]) + (point[1] - start[1]) * (end[1] - start[1])) / l2
+	if t < 0:
+		return dist2(point, start)
+	elif t > 1:
+		return dist2(point, end)
+	else:
+		return dist2(point, (start[0] + t * (end[0] - start[0]),
+		                     start[1] + t * (end[1] - start[1])) )
+
+class Segment(object):
+	def __init__(self, start, end):
+		self.start = start
+		self.end = end
+
+	def point_distance(self, point):
+		return sqrt(distToSegmentSquared(point, self.start, self.end))
+\end{lstlisting}
+
+With this, it was possible to implement a function that given a route, a point and a threshold in meters is able to return whether or not the point is within threshold distance of the route. This can be used by the server to ensure that each participant in a match stays on their chosen route. This in itself is not enough to check whether a participant is reaching checkpoints in the correct order, but is still an important part of the anti cheating systems needed for the project.
