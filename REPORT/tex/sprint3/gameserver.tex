@@ -110,9 +110,9 @@ class Polyline(object):
 			segments.append(Segment(self.points[i], self.points[i + 1]))
 		return segments
        
-    '''
-    Checks whether a coordinate in (longitude, latitude) is within threshold in meters of the polyline.
-    '''
+	'''
+	Checks whether a coordinate in (longitude, latitude) is within threshold in meters of the polyline.
+	'''
 	def on_route(self, coord, threshold = 50):
 		return self.point_distance(coord) <= threshold
 \end{lstlisting}
