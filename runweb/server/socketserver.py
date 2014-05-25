@@ -135,11 +135,11 @@ class ClientThread:
 			return
 		polyline = player.route.get_polyline()
 		(current, total, completed) = polyline.advance(player.position,
-													   (client_cmd.data['lat'], client_cmd.data['lng']))
+													   (client_cmd.data['lng'], client_cmd.data['lat']))
 		if completed:
 			self._finish_match(player, opponent, currentmatch)
 		else:
-			if polyline.on_route((client_cmd.data['lat'], client_cmd.data['lng'])):
+			if polyline.on_route((client_cmd.data['lng'], client_cmd.data['lat'])):
 				player.position = current
 				player.completion = current/total
 				server_cmd = ServerCommand(ServerCommand.POSITION, {'completion': opponent.completion})
