@@ -155,8 +155,6 @@ class ClientThread:
 		self.server_cmd_q[loser.socket].put(ServerCommand(ServerCommand.LOSER))
 		self._update_rating(winner, loser, 1)
 		self._update_rating(loser, winner, 0)
-		print(winner)
-		print(loser)
 		competitive.models.Match(winner=winner.id, loser=loser.id).save()
 
 	def _update_rating(self, player, opponent, outcome):
