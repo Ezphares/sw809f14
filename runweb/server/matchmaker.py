@@ -70,43 +70,18 @@ class Match:
 		return '({0} vs. {1})'.format(self.player1, self.player2)
 
 
-class PlayerQueue(list):
-
-	def enqueue(self, player):
-		high = len(self)
-		low = 0
-		while low < high:
-			mid = (low+high)//2
-			if self[mid].rating > player.rating:
-				high = mid
-			else:
-				low = mid+1
-		super(PlayerQueue, self).insert(low, player)
-		logging.info('Player queued {0}'.format(str(player)))
-		logging.info('Players in queue {0}'.format(str(len(self))))
-
-	def dequeue(self, id):
-		for player in self:
-			if player.id == id:
-				super(PlayerQueue, self).remove(player)
-				logging.info('Player dequeued {0}'.format(str(player)))
-				break
-		logging.info('Players in queue {0}'.format(str(len(self))))
-
-
 class Matchmaker:
 
 	def __init__(self, client_cmd_q, server_cmd_q, matches):
-		self.distance_threshold = 0.1
+		self.distance_threshold = 0.15
 		self.increment_time = 30
-		self.increment = 0.1
+		self.increment = 0.25
 		self.accept_time = 20
-
 		self.client_cmd_q = client_cmd_q
 		self.server_cmd_q = server_cmd_q
 		self.matches = matches
 		self.temp_matches = []
-		self.players = PlayerQueue()
+		self.players = []
 		self.handlers = {
 			server.socketserver.ClientCommand.QUEUE: self._handle_queue,
 			server.socketserver.ClientCommand.CANCEL: self._handle_cancel,
@@ -124,10 +99,8 @@ class Matchmaker:
 				except queue.Empty:
 					break
 				self.handlers[client_cmd.cmd](client_cmd)
-
 			self._check_matches()
 			self._update_players()
-
 			if len(self.players) >= 2: # Need at least two players.
 				player = self.players[index]
 				best_match = self._get_best_match(player)
@@ -137,14 +110,13 @@ class Matchmaker:
 			time.sleep(0.01)
 
 	def _handle_queue(self, client_cmd):
-		if not self._get_player(client_cmd.id): # Player not already queued.
 			player = Player(competitive.models.Player.objects.get(pk=client_cmd.id),
 							routes.models.Route.objects.get(pk=client_cmd.data['route_id']),
 							client_cmd.socket)
-			self.players.enqueue(player)
+			self._enqueue(player)
 
 	def _handle_cancel(self, client_cmd):
-		self.players.dequeue(client_cmd.id)
+		self._dequeue(client_cmd.id)
 
 	def _handle_accept(self, client_cmd):
 		for i, match in enumerate(self.temp_matches):
@@ -165,7 +137,21 @@ class Matchmaker:
 	def _handle_disconnect(self, client_cmd):
 		for player in self.players:
 			if player.socket is client_cmd.socket:
-				self.players.dequeue(player.id)
+				self._dequeue(player.id)
+				break
+
+	def _enqueue(self, player):
+		if self._get_player(player.id) is None: # Ensure that the player is not already queued.
+			self.players.append(player)
+			logging.info('Player queued {0}'.format(str(player)))
+			logging.info('Players in queue {0}'.format(str(len(self.players))))
+
+	def _dequeue(self, id):
+		player = self._get_player(id)
+		if player is not None: # Ensure that the player is queued.
+			self.players.remove(player)
+			logging.info('Player dequeued {0}'.format(str(player)))
+			logging.info('Players in queue {0}'.format(str(len(self.players))))
 
 	def _match(self, player1, player2):
 		match = Match(player1, player2)
@@ -173,9 +159,9 @@ class Matchmaker:
 		server_cmd = server.socketserver.ServerCommand(server.socketserver.ServerCommand.FOUND)
 		self.server_cmd_q[player1.socket].put(server_cmd)
 		self.server_cmd_q[player2.socket].put(server_cmd)
-		self.players.dequeue(player1.id)
-		self.players.dequeue(player2.id)
 		logging.info('Match found {0}'.format(str(match)))
+		self._dequeue(player1.id)
+		self._dequeue(player2.id)
 
 	def _check_matches(self):
 		now = int(time.time())
@@ -200,31 +186,23 @@ class Matchmaker:
 		return abs(player1.rating-player2.rating)
 
 	def _distance_diff(self, player1, player2):
-		return 1 - min(player1.distance, player2.distance)/max(player1.distance, player2.distance)
+		return abs(player1.distance-player2.distance)/min(player1.distance, player2.distance)
 
 	def _is_match(self, player1, player2):
-		rating_diff = self._rating_diff(player1, player2)
-		if self._distance_diff(player1, player2) > self.distance_threshold:
-			return False
-		return rating_diff <= player1.max_rating_diff() and rating_diff <= player2.max_rating_diff()
+		if self._distance_diff(player1, player2) <= self.distance_threshold:
+			rating_diff = self._rating_diff(player1, player2)
+			return rating_diff <= player1.max_rating_diff() and rating_diff <= player2.max_rating_diff()
+		return False
 
 	def _get_best_match(self, player):
-		index = self.players.index(player)
-		if index == 0: # Lowest rated player. Only check RHS.
-			if self._is_match(player, self.players[index+1]):
-				return self.players[index+1]
-		elif index == len(self.players)-1: # Highest rated player. Only check LHS.
-			if self._is_match(player, self.players[index-1]):
-				return self.players[index-1]
-		else: # Neither lowest nor highest rated player. Check both LHS and RHS.
-			left = self.players[index-1]
-			right = self.players[index+1]
-			if self._is_match(player, left) and self._is_match(player, right):
-				if self._rating_diff(player, left) < self._rating_diff(player, right):
-					return left
+		best_match = None
+		for opponent in self.players:
+			if opponent is player:
+				continue
+			if self._is_match(player, opponent):
+				if best_match is not None:
+					if self._rating_diff(player, opponent) < self._rating_diff(player, best_match):
+						best_match = opponent
 				else:
-					return right
-			elif self._is_match(player, left):
-				return left
-			elif self._is_match(player, right):
-				return right
+					best_match = opponent
+		return best_match
