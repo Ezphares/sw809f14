@@ -43,6 +43,7 @@ public class RunProgress extends Activity
     private Marker opponent_position = null;
     private Handler read;
     
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) 
     {
@@ -74,7 +75,8 @@ public class RunProgress extends Activity
         Message enqueue = new Message("queue", UserInfo.get_instance().get_id(), queue_data);
         matchmaker.add_message(enqueue);
         
-        gps = new GPSTracker(this.getApplication(), this.googleMap, this.matchmaker);
+        //Start GPS tracker
+       gps = new GPSTracker(this.getApplication(), this.googleMap, this.matchmaker);
         
         //Get received messages. Called once every second
         read = new Handler();
@@ -132,7 +134,8 @@ public class RunProgress extends Activity
 			decodedRoute = PolyUtil.decode(polyline);
 			googleMap.addPolyline(new PolylineOptions().addAll(decodedRoute).color(Color.argb(255, 101, 169, 234)));
 			
-		} catch (JSONException e) {
+		} 
+        catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -231,14 +234,21 @@ public class RunProgress extends Activity
               	 	}
               	 	else if(input.get_cmd().equals("winner"))
               	 	{
-              	 		if(input.get_id() != UserInfo.get_instance().get_id())
+              	 		try 
               	 		{
-              	 			Toast.makeText(getBaseContext(), "You lost the race", Toast.LENGTH_LONG).show();
-              	 		}
-              	 		else
+							if(input.get_data().getInt("result") != UserInfo.get_instance().get_id())
+							{
+								Toast.makeText(getBaseContext(), "You lost the race", Toast.LENGTH_LONG).show();
+							}
+							else
+							{
+								Toast.makeText(getBaseContext(), "YOU WON THE RACE!", Toast.LENGTH_LONG).show();
+							}
+						} 
+              	 		catch (JSONException e) 
               	 		{
-              	 			Toast.makeText(getBaseContext(), "YOU WON THE RACE!", Toast.LENGTH_LONG).show();
-              	 		}
+							e.printStackTrace();
+						}
               	 		
               	        Intent intent = new Intent(getBaseContext(), MainActivity.class);
               	        startActivity(intent);

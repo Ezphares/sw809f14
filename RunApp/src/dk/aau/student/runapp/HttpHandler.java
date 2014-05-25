@@ -33,7 +33,8 @@ import java.util.List;
 public class HttpHandler
 {
     private static HttpClient client = new DefaultHttpClient();
-    private static String IP = "192.168.0.102";
+    private static String IP = "130.225.243.80";
+    private static int port = 60351;
     public static class ResponseData
     {
         public String body;
@@ -44,14 +45,14 @@ public class HttpHandler
 
     public static boolean is_reachable()
     {
-    	SocketAddress sockaddr = new InetSocketAddress(IP, 8000);
+    	SocketAddress sockaddr = new InetSocketAddress(IP, port);
     	// Create your socket
     	Socket socket = new Socket();
     	boolean online = true;
-    	// Connect with 10 s timeout
+    	// Connect with 15 s timeout
     	try 
     	{
-    	    socket.connect(sockaddr, 2000);
+    	    socket.connect(sockaddr, 15000);
     	} 
     	catch (IOException iOException) 
     	{
@@ -135,7 +136,7 @@ public class HttpHandler
         nameValuePair.add(username);
         nameValuePair.add(password);
 
-        HttpHandler.ResponseData response = HttpHandler.http_request("http://" + IP + ":8000/api/login/", HttpHandler.HttpMethod.POST, nameValuePair);
+        HttpHandler.ResponseData response = HttpHandler.http_request("http://" + IP + ":" + Integer.toString(port) + "/api/login/", HttpHandler.HttpMethod.POST, nameValuePair);
         JSONObject json;
         try
         {
@@ -160,7 +161,7 @@ public class HttpHandler
 
     public static JSONArray route_request()
     {
-        HttpHandler.ResponseData response = HttpHandler.http_request("http://" + IP + ":8000/api/routes/", HttpMethod.GET, null);
+        HttpHandler.ResponseData response = HttpHandler.http_request("http://" + IP + ":" + Integer.toString(port) + "/api/routes/", HttpMethod.GET, null);
         JSONArray routes;
         JSONObject json;
 

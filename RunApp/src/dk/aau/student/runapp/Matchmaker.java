@@ -16,8 +16,8 @@ import android.util.Log;
 
 public class Matchmaker 
 {
-	private static String IP = "192.168.0.102";
-	private static int port = 8001;
+	private static String IP = "130.225.243.80";
+	private static int port = 60352;
 	private String header = "";
 	private String message = "";
 	private int remaining = 0;
@@ -55,6 +55,7 @@ public class Matchmaker
 							send_message();
 						}
 					}
+					
 				} 
 	        	catch (IOException e) 
 	        	{

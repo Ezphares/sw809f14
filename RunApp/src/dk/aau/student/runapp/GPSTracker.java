@@ -3,6 +3,7 @@ package dk.aau.student.runapp;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -38,7 +39,6 @@ public class GPSTracker extends Service implements LocationListener {
 
     boolean canGetLocation = false;
 
-    Location location; // location
     double latitude; // latitude
     double longitude; // longitude
 
@@ -70,66 +70,46 @@ public class GPSTracker extends Service implements LocationListener {
             isNetworkEnabled = locationManager
                     .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-            if (!isGPSEnabled && !isNetworkEnabled) {
-                // no network provider is enabled
-            } else {
+            if (!isGPSEnabled) 
+            {
+            	stopSelf();
+            } 
+            else 
+            {
                 this.canGetLocation = true;
-                // First get location from Network Provider
-                if (isNetworkEnabled) {
-                    locationManager.requestLocationUpdates(
-                            LocationManager.NETWORK_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                    Log.d("Network", "Network");
-                    if (locationManager != null) {
-                        location = locationManager
-                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if (location != null) {
-                            latitude = location.getLatitude();
-                            longitude = location.getLongitude();
-                        }
-                    }
-                }
                 // if GPS Enabled get lat/long using GPS Services
-                if (isGPSEnabled) {
-                    if (location == null) {
-                        locationManager.requestLocationUpdates(
-                                LocationManager.GPS_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                        Log.d("GPS Enabled", "GPS Enabled");
-                        if (locationManager != null) {
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                            if (location != null) {
-                                latitude = location.getLatitude();
-                                longitude = location.getLongitude();
-                            }
-                        }
-                    }
-                }
+	            locationManager.requestLocationUpdates(
+	                    LocationManager.GPS_PROVIDER,
+	                    MIN_TIME_BW_UPDATES,
+	                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+	            Log.d("GPS Enabled", "GPS Enabled");
+                    
+
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return location;
+        
+        return null;
     }
 
     //Default overrides.
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(Location location) 
+    {
+    	latitude = location.getLatitude();
+    	longitude = location.getLongitude();
+		LatLng latlng = new LatLng(latitude, longitude);
+    	
     	//CODE HERE!
-    	Log.d("GPS", Double.toString(getLatitude()) + "      " + Double.toString(getLongitude()));
-    	if(getLatitude() == 0.0 || getLongitude() == 0.0)
-    		return;
+    	Log.d("GPS", Double.toString(latitude) + "      " + Double.toString(longitude));
 
     	JSONObject data = new JSONObject();
     	try 
     	{
-			data.put("lat", getLatitude());
-	    	data.put("lng", getLongitude());
+			data.put("lat", latitude);
+	    	data.put("lng", longitude);
 		} 
     	catch (JSONException e) 
     	{
@@ -140,11 +120,13 @@ public class GPSTracker extends Service implements LocationListener {
     	this.matchmaker.add_message(msg);
    	
     	if(currentLocation == null) {
-    		currentLocation = googleMap.addMarker(new MarkerOptions().position(new LatLng(getLatitude(), getLongitude())));
+    		currentLocation = googleMap.addMarker(new MarkerOptions().position(latlng));
 			currentLocation.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
     	}
     	else {
-    		currentLocation.setPosition(new LatLng(getLatitude(),getLongitude()));
+
+    		currentLocation.setPosition(latlng);
+			//googleMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
     	}
     }
 
@@ -169,10 +151,6 @@ public class GPSTracker extends Service implements LocationListener {
      * Function to get latitude returns 0.0 on fault
      * */
     public double getLatitude(){
-        if(location != null){
-            latitude = location.getLatitude();
-        }
-
         // return latitude
         return latitude;
     }
@@ -181,10 +159,6 @@ public class GPSTracker extends Service implements LocationListener {
      * Function to get longitude
      * */
     public double getLongitude(){
-        if(location != null){
-            longitude = location.getLongitude();
-        }
-
         // return longitude
         return longitude;
     }

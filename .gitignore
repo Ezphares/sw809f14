@@ -20,4 +20,3 @@ Release
 *.sublime-workspace
 *.metadata
 */bin/*
-RunApp/gen/*
