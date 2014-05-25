@@ -5,7 +5,6 @@ A beginner should not be matched against a seasoned runner, but on the other han
 
 In the following sections the design, implementation and testing of the matchmaker is described.
 
-
 \subsection{Design}
 In order for two players A and B to be matched against each other there are three criteria that must be satisfied:
 
@@ -57,7 +56,6 @@ The first criterion now becomes $\Delta R_{AB} \leq RD_A\beta$ and $\Delta R_{AB
 As an example, suppose that $\beta$ is incremented by 0.25 every 30 seconds.
 Now player A and player B will be matched after 120 seconds since the condition $50 \leq 25\left(1+0.25\cdot4\right)$ is satisfied.
 
-
 \subsection{Implementation}
 The matchmaker is written in Python because it needs to access the database to retrieve player ratings and RDs, which it does using the ORM provided by the Django web server.
 The actual code of the matchmaker follows the concepts described in the previous section very closely, and is therefore not included here.
@@ -65,7 +63,6 @@ The actual code of the matchmaker follows the concepts described in the previous
 The matchmaker is designed to run indefinitely in its own thread, where it continually attempts to generate matches from its internal list of queued players.
 It communicates with the socket server by passing messages using two thread-safe queues.
 One queue is for receiving messages from the server, such as ``add player A to the queue'' and ``remove player A from the queue'', and the other is for informing the server of the matches that it generates.
-
 
 \subsection{Testing}
 The matchmaker was tested by simulating 10 runs lasting 2 minutes each with 100 randomly generated players.
