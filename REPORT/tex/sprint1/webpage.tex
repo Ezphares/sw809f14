@@ -9,9 +9,10 @@ For this sprint, a route designer web page was desired. Its functionality should
 A simple user interface was designed. An initial mock-up can be seen in \autoref{fig:sprint1-web-ui}, which shows the desired layout of the route planner display. The general philosophy was to keep the layout consistent on all pages. As such, the title and the menu will be at the same position on all views, though the menu options will change depending on the permissions of the user, in this case whether the user is logged in or not.
 
 \begin{figure}[ht]
+ \centering
+ \includegraphics[scale=1]{img/webmockup1.png}
  \caption{Web UI Mock up}
  \label{fig:sprint1-web-ui}
- \includegraphics[scale=1]{img/webmockup1.png}
 \end{figure}
 
 Four views, which should constitute an \ac{MVP}, were planned for this sprint:
@@ -41,9 +42,10 @@ Additionally, the planner should expose various controls separate from the map i
 The route planner needed a database to store the routes for each user. The database design can be seen in \autoref{fig:sprint1-db-model}. This simple design allows for multiple users to store a number of routes which each have several waypoints. The index column in the \texttt{Waypoint} table is the waypoint ``number'' within the route, and this design allows sorting the waypoints correctly already at the time where they are retrieved from the database.
 
 \begin{figure}[ht]
+ \centering
+ \includegraphics[scale=0.5]{img/sprint1db.png}
  \caption{Sprint 1 Database Model}
  \label{fig:sprint1-db-model}
- \includegraphics[scale=0.5]{img/sprint1db.png}
 \end{figure}
 
 The decision to use a boolean on the \texttt{Route} to denote whether or not the route is a round-trip, rather than saving two copies of the first waypoint with different index values, was made partly because it results ion less database entries, but the primary reason was that it made it easier to correctly load the settings of a previously saved route, should the user desire to edit it. Distance is allowed to be \texttt{null} for a route, for the reason that a user might save a route with less than two waypoints, or waypoints which might not be reachable from each other with the intent to fix it later.
@@ -56,7 +58,7 @@ Implementing the web page was done in two parts, the server and client.
 
 The server was implemented in Django\cite{djangoproject}, a web framework for the Python programming language. We decided to use Python3, the newest version of Python. We made use of several of the features of Django, to ease the implementation of the previously mentioned design. An example of this, is Django's \ac{ORM}, which was used to implement the database, removing any need to write database code directly. As such, the \texttt{Route} table seen in \autoref{fig:sprint1-db-model} was implemented as a Django model with the code seen in \autoref{lst:sprint1-route-model}. From this code, Django is able to generate code for several different database engines, chosen simply by changing the django settings file.
 
-\begin{lstlisting}[language=Python,label={lst:sprint1-route-model},caption={Sprint 1 "Route" Model}]
+\begin{code}[language={Python}, label={lst:sprint1-route-model}, caption={Sprint 1 "Route" Model}]
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -65,7 +67,7 @@ class Route(models.Model):
 	title = models.CharField(max_length = 128)
 	roundtrip = models.BoolenField(default = False)
 	distance = models.FloatField(null = True)
-\end{lstlisting}
+\end{code}
 
 The server logic implemented in this sprint is all related to insertion and retrieval of data form the database.
 
@@ -86,7 +88,12 @@ After initialization, the \texttt{Planner} instance contains a few member variab
  \item \texttt{initialize\_controls(target)}. Like \texttt{initialize\_map} this function is called upon construction, but as the name suggests, sets up the controls. This consists of generating an \ac{HTML} form for submitting the map, and inputs for naming the map, reversing order of waypoints, clearing the map and toggling whether the map is a round trip.
  \item \texttt{clear()}. This function removes any markers and directions from the map, as well as emptying the \texttt{Planner} instance's waypoint array.
  \item \texttt{update\_route()}. This function basically has two modes. The first, if the \texttt{Planner} instance has fewer than two waypoints in its array, removes rendered directions from the map. If there are more than two waypoints, it initializes a call to the Google Maps Directions service, to get directions for the route. The directions service needs to receive the waypoints in a very specific way, the code for which can be seen in \autoref{lst:update-route-1}.
- \begin{lstlisting}[label={lst:update-route-1},caption={Converting a List of Waypoints for Directions}]
+ \item \texttt{add\_marker(position, suppress\_direction)}. This function contains a bit of logic. First it checks if the number of waypoints already on the map is below the maximum allowed by the Google Maps Directions Service. If more markers can be added, it converts the \texttt{position} parameter from screen coordinates into latitude and longitude on the map, and creates the marker. It then sets up two events on the marker: One to remove the marker and call \texttt{update\_route} when the marker is right-clicked, and one to simply call \texttt{update\_route} when the marker is dragged. Finally, the \texttt{add\_marker} function itself calls \texttt{update\_route}, unless the parameter \texttt{supress\_directions} is set to true.
+ \item \texttt{load(json)}. This function loads an existing route, encoded in \ac{JSON}. If the load parameter is given to the constructor, this function is called on construction, but can otherwise be called at any time. The function starts by calling \texttt{clear}. After that, it updates the controls, setting the title and round trip settings to those from the desired route. It then adds each waypoint, using the \texttt{add\_marker} function with \texttt{supress\_directions} set to true, so that the directions service is not invoked for each waypoint. Finally, it calls \texttt{update\_route}.
+ \item{update\_info}. This function is called every time \texttt{update\_route} has finished. Update info does two things: First it updates the info window with the total route distance, and second it encodes the route waypoints as \ac{JSON} and stores them in a hidden field in the controls form, so that it is correclty submitted when the user submits the form.
+\end{itemize}
+
+\begin{code}[label={lst:update-route-1}, caption={Converting a List of Waypoints for Directions}, language={JavaScript}]
 var plan = []
 // Extract positions. This has the nice side effect of copying the array, so markers are unaffected later on.
 for (var i = 0; i < this.markers.length; i++)
@@ -113,25 +120,22 @@ var route_options = {'origin': origin,
 					 'destination': destination,
 					 'waypoints': plan,
 					 ...}
- \end{lstlisting}
- \item \texttt{add\_marker(position, suppress\_direction)}. This function contains a bit of logic. First it checks if the number of waypoints already on the map is below the maximum allowed by the Google Maps Directions Service. If more markers can be added, it converts the \texttt{position} parameter from screen coordinates into latitude and longitude on the map, and creates the marker. It then sets up two events on the marker: One to remove the marker and call \texttt{update\_route} when the marker is right-clicked, and one to simply call \texttt{update\_route} when the marker is dragged. Finally, the \texttt{add\_marker} function itself calls \texttt{update\_route}, unless the parameter \texttt{supress\_directions} is set to true.
- \item \texttt{load(json)}. This function loads an existing route, encoded in \ac{JSON}. If the load parameter is given to the constructor, this function is called on construction, but can otherwise be called at any time. The function starts by calling \texttt{clear}. After that, it updates the controls, setting the title and round trip settings to those from the desired route. It then adds each waypoint, using the \texttt{add\_marker} function with \texttt{supress\_directions} set to true, so that the directions service is not invoked for each waypoint. Finally, it calls \texttt{update\_route}.
- \item{update\_info}. This function is called every time \texttt{update\_route} has finished. Update info does two things: First it updates the info window with the total route distance, and second it encodes the route waypoints as \ac{JSON} and stores them in a hidden field in the controls form, so that it is correclty submitted when the user submits the form.
-\end{itemize}
+\end{code}
 
 \begin{figure}[ht]
+ \centering
+ \includegraphics[width=\textwidth]{img/sprint1webflow.png}
  \caption{Sprint 1 Planner Flowchart}
  \label{fig:sprint1-web-flow}
- \includegraphics[width=\textwidth]{img/sprint1webflow.png}
 \end{figure}
-
 
 All in all, most of the functionality revolves around sending and retrieving data to and from the Google Maps \ac{API}, as well as ensuring that using the planner is as smooth as possible. The look of the planner at the end of the first sprint can be seen in \autoref{fig:sprint1-web-screen}.
 
 \begin{figure}[ht]
+ \centering
+ \includegraphics[width=\textwidth]{img/webplanner1.png}
  \caption{Sprint 1 Webpage}
  \label{fig:sprint1-web-screen}
- \includegraphics[width=\textwidth]{img/webplanner1.png}
 \end{figure}
 
 \subsection{Tests}
