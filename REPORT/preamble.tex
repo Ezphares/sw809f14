@@ -53,21 +53,6 @@
 \usetikzlibrary{shapes,arrows}
 
 % CODE %
-\usepackage{listings}
-\usepackage{color}
-\definecolor{gray}{rgb}{0.4,0.4,0.4}
-\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
-\definecolor{cyan}{rgb}{0.0,0.6,0.6}
-\lstset{
-  tabsize=4,
-  breaklines=true,
-  numbers=left,
-  captionpos=b,
-  stepnumber=1,
-  numbersep=10pt,
-  showstringspaces=false,
-  basicstyle=\footnotesize,
-}% Neat-o referencer...o.
 \usepackage{bookmark,hyperref}
 \usepackage{nameref}
 
@@ -85,41 +70,51 @@
 \def\subsectionautorefname{Subsection}
 \def\appendixautorefname{Appendix}
 
-%Ingen indentering
-\setlength{\parindent}{0mm}
+% Listings.
+\usepackage{listings}
+\renewcommand{\ttdefault}{pcr} % Bold monospace font.
+\usepackage{color}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
 
-%Defining JavaScript language
-\definecolor{lightgray}{rgb}{.9,.9,.9}
-\definecolor{darkgray}{rgb}{.4,.4,.4}
-\definecolor{purple}{rgb}{0.65, 0.12, 0.82}
+\lstnewenvironment{code}[1][]
+	{\minipage{\linewidth} 
+		\lstset{%
+			aboveskip=2em,
+			basicstyle=\footnotesize\ttfamily,
+			belowskip=2em,
+			breaklines=true,
+			captionpos=b,
+			commentstyle=\color{gray},
+			frame=lrbt,
+			keywordstyle=\bfseries,
+			numbers=left,
+			numbersep=10pt,
+			numberstyle=\tiny,
+			showstringspaces=false,
+			stepnumber=1,
+			tabsize=4,
+			#1
+		}}
+	{\endminipage}
 
-\lstdefinelanguage{JavaScript}{
-  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
-  keywordstyle=\color{blue}\bfseries,
-  ndkeywords={class, export, boolean, throw, implements, import, this},
-  ndkeywordstyle=\color{darkgray}\bfseries,
-  identifierstyle=\color{black},
-  sensitive=false,
-  comment=[l]{//},
-  morecomment=[s]{/*}{*/},
-  commentstyle=\color{purple}\ttfamily,
-  stringstyle=\color{red}\ttfamily,
-  morestring=[b]',
-  morestring=[b]"
+\lstdefinestyle{PythonDoc}{
+	morecomment=[s]{'''}{'''},
 }
 
-\lstset{
-   language=JavaScript,
-   backgroundcolor=\color{lightgray},
-   extendedchars=true,
-   basicstyle=\footnotesize\ttfamily,
-   showstringspaces=false,
-   showspaces=false,
-   numbers=left,
-   numberstyle=\footnotesize,
-   numbersep=9pt,
-   tabsize=2,
-   breaklines=true,
-   showtabs=false,
-   captionpos=b
+\lstdefinelanguage{JavaScript}{
+	comment=[l]{//},
+	keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in,
+		while, do, else, case, break, class, export, boolean, throw, implements, import, this},
+	morecomment=[s]{/*}{*/},
+	morestring=[b]',
+	morestring=[b]"
+}
+
+\lstdefinelanguage{Command}{
+	aboveskip=0pt,
+	basicstyle=\footnotesize\ttfamily,
+	belowskip=0pt,
+	keywords={null},
+	keywordstyle=\bfseries,
+	tabsize=4,
 }
