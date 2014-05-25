@@ -7,12 +7,11 @@ At its core the application is intended to be quick and easy to use - the user s
 
 When the user opens the application the first screen should show four buttons, encompassing the basic functionality of the application, illustrated in \autoref{fig:mainMock}
 
-
 \begin{figure}[ht]
 \begin{center}
+ \includegraphics[scale=0.4]{img/mainMockV1.png}
  \caption{Main User Interface Mock-up}
  \label{fig:mainMock}
- \includegraphics[scale=0.4]{img/mainMockV1.png}
 \end{center}
 \end{figure}
 
@@ -23,9 +22,9 @@ Choosing to start an exercise session will take the user to an options menu show
 
 \begin{figure}[ht]
 \begin{center}
+ \includegraphics[scale=0.4]{img/optionsMock.png}
  \caption{Options Menu Mock-up}
  \label{fig:optionsMock}
- \includegraphics[scale=0.4]{img/optionsMock.png}
 \end{center}
 \end{figure}
 
@@ -33,9 +32,9 @@ The user can either choose to start a RunOff, i.e. a ranked game against an unkn
 
 \begin{figure}[ht]
 \begin{center}
+ \includegraphics[scale=0.4]{img/matchMock.png}
  \caption{Matchmaking Screen Mock-up}
  \label{fig:matchMock}
- \includegraphics[scale=0.4]{img/matchMock.png}
 \end{center}
 \end{figure}
 
@@ -43,9 +42,9 @@ If the user wishes to pick a route, they will push the "Pick Route" button which
 
 \begin{figure}[ht]
 \begin{center}
+ \includegraphics[scale=0.4]{img/pickRouteMock.png}
  \caption{Pick Route Mock-up}
  \label{fig:pickRouteMock}
- \includegraphics[scale=0.4]{img/pickRouteMock.png}
 \end{center}
 \end{figure}
 
@@ -57,9 +56,9 @@ The main screen, as all the other screens, was implemented as a class extending 
 
 \begin{figure}[ht]
 \begin{center}
+ \includegraphics[scale=0.4]{img/mainV1.png}
  \caption{Main Activity Prototype}
  \label{fig:mainV1}
- \includegraphics[scale=0.4]{img/mainV1.png}
 \end{center}
 \end{figure}
 
@@ -75,64 +74,54 @@ The \texttt{HttpHandler} class has 4 functions:
 
 \item \texttt{http\_request} is a generic \ac{HTTP} request function returning a custom \texttt{ResponseData} object consisting of a status code in integers and a response body, which is stored in a string. The implementation is shown in \autoref{lst:http-request}
 
-\begin{lstlisting}[label={lst:http-request},caption={The http-request function},language=java]    
-public static ResponseData http_request(String url, HttpMethod method, List<NameValuePair> parameters)
-{
-    //prep request
-    HttpRequestBase request = null;
-
-    if(method == HttpMethod.GET)
-    {
-        request = new HttpGet(url);
-        //TODO: URL encode parameters
-
-    }
-    else if(method == HttpMethod.POST)
-    {
-        HttpPost post = new HttpPost(url);
-        try
-        {
-            post.setEntity(new UrlEncodedFormEntity(parameters));
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            e.printStackTrace();
-        }
-
-        request = post;
-    }
-    
-    try
-    {
-        HttpResponse response = client.execute(request);
-        HttpEntity entity = response.getEntity();
-
-        ResponseData data = new HttpHandler.ResponseData();
-        data.body = EntityUtils.toString(entity, "UTF-8");
-        data.status = response.getStatusLine().getStatusCode();
-
-        return data;
-    }
-    catch (ClientProtocolException e)
-    {
-        // writing exception to log
-        e.printStackTrace();
-   }
-   catch (IOException e)
-   {
-       // writing exception to log
-       e.printStackTrace();
-    }
-    return null;
-}
-\end{lstlisting} 
-
 The function works by creating an \texttt{HttpRequestBase} called \texttt{request} in line 4. It then checks what request method (defined in an enumerate on the class) is needed: If the request method in the parameters is of type \texttt{GET} the function will set \texttt{request} to an \texttt{HttpGet} request with the provided URL, done in lines 6-11. If the request method is of type \texttt{POST} the function will try to add the post-parameters provided to a post request and set \texttt{request} to that request, seen in lines 12-25. When the type of request has been decided and the request is ready an \texttt{HttpResponse} is created to catch the response from the server when the request is executed in line 28. Seeing as we are only interested in the content of the response, not the headers, the content is transferred to an instance of the custom \texttt{ResponseData} class in lines 29-33. The data object is then returned in line 35. Lines 37-48 contain exception handling.
  
 \item \texttt{login\_request} is a function taking a username and password as parameters and returning a boolean signifying if the login was successful or not. It adds its received parameters to a list of \texttt{NameValuePair}s and calls \texttt{http\_request} with a \texttt{POST} request and the list as parameters. The \texttt{ResponseData} object is then checked to see that the response has status code 200 and text "OK" which means the login was successful.
 
 \item \texttt{route\_request} takes no parameters and returns a \texttt{JSONArray} with the routes the user has saved. It sends a \texttt{GET} request using \texttt{http\_request}. If the response status code is 200, signifying that the response is OK, the array of routes in the \texttt{ResponseData} object resulting from the function call is then saved in a \texttt{JSONArray} object, which is returned. 
 \end{itemize}
+
+\begin{code}[label={lst:http-request}, caption={The http-request function}, language=java]    
+public static ResponseData http_request(String url, HttpMethod method, List<NameValuePair> parameters) {
+	//prep request
+	HttpRequestBase request = null;
+
+	if (method == HttpMethod.GET) {
+		request = new HttpGet(url);
+		// TODO: URL encode parameters
+	}
+	else if (method == HttpMethod.POST) {
+		HttpPost post = new HttpPost(url);
+		try {
+			post.setEntity(new UrlEncodedFormEntity(parameters));
+		}
+		catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		request = post;
+	}
+
+	try {
+		HttpResponse response = client.execute(request);
+		HttpEntity entity = response.getEntity();
+
+		ResponseData data = new HttpHandler.ResponseData();
+		data.body = EntityUtils.toString(entity, "UTF-8");
+		data.status = response.getStatusLine().getStatusCode();
+
+		return data;
+	}
+	catch (ClientProtocolException e) {
+		// writing exception to log
+		e.printStackTrace();
+	}
+	catch (IOException e) {
+		// writing exception to log
+		e.printStackTrace();
+	}
+	return null;
+}
+\end{code}
 
 \subsection{Testing}
 The implementation was unit tested to ensure that the functionality worked as intended. For this the jUnit \cite{junit} test framework and the EMMA \cite{emma} code coverage tool was used. The focus of the test was on ensuring that correct use of the application resulted in the expected behaviour, thus things like incorrect login credentials was not a part of this test. The tests currently require the server to be running in order to pass.

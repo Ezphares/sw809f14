@@ -1,5 +1,14 @@
 \section{Rating System}
+The purpose of a rating system is to keep track of the relative skill levels of players.
+A rating system in its most basic form accomplishes this by representing the skill level of a player as a number of points, which is decreased when the player loses a match, and increased when the player wins a match.
+The exact number of points by which the rating is increased or decreased, and how often this is done etc. depends on the particular rating system.
 
+In order to automatically match users against each other we need a way to determine their relative skill levels.
+This is also needed in order to provide users with feedback on their personal progress, for example by creating leaderboards or by providing users with statistics about their increase or decrease in rating.
+
+A number of rating systems already exist, which are in use in different types of games such as sports, board games and video games.
+In this section some of the most well known rating systems will be analyzed.
+The rating system used in this project will also be described in terms of implementation and testing.
 
 \subsection{Elo}
 \label{sec:elo}
@@ -58,7 +67,7 @@ The RD of a player is always decreased when the player competes, and increases a
 The Glicko rating system treats games that occurred within the same \emph{rating period} as if they occurred simultaneously.
 The length of a rating period ranges from several months to a game-by-game basis depending on the particular application.
 
-Before determining the post-period rating and RD of a player, the pre-period rating and RD of the player must be updated.
+Before determining the post-period rating and RD of a player, the pre-period RD of the player must first be updated.
 This is shown in Equation \ref{eq:pre_rd}, where $t$ is the number of rating periods since the player last competed, and $c$ is a constant that controls the volatility of increase in uncertainty over time.
 
 \begin{equation} \label{eq:pre_rd}
@@ -99,12 +108,22 @@ The rating volatility for a player is high when the player performs erratically 
 The Glicko 2 rating system is most suitable for games with extremely unpredictable outcomes.
 
 \subsection{Implementation}
-For our application we use the original Glicko rating system, in order to benefit from the improvements it provides over the Elo rating system.
-The Glicko rating system is preferred over the Glicko 2 rating system as we do not expect the games to have extremely unpredictable outcomes, 
+For our application we use the original Glicko rating system, in order to benefit from the mentioned improvements it provides over the Elo rating system.
+The Glicko rating system is preferred over the Glicko 2 rating system as we do not expect the games to have extremely unpredictable outcomes.
 
-The default rating for new players is set to 1500 with an RD of 350.
+The default rating for new players is set to 1500 with an RD of 350, as these are the values recommended by Glickman.
 The minimum RD is set to 30 to ensure that the rating of a player can always change appreciably.
-The rating period is set to one day, and the value of the constant $c$ is 18.1.
-The value of $c$ was determined using the method proposed by Glickman \cite{glicko}, which is to determine how many ratings periods it would take for the rating of a typical player to become as uncertain as the rating of an unranked player.
-We assume that this would take 365 rating periods (one year) and that the RD of a typical player is 50.
+The rating period is set to one day, and matches will be scored on a game-by-game basis as soon as they are over.
+
+The value of the constant $c$ is set to 18.1.
+This was determined by using the method proposed by Glickman \cite{glicko}, which is to determine how many ratings periods it would take for the rating of a typical player to become as uncertain as the rating of an unranked player.
+These numbers cannot be determined in an exact manner, so we make an estimation that this would take approximately 365 rating periods (one year), and that the RD of a typical player is approximately 50.
 These numbers were then used to solve Equation \ref{eq:pre_rd} for $c$.
+
+The Glicko rating system is implemented as a single Python class.
+The implementation is straightforward as it only contains the six equations shown in Section \ref{sec:glicko}.
+
+\subsection{Testing}
+Every method in the \texttt{Glicko} class has been unit tested.
+The \texttt{Glicko} class is very suitable for unit testing because it has no external dependencies or side effects.
+A total of 6 tests cases and 6 assertions were written, giving a code coverage of 100 \%.

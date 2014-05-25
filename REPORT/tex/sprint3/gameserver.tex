@@ -11,19 +11,20 @@ The first problem is that the earth is a sphere, which means that conventional E
 
 That leads to the second problem. One degree of longitude's length in meters varies depending on the latitude\cite{wikidecimaldegrees}. This meant a function, seen in \autoref{lst:sprint3-coord-offset}, had to be created to convert from coordinates in \texttt{(Longitude, Latitude)} to an \texttt{(x, y)} offset in meters. This approach resulted in very small imprecisions (on a scale of centimeters), though imprecisions grow as you get further from the equator.
 
-\begin{lstlisting}[label={lst:sprint3-coord-offset},caption={Convert Decimal Degrees to Offset in Meters},language={Python}]
+\begin{code}[label={lst:sprint3-coord-offset}, caption={Convert Decimal Degrees to Offset in Meters}, language={Python}]
 def metric_offset(coord):
-	return (coord[0] * 111319.9 * cos(radians(coord[1])) , coord[1] * 111319.9)
-\end{lstlisting}
+	return (coord[0] * 111319.9 * cos(radians(coord[1])), coord[1] * 111319.9)
+\end{code}
 
 \subsection{Distance Between Point and Route}
 
 Finding the distance between two points is not enough to determine whether a point is close to a route. The first problem with this, is that there might be quite far between two waypoints on a route, that is a user might have a 5 kilometre long route with just two waypoints. The natural solution to this is to project the point onto the line between the points and find the distance between those. However, as seen in \autoref{fig:sprint3-bad-route} using the line between the waypoints is often not indicative of the actual route.
 
 \begin{figure}[ht]
+ \centering
+ \includegraphics[scale=0.5]{img/sprint3br.png}
  \caption{Non-linear Route}
  \label{fig:sprint3-bad-route}
- \includegraphics[scale=0.5]{img/sprint3br.png}
 \end{figure}
 
 \subsubsection{Decoding the Route}
@@ -46,12 +47,13 @@ A route's checkpoints represent the interval between each section of the route t
 When finding the distance between a line segment and a point, the method is as follows: Find out if the point is between the ends of the segments. If it is, project the point onto the line and take that distance. If it isn't, take the distance to the closest of the start and end points. This is illustrated in \autoref{fig:sprint3-linesegment}. This is not a new problem, and there were a lot of inspiration for efficient implementations of this to be found\cite{point2line1}\cite{point2line2}, and we ended up with the functions seen in \autoref{lst:sprint3-dist}.
 
 \begin{figure}[ht]
+ \centering
+ \includegraphics[scale=0.85]{img/sprint3linesegment.png}
  \caption{Shortest Distance to Line Segment}
  \label{fig:sprint3-linesegment}
- \includegraphics[scale=0.85]{img/sprint3linesegment.png}
 \end{figure}
 
-\begin{lstlisting}[label={lst:sprint3-dist},caption={Distance Between Point and Line Segment.},language={Python}]
+\begin{code}[label={lst:sprint3-dist}, caption={Distance Between Point and Line Segment.}, language={Python}, style={PythonDoc}]
 def dist2(p1, p2):
 	return sqr(p1[0] - p2[0]) + sqr(p1[1] - p2[1])
 
@@ -72,7 +74,7 @@ def distToSegmentSquared(point, start, end):
 		return dist2(point, end)
 	else:
 		return dist2(point, (start[0] + t * (end[0] - start[0]),
-		                     start[1] + t * (end[1] - start[1])) )
+		                     start[1] + t * (end[1] - start[1])))
 
 class Segment(object):
 	def __init__(self, start, end):
@@ -81,11 +83,11 @@ class Segment(object):
 
 	def point_distance(self, point):
 		return sqrt(distToSegmentSquared(point, self.start, self.end))
-\end{lstlisting}
+\end{code}
 
 With this, it was possible to implement a function for the \texttt{Polyline} class that given a route, a point and a threshold in meters is able to return whether or not the point is within threshold distance of the route. This can be used by the server to ensure that each participant in a match stays on their chosen route. The final implementation of the \texttt{Polyline} class can be seen in \autoref{lst:sprint3-polyline}. This in itself is not enough to check whether a participant is reaching checkpoints in the correct order, but is still an important part of the anti-cheating systems needed for the project.
 
-\begin{lstlisting}[label={lst:sprint3-polyline},caption={The Polyline Class.},language={Python}]
+\begin{code}[label={lst:sprint3-polyline}, caption={The Polyline Class.}, language={Python}, style={PythonDoc}]
 class Polyline(object):
 	def __init__(self, encoded):
 		# 'depoly' is the function to decode polyline strings.
@@ -93,8 +95,8 @@ class Polyline(object):
 		self.points = [self.metric_offset(c) for c in coords]
 
 	def metric_offset(self, coord):
-		return (coord[0] * 111319.9 * cos(radians(coord[1])) , coord[1] * 111319.9)
-        
+		return (coord[0] * 111319.9 * cos(radians(coord[1])), coord[1] * 111319.9)
+
 	def point_distance(self, coord):
 		point = self.metric_offset(coord)
 		distance = float('inf')
@@ -107,12 +109,12 @@ class Polyline(object):
 	def get_segments(self):
 		segments = []
 		for i in range(len(self.points) - 1):
-			segments.append(Segment(self.points[i], self.points[i + 1]))
+			segments.append(Segment(self.points[i], self.points[i+1]))
 		return segments
-       
+
 	'''
 	Checks whether a coordinate in (longitude, latitude) is within threshold in meters of the polyline.
 	'''
 	def on_route(self, coord, threshold = 50):
 		return self.point_distance(coord) <= threshold
-\end{lstlisting}
+\end{code}

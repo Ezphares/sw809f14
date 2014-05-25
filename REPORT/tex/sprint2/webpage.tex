@@ -24,9 +24,10 @@ Apart from the new elements in the interface, the look of the web page should be
 The database had to be updated to allow for the social aspects. This was accomplished by adding a new table for friends, as can be seen in \autoref{fig:sprint2-db-model}. The \texttt{Friend} table is used to represent both friend requests and established friend relationships, using the \texttt{accepted} column to determine which of the two it is. Apart from this change, the database model is the same as before.
 
 \begin{figure}[ht]
+ \centering
+ \includegraphics[scale=0.5]{img/sprint2db.png}
  \caption{Sprint 2 Database Model}
  \label{fig:sprint2-db-model}
- \includegraphics[scale=0.5]{img/sprint2db.png}
 \end{figure}
 
 \subsection{Implementation}
@@ -39,24 +40,23 @@ On the server, two separate parts were implemented: The route validation as well
 
 \begin{itemize}
  \item The route validation consisted mostly of writing a server side version of much of the route planner code, employing the web version of the Google Maps \ac{API}, rather than the javascript version. This means that given a set waypoints, it is possible for the server to construct a version of the route and calculate its distance, just like the client can. Having the distance calculated and stored on the server, has several advantages:
-  \begin{itemize}
-   \item A user cannot send forged data to the server, for example create a route that is 5 kilometres, tell the server it is 10 and use that to get matched up against opponents running harder routes.
-   \item The server can send the length of each route to the phone application, so presenting the routes to the user does not require recalculating each route on the phone.
-   \item At some point, the matching system will want access to all of the details of a route, so it can calculate a users progress during a run.
-  \end{itemize}
-  Even though the information calculated about a route on the server is considered the correct information, the route designer still presents the information calculated by the client, as this allows for faster information updates during route design.
-  
+ \begin{itemize}
+  \item A user cannot send forged data to the server, for example create a route that is 5 kilometres, tell the server it is 10 and use that to get matched up against opponents running harder routes.
+  \item The server can send the length of each route to the phone application, so presenting the routes to the user does not require recalculating each route on the phone.
+  \item At some point, the matching system will want access to all of the details of a route, so it can calculate a users progress during a run.
+ \end{itemize}
+ Even though the information calculated about a route on the server is considered the correct information, the route designer still presents the information calculated by the client, as this allows for faster information updates during route design.
  \item The social system was a pretty simple implementation. It provides four different actions:
-  \begin{itemize}
-   \item Sending a friend request to another user. This requires the target user to not already have a friend relationship with the requester (either accepted or pending).
-   \item Accept and deny incoming friend requests.
-   \item Remove established friends.
-   \item Retrieve a list of friends and requests.
-  \end{itemize}
-  The main challenge of this was having the server consider entries in the \texttt{Friend} table equal regardless of which user is the \texttt{to} and \texttt{from} user after the request has been accepted, but different while still pending. That is, an accepted friend request makes users mutual friends, while a pending friend request require action from a specific user. This was solved by creating a function that retrieves all of a users accepted friends, which can be seen in \autoref{lst:sprint2-get-friends}, while retrieving pending requests was done by filtering requests where the involved user is the \texttt{to} user, as well as \texttt{accepted} set to false.
+ \begin{itemize}
+  \item Sending a friend request to another user. This requires the target user to not already have a friend relationship with the requester (either accepted or pending).
+  \item Accept and deny incoming friend requests.
+  \item Remove established friends.
+  \item Retrieve a list of friends and requests.
+ \end{itemize}
+ The main challenge of this was having the server consider entries in the \texttt{Friend} table equal regardless of which user is the \texttt{to} and \texttt{from} user after the request has been accepted, but different while still pending. That is, an accepted friend request makes users mutual friends, while a pending friend request require action from a specific user. This was solved by creating a function that retrieves all of a users accepted friends, which can be seen in \autoref{lst:sprint2-get-friends}, while retrieving pending requests was done by filtering requests where the involved user is the \texttt{to} user, as well as \texttt{accepted} set to false.
 \end{itemize}
 
-\begin{lstlisting}[label={lst:sprint2-get-friends},caption={'Friend List' function},language={Python}]
+\begin{code}[label={lst:sprint2-get-friends}, caption={'Friend List' function}, language={Python}]
 @login_required
 def friendlist(request):
 	friends_inbound = Friend.objects.filter(accepted = True, to_user = request.user)
@@ -66,16 +66,17 @@ def friendlist(request):
 	friends.extend([y.to_user for y in friends_outbound])
 	
 	...
-\end{lstlisting}
+\end{code}
 
 \subsubsection{Client Implementation}
 
 The introduction of elevation profiles was the major point of implementation on the client. Using the Google Maps \ac{API}, getting said elevation profile is very simple. It provides an \texttt{ElevationService} class, which, provided a path in the same format as the one required by the directions service, will return a list of elevation values. These values are then added to a graph using a library called ChartJS\cite{chartjs}, which is presented to the user. This can be seen in \autoref{fig:sprint2-web-screen}, along with the changes made to the \ac{GUI} of the site.
 
 \begin{figure}[ht]
+ \centering
+ \includegraphics[width=\textwidth]{img/webplanner2.png}
  \caption{Sprint 2 Webpage}
  \label{fig:sprint2-web-screen}
- \includegraphics[width=\textwidth]{img/webplanner2.png}
 \end{figure}
 
 \subsection{Test}
@@ -83,7 +84,3 @@ The introduction of elevation profiles was the major point of implementation on 
 Like before, unit testing was done with QUnit and coverage metrics was delivered by Blanket. Code coverage after this sprint was reported to be 82\%.
 
 Specific unit tests for the server was not written for the server, instead this was tested by making sure the results for each route was the same as those the client calculated. While not extensive, this was deemed to be enough, seeing as the validation is mostly the same calculations that already happened on the client.
-
-
-
-

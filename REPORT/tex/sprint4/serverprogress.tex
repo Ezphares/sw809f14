@@ -5,6 +5,7 @@ An important feature of the match server is to keep track of how far each partic
 The approach used for advancing the participant is then simply to check if their position is within a certain threshold of the next checkpoint, and if it is, set that as the current checkpoint. The only caveat is that some checkpoints may be very close, and their might be some distance between the positions received from the participant, so it is desirable to advance them as many checkpoints as possible, and not just a single checkpoint. The implementation of this approach can be seen in \autoref{lst:sprint4-polyline}, which shows a function added to the \texttt{Polyline} class from \autoref{lst:sprint3-polyline}.
 
 This function takes the checkpoint stored in the match state, and the participants current position in \texttt{(Longitude, Latitude)}, as well as a threshold in meters. It then tries to advance the user a single checkpoint at a time, until the next checkpoint in the list is further away than the threshold. The return value of the function might need some explanation, it is a tuple on the form \texttt{(current, total, complete)} which denotes:
+
 \begin{itemize}
  \item \texttt{current}: the checkpoint reached, this should be the new value stored in the match state.
  \item \texttt{total}: the total number of checkpoints for the route. This, together with \texttt{current} can give an indication of how far along the participant is.
@@ -13,7 +14,7 @@ This function takes the checkpoint stored in the match state, and the participan
 
 In conclusion, this small function is able to track participants advancing along their route and declaring the winner, but using \texttt{current} and \texttt{total} to determine how far a participant is on his route is imprecise, as the distance between each checkpoint might vary greatly.
 
-\begin{lstlisting}[label={lst:sprint4-polyline},caption={The Advance Function of Polyline},language={Python}]
+\begin{code}[label={lst:sprint4-polyline}, caption={The Advance Function of Polyline}, language={Python}]
 class Polyline(object):
 
 	...
@@ -32,5 +33,4 @@ class Polyline(object):
 				advancing = False
 
 		return (current, len(self.points), False)
-\end{lstlisting}
-
+\end{code}
