@@ -1,146 +1,264 @@
-\section{Matchmaking and Client Server Communication}
+\section{Communications Protocol}
+In order to facilitate communication between clients and the server a simple communications protocol was designed.
+This protocol defines the set of legal messages (referred to as commands in this section) that may be exchanged between a client and the server.
 
-\subsection{Communication Format}
-The messages exchanged between the server and the clients are encoded as JSON and share a common format.
+The commands are encoded as JSON and share a common format.
 Every command has a \texttt{cmd} field indicating the type of command and a \texttt{data} field containing the data needed to process the command.
-For some command types the \texttt{data} field may be \texttt{null} if no data is needed to process the command of that particular type.
+For some command types the \texttt{data} field may be \texttt{null} if no data is needed to process a command of that particular type.
 All commands sent from a client to the server also contain an \texttt{id} field containing a unique identifier for the user.
 
-All commands are prefixed with two bytes in network byte order (big endian) indicating the number of characters in the command.
+All commands are prefixed with two bytes in network byte order (big endian) indicating the length of the command.
+Using this approach enables the receiving end to read a single command from the network buffer without accidentally reading into the beginning of the following command.
+This is necessary because the communication protocol allows an endpoint to send multiple commands back-to-back without needing a reply in between.
 
+\subsection{Commands}
+In this section the different types of commands exchanged between the clients and the server will be described.
+Parameters are prefixed with a dollar sign in the descriptions.
 
 \subsubsection{Matchmaking Commands}
+In order for a client to be matched against a suitable opponent it must first enter the matchmaking queue by sending the command shown in Table \ref{tab:cmd_queue}.
 
-
-\tikzstyle{decision} = [diamond, draw, fill=blue!20, text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
-\tikzstyle{block} = [rectangle, draw, fill=blue!20, text width=5em, text centered, rounded corners, minimum height=4em]
-\tikzstyle{line} = [draw, -latex']
-\tikzstyle{cloud} = [draw, ellipse, fill=red!20, node distance=3cm, minimum height=2em]
-
-\begin{center}
-\begin{tikzpicture}[node distance=2.5cm, auto]
-	% Place nodes
-	\node [block] (notqueued) {not queued};
-	\node [block, right of=notqueued, node distance=5cm] (queued) {queued};
-	\node [block, below of=queued] (found) {match found};
-	\node [block, below of=found] (accepted) {match accepted};
-	\node [block, below of=accepted] (started) {match started};
-	% Draw edges
-	\path [line] (notqueued) -- node[] {queue [client]} (queued);
-	\path [line] (queued) -- node[] {cancel [client]} (notqueued);
-	\path [line] (queued) -- node[] {found [server]} (found);
-	\path [line] (found) -- node[] {accept [client]} (accepted);
-	\path [line] (found) -| node[] {decline [client]} (notqueued);
-	\path [line] (accepted) -- node[] {start [server]} (started);
-\end{tikzpicture}
-\end{center}
+\newenvironment{command}
+{\bigskip\begin{minipage}{\textwidth}\hrule\begin{description}}
+{\end{description}\hrule\end{minipage}\bigskip}
 
 \begin{table}[!ht]
 	\centering
-	\begin{tabular}{| r | p{3in} |}
+	\begin{tabular}{| r | p{0.7\textwidth} |}
 		\hline
-		\textbf{Description} & Places the client in the matchmaking queue. \\ \hline
+		\textbf{Description} & Adds the client to the matchmaking queue. \\ \hline
 		\textbf{Direction} & Client $\rightarrow$ Server. \\ \hline
+		\textbf{Parameters} & \texttt{\$id} : The id of the client. \newline \texttt{\$route\_id} : The id of the route selected by the client. \\ \hline
 		\textbf{Format} &
-			\begin{verbatim}{
-			"cmd": "cancel",
-			"id": $id,
-			"data": null
-			}\end{verbatim} \\ \hline
+\begin{lstlisting}[language=Command]
+{
+	"cmd": "queue",
+	"id": $id,
+	"data": {
+		"route_id": $route_id
+	}
+}
+\end{lstlisting}
+		\\ \hline
 	\end{tabular}
-	\caption{}
-	\label{}
+	\caption{\texttt{queue} command.}
+	\label{tab:cmd_queue}
 \end{table}
 
-\begin{verbatim}
-{
-	"cmd": "cancel",
-	"id": $id,
-	"data": null
-}
-\end{verbatim}
+If the client wants to be removed from the matchmaking queue the command shown in Table \ref{tab:cmd_cancel} must be sent.
 
-\hrule
-
-\begin{description}
-\item[Description] \hfill \\
-	Removes the client from the matchmaking queue.
-\item[Direction] \hfill \\
-	Client $\rightarrow$ Server.
-\item[Format] \hfill
-\begin{lstlisting}[language=JavaScript]
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{| r | p{0.7\textwidth} |}
+		\hline
+		\textbf{Description} & Removes the client from the matchmaking queue. \\ \hline
+		\textbf{Direction} & Client $\rightarrow$ Server. \\ \hline
+		\textbf{Parameters} & \texttt{\$id} : The id of the client. \\ \hline
+		\textbf{Format} &
+\begin{lstlisting}[language=Command]
 {
 	"cmd": "cancel",
 	"id": $id,
 	"data": null
 }
 \end{lstlisting}
-\end{description}
+		\\ \hline
+	\end{tabular}
+	\caption{\texttt{cancel} command.}
+	\label{tab:cmd_cancel}
+\end{table}
 
-\hrule
+When the server has found a suitable opponent it responds by sending the command shown in Table \ref{tab:cmd_found} to both clients:
 
-\begin{description}
-\item[Description] \hfill \\
-	Informs the client that an opponent has been found.
-\item[Direction] \hfill \\
-	Server $\rightarrow$ Client.
-\item[Format] \hfill
-\begin{lstlisting}[language=JavaScript]
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{| r | p{0.7\textwidth} |}
+		\hline
+		\textbf{Description} & Informs the client that an opponent has been found. \\ \hline
+		\textbf{Direction} & Server $\rightarrow$ Client. \\ \hline
+		\textbf{Parameters} & None. \\ \hline
+		\textbf{Format} &
+\begin{lstlisting}[language=Command]
 {
 	"cmd": "found",
-	"id": $id,
 	"data": null
 }
 \end{lstlisting}
-\end{description}
+		\\ \hline
+	\end{tabular}
+	\caption{\texttt{found} command.}
+	\label{tab:cmd_found}
+\end{table}
 
-\hrule
+Both clients must reply with the command shown in Table \ref{tab:cmd_accept} in order for the match to begin:
 
-\begin{description}
-\item[Description] \hfill \\
-	Informs the server that the client accepts the match.
-\item[Direction] \hfill \\
-	Client $\rightarrow$ Server.
-\item[Format] \hfill
-\begin{lstlisting}[language=JavaScript]
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{| r | p{0.7\textwidth} |}
+		\hline
+		\textbf{Description} & Accept the match. \\ \hline
+		\textbf{Direction} & Client $\rightarrow$ Server. \\ \hline
+		\textbf{Parameters} & \texttt{\$id} : The id of the client. \\ \hline
+		\textbf{Format} &
+\begin{lstlisting}[language=Command]
 {
 	"cmd": "accept",
 	"id": $id,
 	"data": null
 }
 \end{lstlisting}
-\end{description}
+		\\ \hline
+	\end{tabular}
+	\caption{\texttt{accept} command.}
+	\label{tab:cmd_accept}
+\end{table}
 
-\hrule
+If both clients have not accepted within 20 seconds the match will be canceled and both clients will be removed from the matchmaking queue.
+If both clients accept within the time limit, then the server will send the command shown in Table \ref{tab:cmd_start} to both clients to inform them that the match has started:
 
-\begin{description}
-\item[Description] \hfill \\
-	Informs the server that the client declines the match.
-\item[Direction] \hfill \\
-	Client $\rightarrow$ Server.
-\item[Format] \hfill
-\begin{lstlisting}[language=JavaScript]
-{
-	"cmd": "decline",
-	"id": $id,
-	"data": null
-}
-\end{lstlisting}
-\end{description}
-
-\hrule
-
-\begin{description}
-\item[Description] \hfill \\
-	Informs the client that the match starts in 10 seconds.
-\item[Direction] \hfill \\
-	Server $\rightarrow$ Client.
-\item[Format] \hfill
-\begin{lstlisting}[language=JavaScript]
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{| r | p{0.7\textwidth} |}
+		\hline
+		\textbf{Description} & Informs the client that the match has started. \\ \hline
+		\textbf{Direction} & Server $\rightarrow$ Client. \\ \hline
+		\textbf{Parameters} & None. \\ \hline
+		\textbf{Format} &
+\begin{lstlisting}[language=Command]
 {
 	"cmd": "start",
-	"id": $id,
 	"data": null
 }
 \end{lstlisting}
-\end{description}
+		\\ \hline
+	\end{tabular}
+	\caption{\texttt{start} command.}
+	\label{tab:cmd_start}
+\end{table}
+
+\subsubsection{Match Progress Commands}
+During a match both clients must continuously relay their positions to the server so that it can determine if they are both following the correct route and if one them has won the match.
+Figure \ref{fig:match_flow} shows the basic flow of determining a winner (and loser) of a match.
+The commands involved in this flow will be described in this section.
+
+\tikzstyle{decision} = [diamond, draw, fill=blue!20, minimum width=6em, minimum height=6em, text badly centered]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, minimum width=5em, minimum height=3em, text centered, rounded corners]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [ellipse, draw, fill=blue!20, minimum width=5em, text centered]
+    
+\begin{figure}[!ht]
+	\centering
+	\begin{tikzpicture}[node distance = 3cm, auto]
+		\node [cloud] (start) {begin};
+		\node [block, left of=start] (inprogress) {in progress};
+		\node [decision, below of=inprogress] (finished) {done?};
+		\node [block, right of=finished] (winner) {winner};
+		\node [decision, left of=finished] (onroute) {on route?};
+		\node [block, below of=onroute] (loser) {loser};
+		\node [cloud, below of=winner] (end) {end};
+		\path [line] (start) -- (inprogress);
+		\path [line] (inprogress) -- node {send position} (finished);
+		\path [line] (finished) -- node {yes} (winner);
+		\path [line] (finished) -- node {no} (onroute);
+		\path [line] (onroute) -- node {no} (loser);
+		\path [line] (onroute) |- node {yes} (inprogress);
+		\path [line] (winner) -- (end);
+		\path [line] (loser) -- (end);
+	\end{tikzpicture}
+	\caption{Match flow.}
+	\label{fig:match_flow}
+\end{figure}
+
+A client must continuously relay its current position to the server using the command shown in Table \ref{tab:cmd_pos}.
+
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{| r | p{0.7\textwidth} |}
+		\hline
+		\textbf{Description} & Informs the server of the current position of the client. \\ \hline
+		\textbf{Direction} & Client $\rightarrow$ Server. \\ \hline
+		\textbf{Parameters} & \texttt{\$id} : The id of the client. \newline \texttt{\$lat} : Current latitude. \newline \texttt{\$lng} : Current longitude. \\ \hline
+		\textbf{Format} &
+\begin{lstlisting}[language=Command]
+{
+	"cmd": "position",
+	"id": $id,
+	"data": {
+		"lat": $lat,
+		"lng": $lng
+	}
+}
+\end{lstlisting}
+		\\ \hline
+	\end{tabular}
+	\caption{\texttt{position} command (client).}
+	\label{tab:cmd_pos}
+\end{table}
+
+The server responds with the progress of the opponent as shown in Table \ref{tab:cmd_pos_server}.
+
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{| r | p{0.7\textwidth} |}
+		\hline
+		\textbf{Description} & Informs the client of the progress of its opponent. \\ \hline
+		\textbf{Direction} & Server $\rightarrow$ Client. \\ \hline
+		\textbf{Parameters} & \texttt{\$completion} : Progress of opponent in percent. \\ \hline
+		\textbf{Format} &
+\begin{lstlisting}[language=Command]
+{
+	"cmd": "position",
+	"data": {
+		"completion": $completion
+	}
+}
+\end{lstlisting}
+		\\ \hline
+	\end{tabular}
+	\caption{\texttt{position} command (server).}
+	\label{tab:cmd_pos_server}
+\end{table}
+
+If the client has finished the selected route, then the server will respond with the command shown in Table \ref{tab:cmd_winner} to inform the client that it has won the match.
+
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{| r | p{0.7\textwidth} |}
+		\hline
+		\textbf{Description} & Informs the client that it has won the match. \\ \hline
+		\textbf{Direction} & Server $\rightarrow$ Client. \\ \hline
+		\textbf{Parameters} & None. \\ \hline
+		\textbf{Format} &
+\begin{lstlisting}[language=Command]
+{
+	"cmd": "winner",
+	"data": null
+}
+\end{lstlisting}
+		\\ \hline
+	\end{tabular}
+	\caption{\texttt{winner} command.}
+	\label{tab:cmd_winner}
+\end{table}
+
+The other client (the loser) will receive the command shown in Table \ref{tab:cmd_loser}.
+
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{| r | p{0.7\textwidth} |}
+		\hline
+		\textbf{Description} & Informs the client that it has lost the match. \\ \hline
+		\textbf{Direction} & Server $\rightarrow$ Client. \\ \hline
+		\textbf{Parameters} & None. \\ \hline
+		\textbf{Format} &
+\begin{lstlisting}[language=Command]
+{
+	"cmd": "loser",
+	"data": null
+}
+\end{lstlisting}
+		\\ \hline
+	\end{tabular}
+	\caption{\texttt{loser} command.}
+	\label{tab:cmd_loser}
+\end{table}
