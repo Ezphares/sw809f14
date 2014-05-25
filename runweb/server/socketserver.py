@@ -42,7 +42,6 @@ class ServerCommand:
 	START = 'start'
 	POSITION = 'position'
 	WINNER = 'winner'
-	LOSER = 'loser'
 
 	def __init__(self, cmd, data=None):
 		self.cmd = cmd
@@ -151,8 +150,9 @@ class ClientThread:
 
 	def _finish_match(self, winner, loser, match):
 		self.matches.remove(match)
-		self.server_cmd_q[winner.socket].put(ServerCommand(ServerCommand.WINNER))
-		self.server_cmd_q[loser.socket].put(ServerCommand(ServerCommand.LOSER))
+		server_cmd = ServerCommand(ServerCommand.WINNER, {'result': winner.id})
+		self.server_cmd_q[winner.socket].put(server_cmd)
+		self.server_cmd_q[loser.socket].put(server_cmd)
 		self._update_rating(winner, loser, 1)
 		self._update_rating(loser, winner, 0)
 		competitive.models.Match(winner=winner.id, loser=loser.id).save()
