@@ -17,7 +17,7 @@ class SocketServer:
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.server.bind((host, port))
 		self.server.listen(socket.SOMAXCONN)
-		socket.setdefaulttimeout(5.0)
+		socket.setdefaulttimeout(1.0)
 		logging.info('Server listening on ' + str((host, port)))
 
 		self.client_cmd_q = queue.Queue()
@@ -75,7 +75,7 @@ class ClientThread:
 		self.client_cmd_q = client_cmd_q
 		self.server_cmd_q = server_cmd_q
 		self.matches = matches
-		self.glicko = server.glicko.Glicko(18)
+		self.glicko = server.glicko.Glicko(18.1)
 		self.server_cmd_q[self.socket] = queue.Queue()
 		self.handlers = {
 			ClientCommand.QUEUE: self._handle,
@@ -87,12 +87,12 @@ class ClientThread:
 	def run(self):
 		while True:
 			header = self._recv_n(2, False) # Get message length as 2 bytes.
-			if header is False: # Clean disconnect from client detected.
+			if header is False: # Client disconnected.
 				break
 			elif header is not None:
 				msg_len = struct.unpack('!h', header)[0] # Convert message length to 16 bit integer.
 				data = self._recv_n(msg_len)
-				if data == False: # Clean disconnect from client detected.
+				if data == False: # Client disconnected.
 					break
 				try:
 					data = json.loads(data)
@@ -108,8 +108,11 @@ class ClientThread:
 			except queue.Empty: # No commands available.
 				pass
 			else: # If there was a command, try to send it.
-				if self._send(server_cmd.serialize()) == None: # Message not sent.
-					self.server_cmd_q[self.socket].put(server.cmd) # Put the message back in the queue.
+				status = self._send(server_cmd.serialize())
+				if status is None: # Timed out. Put the command back in the queue.
+					self.server_cmd_q[self.socket].put(server_cmd)
+				elif status is False: # Client disconnected.
+					break
 				else:
 					logging.info('Sent command {0} to {1}'.format(server_cmd.cmd.upper(), self.address))
 		self._close()
@@ -127,25 +130,36 @@ class ClientThread:
 				opponent = match.player1
 			else:
 				continue
-			self.matches.remove(match)
+			currentmatch = match
 			break
 		else: # Match not found.
 			return
 		polyline = player.route.get_polyline()
 		(current, total, completed) = polyline.advance(player.position,
 													   (client_cmd.data['lat'], client_cmd.data['lng']))
-		player.position = current
-		player.completion = current/total
-		server_cmd = ServerCommand(ServerCommand.POSITION, {'completion': opponent.completion})
-		self.server_cmd_q[player.socket].put(server_cmd)
 		if completed:
-			self.server_cmd_q[player.socket].put(ServerCommand(ServerCommand.WINNER))
-			self.server_cmd_q[opponent.socket].put(ServerCommand(ServerCommand.LOSER))
-			self._update_player(player, opponent, 1)
-			self._update_player(opponent, player, 0)
-			competitive.models.Match(player.model, opponent.model).save
+			self._finish_match(player, opponent, currentmatch)
+		else:
+			if polyline.on_route((client_cmd.data['lat'], client_cmd.data['lng'])):
+				player.position = current
+				player.completion = current/total
+				server_cmd = ServerCommand(ServerCommand.POSITION, {'completion': opponent.completion})
+				self.server_cmd_q[player.socket].put(server_cmd)
+			else:
+				self._finish_match(opponent, player, currentmatch)
 
-	def _update_player(self, player, opponent, outcome):
+
+	def _finish_match(self, winner, loser, match):
+		self.matches.remove(match)
+		self.server_cmd_q[winner.socket].put(ServerCommand(ServerCommand.WINNER))
+		self.server_cmd_q[loser.socket].put(ServerCommand(ServerCommand.LOSER))
+		self._update_rating(winner, loser, 1)
+		self._update_rating(loser, winner, 0)
+		print(winner)
+		print(loser)
+		competitive.models.Match(winner=winner.id, loser=loser.id).save()
+
+	def _update_rating(self, player, opponent, outcome):
 		last_match = player.last_match
 		today = datetime.date.today()
 		days_since_last_match = (today-last_match).days if last_match is not None else 0
@@ -168,7 +182,11 @@ class ClientThread:
 				sent = self.socket.send(msg[totalsent:])
 			except socket.timeout:
 				return None
+			except:
+				return False
 			else:
+				if sent == 0:
+					return False
 				totalsent += sent
 		logging.info('Sent {0} bytes to {1}'.format(len(msg), self.address))
 		return True
@@ -180,6 +198,8 @@ class ClientThread:
 				chunk = self.socket.recv(n - len(data))
 			except socket.timeout:
 				return None
+			except:
+				return False
 			else:
 				if chunk == b'':
 					return False
