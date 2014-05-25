@@ -1,3 +1,4 @@
+import math
 import unittest
 
 from server.glicko import Glicko
@@ -6,6 +7,12 @@ class TestGlicko(unittest.TestCase):
 
     def setUp(self):
         self.glicko = Glicko(1)
+
+    def test_init(self):
+        self.assertEqual(self.glicko.max_rd, 350)
+        self.assertEqual(self.glicko.min_rd, 30)
+        self.assertEqual(self.glicko.c, 1)
+        self.assertEqual(self.glicko.q, math.log(10)/400)
 
     def test_update_player_win(self):
         actual = self.glicko.update_player(1500, 100, 1500, 100, 0, 1)
