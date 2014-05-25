@@ -44,7 +44,7 @@ A route's checkpoints represent the interval between each section of the route t
  \item The shortest \texttt{distance} found is the distance from the point to the route.
 \end{enumerate}
 
-When finding the distance between a line segment and a point, the method is as follows: Find out if the point is between the ends of the segments. If it is, project the point onto the line and take that distance. If it isn't, take the distance to the closest of the start and end points. This is illustrated in \autoref{fig:sprint3-linesegment}. This is not a new problem, and there were a lot of inspiration for efficient implementations of this to be found\cite{point2line1}\cite{point2line2}, and we ended up with the functions seen in \autoref{lst:sprint3-dist}.
+When finding the distance between a line segment and a point, the method is as follows: Find out if the point is between the ends of the segments. If it is, project the point onto the line and take that distance. If it isn't, take the distance to the closest of the start and end points. This is illustrated in \autoref{fig:sprint3-linesegment}. This is not a new problem, and there were a lot of inspiration for efficient implementations of this to be found\cite{point2line1}\cite{point2line2}, and we ended up with the functions seen in \autoref{lst:sprint3-dist}, a direct python implementation of referenced algorithms.
 
 \begin{figure}[ht]
  \centering
