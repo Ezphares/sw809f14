@@ -1,8 +1,11 @@
 \section{Communications Protocol}
+\label{sec:com_protocol}
 In order to facilitate communication between clients and the server a simple communications protocol was designed.
 This protocol defines the set of legal messages (referred to as commands in this section) that may be exchanged between a client and the server.
 
 The commands are encoded as JSON and share a common format.
+JSON was chosen because libraries for serializing and deserializing JSON are available for both Java and Python.
+
 Every command has a \texttt{cmd} field indicating the type of command and a \texttt{data} field containing the data needed to process the command.
 For some command types the \texttt{data} field may be \texttt{null} if no data is needed to process a command of that particular type.
 All commands sent from a client to the server also contain an \texttt{id} field containing a unique identifier for the user.
@@ -219,46 +222,26 @@ The server responds with the progress of the opponent as shown in Table \ref{tab
 	\label{tab:cmd_pos_server}
 \end{table}
 
-If the client has finished the selected route, then the server will respond with the command shown in Table \ref{tab:cmd_winner} to inform the client that it has won the match.
+When a winner has been determined the server will send the command shown in Table \ref{tab:cmd_winner} to both clients.
 
 \begin{table}[!ht]
 	\centering
 	\begin{tabular}{| r | p{0.7\textwidth} |}
 		\hline
-		\textbf{Description} & Informs the client that it has won the match. \\ \hline
+		\textbf{Description} & Informs the client of the result of the match. \\ \hline
 		\textbf{Direction} & Server $\rightarrow$ Client. \\ \hline
-		\textbf{Parameters} & None. \\ \hline
+		\textbf{Parameters} & \texttt{\$winner\_id} : The id of the winner. \\ \hline
 		\textbf{Format} &
 \begin{lstlisting}[language=Command]
 {
 	"cmd": "winner",
-	"data": null
+	"data": {
+		"result": $winner_id
+	}
 }
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
 	\caption{\texttt{winner} command.}
 	\label{tab:cmd_winner}
-\end{table}
-
-The other client (the loser) will receive the command shown in Table \ref{tab:cmd_loser}.
-
-\begin{table}[!ht]
-	\centering
-	\begin{tabular}{| r | p{0.7\textwidth} |}
-		\hline
-		\textbf{Description} & Informs the client that it has lost the match. \\ \hline
-		\textbf{Direction} & Server $\rightarrow$ Client. \\ \hline
-		\textbf{Parameters} & None. \\ \hline
-		\textbf{Format} &
-\begin{lstlisting}[language=Command]
-{
-	"cmd": "loser",
-	"data": null
-}
-\end{lstlisting}
-		\\ \hline
-	\end{tabular}
-	\caption{\texttt{loser} command.}
-	\label{tab:cmd_loser}
 \end{table}
