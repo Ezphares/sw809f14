@@ -16,14 +16,14 @@ The Elo rating system is a method for determining the relative skill levels of p
 It was created in the early 1960's by Arpad Elo, and modified versions of it are still in use today by the World Chess Federation (FIDE) and the United States Chess Federation (USCF), among others.
 
 The difference in ratings between two players is used to predict the outcome of a match.
-Suppose that player A has rating $R_A$ and player B has rating $R_B$, then the expected score for player A is calculated as shown in Equation \ref{eq:exp_score}.
+Suppose that player A has rating $R_A$ and player B has rating $R_B$, then the expected score for player A is calculated as shown in \autoref{eq:exp_score}.
 The expected score for player B is calculated as $E_B = 1 - E_A$.
 
 \begin{equation} \label{eq:exp_score}
 E_A = \frac{1}{1 + 10^\frac{R_B - R_A}{400}}
 \end{equation}
 
-The updated rating $R'_A$ for player A is given by Equation \ref{eq:update}, where $S_A$ is the actual score (1 = win, 0.5 = draw, 0 = loss), $E_A$ is the expected score for player A and $K$ is the K-factor.
+The updated rating $R'_A$ for player A is given by \autoref{eq:update}, where $S_A$ is the actual score (1 = win, 0.5 = draw, 0 = loss), $E_A$ is the expected score for player A and $K$ is the K-factor.
 The K-factor governs the volatility of changes to ratings.
 Often a high K-factor is used for new players where there is greater uncertainty about their true rating, and a low K-factor is used for experienced players.
 
@@ -32,7 +32,7 @@ R'_A = R_A + K \left( S_A - E_A \right)
 \end{equation}
 
 For example, suppose player A and player B both have ratings 1700 and player A defeats player B.
-The expected scores for both players are given by Equation \ref{eq:exp_score_ex}, and their updated ratings are given by Equations \ref{eq:update_ex_a} and \ref{eq:update_ex_b}, assuming a K-factor of 32.
+The expected scores for both players are given by \autoref{eq:exp_score_ex}, and their updated ratings are given by \autoref{eq:update_ex_a} and \autoref{eq:update_ex_b}, assuming a K-factor of 32.
 
 \begin{equation} \label{eq:exp_score_ex}
 E_A = E_B = \frac{1}{1 + 10^\frac{1700 - 1700}{400}} = 0.5
@@ -50,7 +50,7 @@ R'_B = 1700 + 32 \left( 0 - 0.5 \right) = 1684
 \label{sec:glicko}
 The Glicko rating system was created in 1995 by Mark E. Glickman to address a deficiency that he identified in the Elo rating system.
 
-Glickman uses the same example as the one given in Section \ref{sec:elo} to illustrate the problem \cite{glicko}.
+Glickman uses the same example as the one given in \autoref{sec:elo} to illustrate the problem~\citep{glicko}.
 Suppose that player A has not competed for a long period of time, and that player B competes frequently.
 This means that the rating of player A is less accurate than the rating of player B.
 He argues that:
@@ -71,7 +71,7 @@ The RD of a player is increased as time passes where the player does not compete
 RDs are increased at the beginning of each \emph{rating period}.
 A rating period is a time interval in which games are treated as though they occurred simultaneously.
 The length of a rating period ranges from several months to a game-by-game basis depending on the particular application, and is at the discretion of the administrator of the rating system.
-The formula for increasing the RD of a player is shown in Equation \ref{eq:increase_rd}, where $RD_{old}$ is the current RD of the player, $t$ is the number of rating periods since the player last competed, $c$ is a constant that controls the volatility of increase in RD over time and $RD_{max}$ is the maximum possible RD.
+The formula for increasing the RD of a player is shown in \autoref{eq:increase_rd}, where $RD_{old}$ is the current RD of the player, $t$ is the number of rating periods since the player last competed, $c$ is a constant that controls the volatility of increase in RD over time and $RD_{max}$ is the maximum possible RD.
 
 \begin{equation} \label{eq:increase_rd}
 RD = \min \left( \sqrt{RD_{old}^2 + c^2t}, RD_{max} \right)
@@ -79,15 +79,15 @@ RD = \min \left( \sqrt{RD_{old}^2 + c^2t}, RD_{max} \right)
 
 As can be seen, the constant $c$ determines the amount by which the RD should be increased when not competing.
 The value of $c$ depends on the application.
-Section \ref{sec:glicko_config} contains a discussion about choosing an appropriate value for $c$.
+\autoref{sec:glicko_config} contains a discussion about choosing an appropriate value for $c$.
 
 At the end of each rating period updated ratings and RDs are calculated for the players who competed during the rating period.
 The updated rating and RD of a player depend on the outcome of the match, the expected and the RD of both players.
-The formulas for updating ratings and RDs are not included here, but can be seen in the implementation of the Glicko rating system in Section \ref{sec:glicko_implementation} and in \cite{glicko}.
+The formulas for updating ratings and RDs are not included here, but can be seen in the implementation of the Glicko rating system in \autoref{sec:glicko_implementation} and in~\citep{glicko}.
 
 \subsection{Glicko vs. Elo}
-Returning to the example with player A and player B given in Section \ref{sec:elo} we saw that using the Elo rating system the updated ratings were 1716 and 1684, respectively.
-In the example given in Section \ref{sec:glicko} we assume that player A has not competed for a long period of time, and thus has a high RD, and that player B competes frequently, and thus has a low RD.
+Returning to the example with player A and player B given in \autoref{sec:elo} we saw that using the Elo rating system the updated ratings were 1716 and 1684, respectively.
+In the example given in \autoref{sec:glicko} we assume that player A has not competed for a long period of time, and thus has a high RD, and that player B competes frequently, and thus has a low RD.
 Using the Glicko rating system, and assuming that player A has an RD of 200 and player B has an RD of 50, the updated ratings are instead 1785 and 1694, respectively.
 This shows that the Glicko rating system has the desired effect in this case of increasing the rating of player A by a large amount while only decreasing the rating of player B by a small amount.
 This is a desirable trait of the Glicko rating system, which we would like the rating system for our project to have as well.
@@ -108,9 +108,9 @@ Glickman also recommends a minimum RD of 30 to ensure that the rating of a playe
 
 The rating period is set to one day, and matches will be scored on a game-by-game basis as soon as they are over.
 
-The value of $c$ was determined by using the method proposed in \cite{glicko}, which is to estimate how many ratings periods it would take for the rating of a typical player to become as uncertain as the rating of an unranked player.
+The value of $c$ was determined by using the method proposed in~\citep{glicko}, which is to estimate how many ratings periods it would take for the rating of a typical player to become as uncertain as the rating of an unranked player.
 These numbers cannot be determined in an exact manner, so we make an estimation that this would take approximately 365 rating periods (one year), and that the RD of a typical player is approximately 50.
-These numbers were then used to solve Equation \ref{eq:increase_rd} for $c$ giving a value of 18.1 as shown in Equation \ref{eq:c}.
+These numbers were then used to solve \autoref{eq:increase_rd} for $c$ giving a value of 18.1 as shown in \autoref{eq:c}.
 
 \begin{equation} \label{eq:c}
 c = \sqrt{\frac{RD^2_{max} - RD^2_{typical}}{t}} = \sqrt{\frac{350^2 - 50^2}{365}} = 18.1
@@ -118,8 +118,8 @@ c = \sqrt{\frac{RD^2_{max} - RD^2_{typical}}{t}} = \sqrt{\frac{350^2 - 50^2}{365
 
 \subsection{Implementation}
 \label{sec:glicko_implementation}
-The Glicko rating system is implemented as a single Python class as shown in Listing \ref{lst:glicko}.
-The implementation is straightforward as the methods correlate the formulas given in \cite{glicko}, including the method names.
+The Glicko rating system is implemented as a single Python class as shown in \autoref{lst:glicko}.
+The implementation is straightforward as the methods correlate to the formulas given in~\citep{glicko}, including the method names.
 This class is specifically designed to only handle updates on a game-by-game basis (as is the case for this project), in order to keep the code as simple as possible.
 
 \begin{code}[language={Python}, style={PythonDoc}, caption={The \texttt{Glicko} Class}, label={lst:glicko}]
