@@ -1,14 +1,14 @@
 \section{Rating System}
 The purpose of a rating system is to keep track of the relative skill levels of players.
-A rating system in its most basic form accomplishes this by representing the skill level of a player as a number of points, which is decreased when the player loses a match, and increased when the player wins a match.
-The exact number of points by which the rating is increased or decreased, and how often this is done etc. depends on the particular rating system.
+A rating system in its most basic form accomplishes this by representing the skill level of a player as a single number, which is decreased when the player loses a match, and increased when the player wins a match.
+The exact amount by which the rating is increased or decreased, and how often this is done etc. depends on the particular rating system.
 
 In order to automatically match users against each other we need a way to determine their relative skill levels.
 This is also needed in order to provide users with feedback on their personal progress, for example by creating leaderboards or by providing users with statistics about their increase or decrease in rating.
 
 A number of rating systems already exist, which are in use in different types of games such as sports, board games and video games.
-In this section some of the most well known rating systems will be analyzed.
-The rating system used in this project will also be described in terms of implementation and testing.
+In this section two of the most well known rating systems will be analyzed.
+The rating system used in this project will also be described in terms of its implementation and testing.
 
 \subsection{Elo}
 \label{sec:elo}
@@ -46,82 +46,126 @@ R'_A = 1700 + 32 \left( 1 - 0.5 \right) = 1716
 R'_B = 1700 + 32 \left( 0 - 0.5 \right) = 1684
 \end{equation}
 
-\subsection{Glicko and Glicko2}
+\subsection{Glicko}
 \label{sec:glicko}
-The Glicko rating system was created in 1995 by Mark E. Glickman to address a deficiency that he identified in the Elo rating system \cite{glicko}.
+The Glicko rating system was created in 1995 by Mark E. Glickman to address a deficiency that he identified in the Elo rating system.
 
-Glickman uses the same example as the one given in Section \ref{sec:elo} to illustrate the problem.
+Glickman uses the same example as the one given in Section \ref{sec:elo} to illustrate the problem \cite{glicko}.
 Suppose that player A has not competed for a long period of time, and that player B competes frequently.
 This means that the rating of player A is less accurate than the rating of player B.
 He argues that:
 
 \begin{itemize}
-	\item{The rating of player A should increase by more than 16 points because it is already not accurate, and defeating a player with a fairly accurate rating of 1700 is a reasonable indication that the true rating of player A is higher than 1700.}
-	\item{The rating of player B should decrease by less than 16 points because the rating of player B is already fairly accurate, and because the rating of player A is not accurate very little can be inferred about the skill level of player B.}
+	\item{The rating of player A should be increased by more than 16 points because it is already not accurate, and defeating a player with a fairly accurate rating of 1700 is a reasonable indication that the true rating of player A is much higher than 1700.}
+	\item{The rating of player B should be decreased by less than 16 points because the rating of player B is already fairly accurate, and because the rating of player A is not accurate very little can be inferred about the skill level of player B.}
 \end{itemize}
 
-To achieve this a \emph{ratings deviation} (RD) is introduced, which is a measure of the uncertainty of a rating.
+To achieve this, the skill level of a player in the Glicko rating system is defined not only by a rating as in the Elo rating system, but instead by a rating and a \emph{ratings deviation} (RD), which is a measure of the uncertainty of a rating.
 A high RD equates to a high uncertainty, and a low RD equates to a low uncertainty.
-The RD of a player is always decreased when the player competes, and increases as time passes.
+In the example above, player A would have a high RD and player B would have a low RD.
 
-The Glicko rating system treats games that occurred within the same \emph{rating period} as if they occurred simultaneously.
-The length of a rating period ranges from several months to a game-by-game basis depending on the particular application.
+The rating of a player is only changed when the player competes, but the RD of a player is changed both when the player competes and as time passes.
+The RD of a player is decreased every time the player competes, regardless of the outcome, as more is learned about the skill level of the player.
+The RD of a player is increased as time passes where the player does not compete, as the uncertainty about the rating of the player increases.
 
-Before determining the post-period rating and RD of a player, the pre-period RD of the player must first be updated.
-This is shown in Equation \ref{eq:pre_rd}, where $t$ is the number of rating periods since the player last competed, and $c$ is a constant that controls the volatility of increase in uncertainty over time.
+RDs are increased at the beginning of each \emph{rating period}.
+A rating period is a time interval in which games are treated as though they occurred simultaneously.
+The length of a rating period ranges from several months to a game-by-game basis depending on the particular application, and is at the discretion of the administrator of the rating system.
+The formula for increasing the RD of a player is shown in Equation \ref{eq:increase_rd}, where $RD_{old}$ is the current RD of the player, $t$ is the number of rating periods since the player last competed, $c$ is a constant that controls the volatility of increase in RD over time and $RD_{max}$ is the maximum possible RD.
 
-\begin{equation} \label{eq:pre_rd}
-RD = \min \left( \sqrt{RD_{old}^2 + c^2t}, 350 \right)
+\begin{equation} \label{eq:increase_rd}
+RD = \min \left( \sqrt{RD_{old}^2 + c^2t}, RD_{max} \right)
 \end{equation}
 
-The post-period rating of a player is given by Equation \ref{eq:post_rating} and the post-period RD is given by Equation \ref{eq:post_rd}.
+As can be seen, the constant $c$ determines the amount by which the RD should be increased when not competing.
+The value of $c$ depends on the application.
+Section \ref{sec:glicko_config} contains a discussion about choosing an appropriate value for $c$.
 
-\begin{equation} \label{eq:post_rating}
-r' = r + \frac{q}{\frac{1}{RD^2} + \frac{1}{d^2}} \sum \limits_{j=1}^m g \left( RD_j \right) \left( s_j - E \left( s | r, r_j, RD_j \right) \right)
-\end{equation}
+At the end of each rating period updated ratings and RDs are calculated for the players who competed during the rating period.
+The updated rating and RD of a player depend on the outcome of the match, the expected and the RD of both players.
+The formulas for updating ratings and RDs are not included here, but can be seen in the implementation of the Glicko rating system in Section \ref{sec:glicko_implementation} and in \cite{glicko}.
 
-\begin{equation} \label{eq:post_rd}
-RD' = \sqrt{\left( \frac{1}{RD^2} + \frac{1}{d^2} \right)^{-1}}
-\end{equation}
+\subsection{Glicko vs. Elo}
+Returning to the example with player A and player B given in Section \ref{sec:elo} we saw that using the Elo rating system the updated ratings were 1716 and 1684, respectively.
+In the example given in Section \ref{sec:glicko} we assume that player A has not competed for a long period of time, and thus has a high RD, and that player B competes frequently, and thus has a low RD.
+Using the Glicko rating system, and assuming that player A has an RD of 200 and player B has an RD of 50, the updated ratings are instead 1785 and 1694, respectively.
+This shows that the Glicko rating system has the desired effect in this case of increasing the rating of player A by a large amount while only decreasing the rating of player B by a small amount.
+This is a desirable trait of the Glicko rating system, which we would like the rating system for our project to have as well.
 
-The value of q is $\frac{ln \left( 10 \right)}{400} = 0.0057565$ and the other variables are given by Equations \ref{eq:glicko_g}, \ref{eq:glicko_e} and \ref{eq:glicko_d2}.
+Another problem with the Elo rating system is that a highly rated player can ``protect'' their rating by not competing.
+The Elo rating system can be modified to prevent this, but in the Glicko rating system this is already taken care of as the RD of an inactive player will increase over time.
 
-\begin{equation} \label{eq:glicko_g}
-g \left( RD \right) = \frac{1}{\sqrt{1 + \frac{3 q^2 RD^2}{\pi^2}}}
-\end{equation}
+For these two reasons we have chosen the Glicko rating system as the rating system for this project. 
 
-\begin{equation} \label{eq:glicko_e}
-E \left( s | r, r_j, RD_j \right) = \frac{1}{1 + 10^{\frac{-g \left( RD_j \right) \left( r - r_j \right)}{400}}}
-\end{equation}
+\subsection{Configuration}
+\label{sec:glicko_config}
+Before the Glicko rating system can be used there a number of parameters which must be determined.
 
-\begin{equation} \label{eq:glicko_d2}
-d^2 = \left( q^2 \sum \limits_{j=1}^m g \left( RD_j \right)^2 E \left( s | r, r_j, RD_j \right) \left( 1 - E \left( s | r, r_j, RD_j \right) \right) \right)^{-1}
-\end{equation}
+Unranked players must be assigned a default rating and RD.
+Glickman recommends that the default rating is set to 1500 and that the default RD is set to 350, and therefore we will also use these values.
+The default RD for unranked players is also the maximum RD as the rating of a player can never be more uncertain than that of an unranked player.
+Glickman also recommends a minimum RD of 30 to ensure that the rating of a player can always change appreciably, which we will also use.
 
-In the example given in Section \ref{sec:elo} the rating of player A was 1716 and the rating of player B was 1684.
-Using the Glicko rating system instead, and assuming that player A has an RD of 200 and player B has an RD of 50, the post-period rating of player A is 1785 and the post-period rating of player B is 1694.
-This shows that the Glicko rating system has the desired effect of increasing the rating of player A by a large amount while only decreasing the rating of player B by a small amount.
-
-Glickman has also proposed an extension to the original Glicko rating system called the Glicko 2 rating system \cite{glicko2}.
-In the Glicko 2 rating system every player still has a rating and an RD, but also a rating volatility $\sigma$.
-The rating volatility for a player is high when the player performs erratically and low when the player performs at a consistent level.
-The Glicko 2 rating system is most suitable for games with extremely unpredictable outcomes.
-
-\subsection{Implementation}
-For our application we use the original Glicko rating system, in order to benefit from the mentioned improvements it provides over the Elo rating system.
-The Glicko rating system is preferred over the Glicko 2 rating system as we do not expect the games to have extremely unpredictable outcomes.
-
-The default rating for new players is set to 1500 with an RD of 350, as these are the values recommended by Glickman.
-The minimum RD is set to 30 to ensure that the rating of a player can always change appreciably.
 The rating period is set to one day, and matches will be scored on a game-by-game basis as soon as they are over.
 
-The value of the constant $c$ is set to 18.1.
-This was determined by using the method proposed by Glickman \cite{glicko}, which is to determine how many ratings periods it would take for the rating of a typical player to become as uncertain as the rating of an unranked player.
+The value of $c$ was determined by using the method proposed in \cite{glicko}, which is to estimate how many ratings periods it would take for the rating of a typical player to become as uncertain as the rating of an unranked player.
 These numbers cannot be determined in an exact manner, so we make an estimation that this would take approximately 365 rating periods (one year), and that the RD of a typical player is approximately 50.
-These numbers were then used to solve Equation \ref{eq:pre_rd} for $c$.
+These numbers were then used to solve Equation \ref{eq:increase_rd} for $c$ giving a value of 18.1 as shown in Equation \ref{eq:c}.
 
-The Glicko rating system is implemented as a single Python class.
-The implementation is straightforward as it only contains the six equations shown in Section \ref{sec:glicko}.
+\begin{equation} \label{eq:c}
+c = \sqrt{\frac{RD^2_{max} - RD^2_{typical}}{t}} = \sqrt{\frac{350^2 - 50^2}{365}} = 18.1
+\end{equation}
+
+\subsection{Implementation}
+\label{sec:glicko_implementation}
+The Glicko rating system is implemented as a single Python class as shown in Listing \ref{lst:glicko}.
+The implementation is straightforward as the methods correlate the formulas given in \cite{glicko}, including the method names.
+This class is specifically designed to only handle updates on a game-by-game basis (as is the case for this project), in order to keep the code as simple as possible.
+
+\begin{code}[language={Python}, style={PythonDoc}, caption={The \texttt{Glicko} Class}, label={lst:glicko}]
+class Glicko:
+
+	"""
+	max_rd - The default RD assigned to unranked players (default 350).
+	min_rd - The lowest possible RD of a player (default 30).
+	c - Constant which governs the increase in uncertainty over time.
+	"""
+
+	def __init__(self, c, max_rd=350, min_rd=30):
+		self.c = c
+		self.max_rd = max_rd
+		self.min_rd = min_rd
+		self.q = math.log(10)/400
+
+	def _g(self, rd):
+		return 1/math.sqrt(1 + 3*self.q**2 * rd**2/math.pi**2)
+
+	def _E(self, r, r_opp, rd_opp):
+		return 1/(1 + 10**(-self._g(rd_opp)*(r-r_opp)/400))
+
+	def _d_squared(self, r, r_opp, rd_opp):
+		temp_E = self._E(r, r_opp, rd_opp)
+		return 1/(self.q**2 * self._g(rd_opp)**2 * temp_E*(1-temp_E))
+
+	def _update_rd(self, rd_old, t):
+		return min(math.sqrt(rd_old**2 + self.c**2*t), self.max_rd)
+
+	def update_player(self, r, rd, r_opp, rd_opp, t, outcome):
+		"""Return the updated rating and RD of a player."""
+		rd = self._update_rd(rd, t)
+		temp_d = self._d_squared(r, r_opp, rd_opp)
+
+		r_new = r + self.q/(1/rd**2 + 1/temp_d) * self._g(rd_opp) *
+			(outcome-self._E(r, r_opp, rd_opp))
+		rd_new = math.sqrt(1 / (1/rd**2 + 1/temp_d))
+
+		return (int(r_new), max(int(rd_new), self.min_rd))
+\end{code}
+
+The main interest is the method \texttt{update\_player} which calculates the updated rating and RD of a player and returns them as a tuple.
+Its parameters are the rating and RD of the player, the rating and RD of the opponent, the number of rating periods since the player last competed and the outcome.
+The outcome can be either 1, 0.5 or 0 indicating a win, draw or loss, respectively.
+All the other methods are auxiliary (by convention, a leading underscore indicates a private method in Python).
 
 \subsection{Testing}
 Every method in the \texttt{Glicko} class has been unit tested.
