@@ -24,12 +24,14 @@
             android:layout_gravity="center"
             android:orientation="vertical"
             android:paddingBottom="15dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
             android:paddingTop="15dp"
             android:showDividers="none" >
 
             <Button
                 android:id="@+id/button_runOptions"
-                style="?android:attr/buttonStyleSmall"
+                style="android:buttonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_weight="0.15"
@@ -39,7 +41,7 @@
 
             <Button
                 android:id="@+id/button_scoreboard"
-                style="?android:attr/buttonStyleSmall"
+                style="android:buttonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="25dp"
@@ -48,7 +50,7 @@
 
             <Button
                 android:id="@+id/button_profile"
-                style="?android:attr/buttonStyleSmall"
+                style="android:buttonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="25dp"
@@ -57,7 +59,7 @@
 
             <Button
                 android:id="@+id/button_routes"
-                style="?android:attr/buttonStyleSmall"
+                style="android:buttonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="25dp"
