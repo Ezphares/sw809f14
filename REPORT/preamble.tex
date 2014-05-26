@@ -1,75 +1,64 @@
-% Define document class. Important.
-\documentclass[a4paper,twoside,openright]{report}
+% Default options: \documentclass[10pt,letterpaper,twoside,onecolumn,openright,final]{memoir}
+\documentclass[12pt,a4paper]{memoir}
 
-\newcommand{\p}{\\ \vspace{2pt} \\}
-
-\usepackage{pbox}
-\usepackage{pdfpages}
-\usepackage{acronym}
-% Margener
-%\setlength{\evensidemargin}{1cm}
-%\setlength{\oddsidemargin}{1cm}
-
-\usepackage[utf8x]{inputenc}
-% Load up bibliography.
+\usepackage[utf8]{inputenc}
 \usepackage[authoryear]{natbib}
-\setcitestyle{numbers,square}
-% Bibliography style.
-\bibliographystyle{plainnat}
+\usepackage{hyperref}
+\usepackage{acronym}
+\usepackage[disable]{todonotes}
+\usepackage{pbox}
+\usepackage{enumitem}
+\usepackage{lastpage}
 
-% Algorithm support.
-\usepackage{algorithmic}
-\usepackage{algorithm2e}
-\usepackage{subfig}
+% Math.
+\usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 
-% Also, images.
+% Figures and floats.
 \usepackage{graphicx}
-\usepackage{pdfpages}
-\usepackage{changepage}
-
-% tabeller der strækker sig over flere sider
-\usepackage{longtable}
-
-% flere tabel-muligheder
-\usepackage{multirow}
-
-% bedre enumerate
-\usepackage{enumitem}
-
-% Todo notes here and there.
-% write instead for disable: \usepackage[disable]{todonotes}
-\usepackage{todonotes}
-
-% Forbedrede floats.
 \usepackage{float}
 \usepackage{rotating}
-
-% Special symbols availability.
-\usepackage{amssymb}
-
-\usepackage{textcomp}
+\usepackage{subfig}
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows}
 
-% CODE %
-\usepackage{bookmark,hyperref}
-\usepackage{nameref}
+% Tables.
+\usepackage{longtable}
+\usepackage{multirow}
 
-\pagenumbering{arabic} % Ensure page numbering in our desired form.
+% Front and title page.
+\usepackage{frontpage}
+\usepackage{titlepage}
 
-% Sørg for at paragrafplads ikke spildes.
+\bibliographystyle{plainnat}
+\setcitestyle{numbers,square}
+
 \raggedbottom
-\usepackage[titletoc]{appendix}
+\checkandfixthelayout[nearest]
 
-% Opsætning af autoref%
+% Autoref configuration.
 \def\figureautorefname{Figure}
 \def\tableautorefname{Table}
 \def\chapterautorefname{Chapter}
 \def\sectionautorefname{Section}
 \def\subsectionautorefname{Subsection}
 \def\appendixautorefname{Appendix}
+
+% Change standard headers and footers.
+\makeoddhead{headings}{}{}{\small\rightmark}
+\makeevenhead{headings}{\small\leftmark}{}{}
+\makeoddfoot{headings}{}{}{\small\thepage}
+\makeevenfoot{headings}{\small\thepage}{}{}
+\makeheadrule{headings}{\textwidth}{\normalrulethickness}
+\makefootrule{headings}{\textwidth}{\normalrulethickness}{\footruleskip}
+
+\newcommand{\blankpage}{
+\newpage
+\thispagestyle{empty}
+\mbox{}
+\newpage
+}
 
 % Listings.
 \usepackage{listings}
