@@ -1,0 +1,27 @@
+% Creates a horizontal rule.
+% Replaces the standard \rule{width}{height} with one that always uses \linewidth as width.
+% E.g. \HRule{0.5pt} creates a new horizontal rule with width = \linewidth and height = 0.5pt.
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+
+% Removes two-sided margins.
+\setlrmargins{*}{*}{1}
+\checkandfixthelayout
+
+% Prints the front page.
+\newcommand{\makefrontpage}{
+	\thispagestyle{empty}
+	\begin{center}
+		\HRule{0.5pt} \\ [0.35cm]
+		\huge \textbf{\maintitle} \\ [0.35cm]
+		\large - \subtitle \\
+		\HRule{2pt} \\ [0.5cm]
+		\normalsize \finished \\ [5cm]
+		\large \textbf{\projectgroup} \\
+		\rule{6cm}{1pt} \\ [0.5cm]
+		\authors
+		\vfill
+		\normalsize \institution \\
+		\department \\
+		\subdepartment
+	\end{center}
+}
