@@ -26,6 +26,8 @@ In this we have declared that if the distance of the device a new update is made
 A \texttt{LocationManager} is initiated in the class, and it is this which retrieves the location from the \ac{GPS} device in the device. The \texttt{LocationManager} can have multiple different providers such as \ac{GPS} and Network.
 If \ac{GPS} connection is available and ready for use the user can request the Latitude and/or Longitude of the device, but using the \texttt{getLatitude}, and \texttt{getLongitude} respectively.
 
+This implementation relies heavily on a tutorial from AndroidHive by Ravi Tamada \citep{androidhive}.
+
 \subsection{Testing}
 The \texttt{GPSTracker} class has not been unit tested because this would require writing a whole new application to provide mock locations for the user. Instead the class outputs the coordinates it retrieves to a log so the person debugging can verify that it does indeed work. User tests were performed as well to ensure that the marker was placed correctly on the map.
 

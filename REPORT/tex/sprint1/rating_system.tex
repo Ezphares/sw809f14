@@ -12,12 +12,12 @@ The rating system used in this project will also be described in terms of its im
 
 \subsection{Elo}
 \label{sec:elo}
-The Elo rating system is a method for determining the relative skill levels of players in two-player games.
+The Elo rating system is a method for determining the relative skill levels of players in two-player games~\citep{elo}.
 It was created in the early 1960's by Arpad Elo, and modified versions of it are still in use today by the World Chess Federation (FIDE) and the United States Chess Federation (USCF), among others.
 
 The difference in ratings between two players is used to predict the outcome of a match.
-Suppose that player A has rating $R_A$ and player B has rating $R_B$, then the expected score for player A is calculated as shown in \autoref{eq:exp_score}.
-The expected score for player B is calculated as $E_B = 1 - E_A$.
+Suppose that player A has rating $R_A$ and player B has rating $R_B$, then the probability of player A winning is calculated as shown in \autoref{eq:exp_score}.
+The probability of player B winning is calculated as $E_B = 1 - E_A$.
 
 \begin{equation} \label{eq:exp_score}
 E_A = \frac{1}{1 + 10^\frac{R_B - R_A}{400}}
