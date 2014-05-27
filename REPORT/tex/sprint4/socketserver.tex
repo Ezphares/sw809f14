@@ -117,7 +117,7 @@ class ServerCommand:
 		return json.dumps(self.__dict__)
 \end{code}
 
-For example, \autoref{lst:sendcmd} shows how to create, serialize and send the command used for informing a client of the progress of its opponent (see Table \vref{tab:cmd_pos_server}).
+For example, \autoref{lst:sendcmd} shows how to create, serialize and send the command used for informing a client of the progress of its opponent.
 
 \begin{code}[language={Python}, caption={Creating and Sending a Command}, label={lst:sendcmd}]
 cmd = ServerCommand(ServerCommand.POSITION, {'completion': 0.42})
