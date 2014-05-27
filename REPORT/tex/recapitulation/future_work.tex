@@ -1,31 +1,30 @@
-\section{Future work}
-This project this has room for improvement, and here we will try to give some ideas of which features could be implemented as future work of the project, and what is currently missing to make the application more stable.
+\section{Future Work}
+This is a proof-of-concept and in this section we will try to give some ideas of which features could be implemented as future work on the project.
 
-\subsection{Difficulty score}
-When a user has plotted a route on the website, a score for the given route can be calculated, this will improve matchmaking and make the competition more fair.
-A score for a given route will have to take into account, the length and topography of the route. A formula for calculating the score, could be anything from a simple formula describing that running uphill is easier than running on a level road. A more detailed route score could also be implemented, where information about which type of road the runner is on would also be taken into account.
+\subsection{Difficulty Score}
+When a user has entered a route on the website, a difficulty score for the given route can be calculated, which will improve matchmaking and make the competition more fair.
+A score for a given route will have to take into account the length and topography of the route. A formula for calculating the score could be anything from a simple formula describing that running uphill is harder than running on a level road. A more detailed route score could also be implemented, where information about which type of surface the runner is running on would also be taken into account.
 
-\subsection{Ranking List}
-A ranking list can be implemented in the app, to give a more competitive feel. This ranking list would be able to show the users current ranking between friends. Other views of this list could be to show where in the global ranking list the user was placed, and the top $50$ runners world wide. This feature is implemented on the website, but should also be implemented in the app.
+\subsection{Leaderboard}
+A leaderboard can be implemented in the application to add to the competitive aspect of the project. This leaderboard would be able to show the user's current ranking in the world. Other views of this list could be to show where between friends the user was placed, and the top $50$ runners world wide. Users already have a rating but the leaderboards are not yet implemented.
 
-\subsection{Server Security}
-The matchmaking server as implemented right now, is lacking some security. One of the things which could be implemented is that when the user queues right now, the user id is sent to the server, and no login is required.
+\subsection{Match Server Security}
+The match server as implemented right now, is lacking some security. One of the things which could be improved is that general communication between the mobile client and the server does not include login-credentials so a user could easily impersonate someone else.
 
-\subsection{Reconnect features}
-Losing internet connectivity while running can be an issue when using our application. The issue is that if the user lose connectivity, issues can arise when trying to send the GPS coordinate to the matchmaking server. This can be improved by implementing a queue system, where coordinates will be queued if there is no connectivity, and then when connectivity is back the queue will be sent.
-This will ensure that every package gets sent, but it can create some confusion for the opponent as his opponent will seem to advance very quickly if he sends a bulk of coordinates.
+\subsection{Reconnect Features}
+Losing Internet connectivity while running is an issue when using our application. The issue is that if the user loses connectivity the socket connection is closed and the user is effectively no longer in a race. This can be improved by implementing a re-connection feature which would allow the server to re-insert a user into a match in progress as well as some changes to the communications protocol.
 
 \subsection{Accelerometer}
-As this is a competitive application anti-cheat measures should be taken, this could include, but not limited to, utilizing the accelerometer. The accelerometer can be used to measure the speed of the runner, calculating the type of transportation used, such as detecting if a user is running,walking or biking. This would also be able to extend our platform to include other types of sporting than running.
+As this is a competitive application anti-cheat measures should be taken. For example, utilizing the accelerometer. The accelerometer can be used to measure the gait of the user which can help in identifying if the user is running, walking or standing still. The accelerometer can also detect if a user is biking or riding a car. This would enable us to extend our platform to include other types of sports than running.
 
-\subsection{Social features}
-The app is build with a competitive mindset, but social features could be implemented to increase the user group.
-This could adding friends who also uses the app, and being able to run against them live, or against a ghost of them.
-Social networking features could also be implemented, namely Facebook, where an app could be build for the social platform, and the user can add his/her Facebook friends as in-app friends.
+\subsection{Social Features}
+The application is built with a competitive mindset, but social features could be implemented to increase the possible audience.
+This could include adding friends who also use the application, and being able to run against them live, or against a ghost, i.e. a log of one of their previous runs.
+Social networking features could also be implemented by adding Facebook integration.
 This will increase the applications user group to not only include competitive users.
 
-\subsection{Fluid opponent position}
-When running against an opponent the runner can see the opponents position relative to his own route, but the implementation of this right now is only done using waypoints on the route. This gives a twisted idea of where the opponent is, and should be implemented so the opponent can be anywhere on the route, and not just at waypoints. Functions for calculating where the opponents location are already implemented, but needs to be reworked to make the position more fluid along the route.
+\subsection{Smooth Opponent Advancement}
+When running against an opponent the runner can see the opponent's position relative to their own route, but the implementation of this right now is only done using the checkpoints on the route. This creates an imprecise perception of the opponent's location, and should be implemented so the opponent's marker can be anywhere on the route, and not just at checkpoints. Functions for calculating where the opponent is located are already implemented, but need to be combined in a new way to make the positioning more fluid along the route.
 
-\subsection{Ranking scalability}
-The ranking system implemented works for the tests we have conducted, but when the number of active users increases this can show to be a limitation. The Gliko system, should still be fine to use, but some improvements would need to be made to the underlying database layer. This could be partitioning the database into queued users depending on their ranking.
+\subsubsection{Additional Feedback Options}
+During a race it is rarely practical to have to look at a screen to determine where your opponent is. For this reason it would be very beneficial to implement support for other feedback options such as the DASH in-ear computer. The feedback could be audio-oriented with the DASH or the smartphone could employ tactile feedback. The options for additional feedback during a race should definitely be explored in future prototypes. 

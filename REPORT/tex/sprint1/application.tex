@@ -66,7 +66,7 @@ The \texttt{MainActivity} class is implemented with an \texttt{onCreate} functio
 
 The \texttt{HttpHandler} class has 4 functions: 
 \begin{itemize}
-	\item{\texttt{is\_reachable} which asserts if the server is reachable and returns a boolean value signifying if it is or not. It instantiates a new socket and attempts to connect via it to the IP and port of the server for up to 15 seconds, closes the socket and returns the result.}
+	\item{\texttt{is\_reachable} which asserts if the server is reachable and returns a boolean value signifying if it is or not. It instantiates a new socket and attempts to connect via it to the \ac{IP} and port of the server for up to 15 seconds, closes the socket and returns the result.}
 	\item{\texttt{http\_request} is a generic \ac{HTTP} request function returning a custom \texttt{ResponseData} object consisting of a status code as an integer and a response body, which is stored in a string.}
 	\item{\texttt{login\_request} is a function taking a username and a password as parameters and returning a boolean signifying if the login was successful or not. The response from the server is a \ac{JSON} object with the following structure: \texttt{\{"status": "OK", "id": 1\}}. This response is checked to see that the message body contains the status \texttt{"OK"} which means the login was successful.}
 	\item{\texttt{route\_request} takes no parameters and returns a \texttt{JSONArray} with the routes the user has saved online. It sends a \texttt{GET} request using \texttt{http\_request}. If the response status code is 200 and the status is OK, the array of routes in the \texttt{ResponseData} object is saved in the returned \texttt{JSONArray}.}

@@ -45,7 +45,7 @@ The route planner needs a database to store the routes for each user. The databa
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[scale=0.5]{img/sprint1db.png}
-	\caption{Sprint 1 Database Model}
+	\caption{Database Model}
 	\label{fig:sprint1-db-model}
 \end{figure}
 
@@ -72,7 +72,7 @@ Apart from inheritance, conditional logic was used in the templates to decide wh
 
 In this sprint, the server logic was kept quite simple, so validation features, such as having the server calculate the distance of a user's routes, were not implemented. At this point the server simply trusts that the client does not try to submit forged information.
 
-\subsection{Client Implementation}
+\subsection{Web Client Implementation}
 
 The primary feature of the client was the route planner. This was implemented as a JavaScript class and makes use of the Google Maps \ac{API}~\citep{gmapsapi}. The \texttt{Planner} class is initialized with a constructor taking five arguments. Three of these should be IDs of \ac{HTML} elements which will be used to contain the map, the map options and the route information respectively. Using parameters for this allows programmers to change the layout of the route editor simply by editing the \ac{HTML} instead of the class, and keeps design and logic separate. The last two parameters for the constructor of the \texttt{Planner} are the dimensions of the map, and an optional route (encoded as \ac{JSON}) to load on the map initially.
 
@@ -124,7 +124,7 @@ var route_options = {'origin': origin,
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[width=\textwidth]{img/sprint1webflow.png}
-	\caption{Sprint 1 Planner Flowchart}
+	\caption{Planner Flowchart}
 	\label{fig:sprint1-web-flow}
 \end{figure}
 
@@ -133,7 +133,7 @@ All in all, most of the functionality revolves around sending and retrieving dat
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[width=\textwidth]{img/webplanner1.png}
-	\caption{Sprint 1 Webpage}
+	\caption{Webpage}
 	\label{fig:sprint1-web-screen}
 \end{figure}
 

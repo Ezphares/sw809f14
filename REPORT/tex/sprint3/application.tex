@@ -1,35 +1,34 @@
 \section{RunOff Application}
 For this sprint the focus was on getting \ac{GPS} tracking of the user's location. This is a crucial part of the application as the user has to be able to track themselves when running and broadcast this information to the server.
 
-The \ac{GUI} for the application was also redesigned to provide a more polished look than the basic Android \ac{GUI} and the Main Screen was configured to prompt the user with a login form when starting the application to get rid of hard-coded user-information.
+The \ac{GUI} for the application was also redesigned to provide a more polished look than the basic Android \ac{GUI} and the Main Screen was configured to prompt the user with a login form when starting the application to get rid of hard-coded user-credentials.
 
-\subsection{GPS location}
-\ac{GPS} uses a number of satellites to determine the users location.
-The basics behind the technology is that the device needs to have access to at least three satellites, then the unit can send a time stamp, and the delay from the response of each satellite can then be computed using trilateration to get a location of the device.
-Another way of determining the location of the device is using network based location. This is done by using information from the network the user is connected to.
+\subsection{GPS Location}
+\ac{GPS} uses a number of satellites to determine the user's location.
+The principle behind the technology is that the device needs to have access to at least three satellites, then the device sends a timestamp, and the delay of the response of each satellite can then be to used to compute the location of the device using trilateration.
 
 \subsubsection{Android Providers}
-The Android \ac{API}'s contain multiple providers, which can be used. The one we are using for location is the Location Service, \ac{GPS} Provider, and Network Provider. These will give us access to the device location and status.
+The Android \ac{API}'s contain multiple providers, which can be used. The one we are using for location is the Location Service and \ac{GPS} Provider. These will give us access to the device location and status.
 
 \subsubsection{Android Location}
 The Android framework supplies an \ac{API} for working with location.
-The developer is presented with a few different options of how to work with location, and the one we choose was to work make a service, with a \texttt{LocationManager}.
+The developer is presented with a few different options on how to work with location and the one we chose was to make a service with a \texttt{LocationManager}.
 
 The \texttt{LocationManager} provides all the default functionality of working with locations in Android, such as, checking the state of the \ac{GPS} connection to see if any satellites are available, and requesting location updates at a time interval or location difference threshold.
 
-The program is built as a service, so it runs in the background without blocking the UI thread, and also being able to run if the device-screen gets turned off.
+The location tracker is implemented as a service, so it runs in the background without blocking the \ac{UI} thread.
 
 \subsubsection{Implementation}
-For the implementation a custom class is made, \texttt{GPSTracker}, which extends Service, and implements \texttt{LocationManager}.
-In this we have declared that if the distance of the device a new update is made each 10 meters. An update is also made at least every minute.
+For the implementation a custom class was made, \texttt{GPSTracker}, which extends \texttt{Service}, and implements \texttt{LocationManager}.
+In this class it is declared that if the distance of the device changes by 10 metres or a device specific timer interval passes an update is made.
 
-A \texttt{LocationManager} is initiated in the class, and it is this which retrieves the location from the \ac{GPS} device in the device. The \texttt{LocationManager} can have multiple different providers such as \ac{GPS} and Network.
-If \ac{GPS} connection is available and ready for use the user can request the Latitude and/or Longitude of the device, but using the \texttt{getLatitude}, and \texttt{getLongitude} respectively.
+A \texttt{LocationManager} is initiated in the class, and it is this manager which retrieves the location from the \ac{GPS} device on the smartphone. The \texttt{LocationManager} can have multiple different providers such as \ac{GPS} and Network.
+If a \ac{GPS} connection is available and ready for use the user can request the latitude and longitude of the device by using the \texttt{getLatitude}, and \texttt{getLongitude} methods, respectively.
 
 This implementation relies heavily on a tutorial from AndroidHive by Ravi Tamada \citep{androidhive}.
 
 \subsection{Testing}
-The \texttt{GPSTracker} class has not been unit tested because this would require writing a whole new application to provide mock locations for the user. Instead the class outputs the coordinates it retrieves to a log so the person debugging can verify that it does indeed work. User tests were performed as well to ensure that the marker was placed correctly on the map.
+The \texttt{GPSTracker} class has not been unit tested because this would require writing a whole new application to provide mock locations for the device. Instead the class outputs the coordinates it retrieves to a log so the person debugging can verify that it does indeed work. User tests were performed as well to ensure that the position marker on the map was placed correctly.
 
 Seeing as this class was not unit tested it means the code coverage drops. The coverage can be seen in \autoref{tab:emma3}.
 
@@ -38,7 +37,7 @@ Seeing as this class was not unit tested it means the code coverage drops. The c
 	\begin{tabular}{| c | c | c | c |}
 		\hline
 		\textbf{Class} & \textbf{Method} & \textbf{Block} & \textbf{Line} \\ \hline
-		69 \% (18/26) & 50 \% (63/126) & 47 \% (907/1930) & 54 \% (254/464) \\
+		69\% (18/26) & 50\% (63/126) & 47\% (907/1930) & 54\% (254/464) \\
 		\hline
 	\end{tabular}
 	\caption{EMMA Coverage Results}

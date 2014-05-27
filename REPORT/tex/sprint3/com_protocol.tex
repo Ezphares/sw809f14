@@ -1,22 +1,22 @@
 \section{Communications Protocol}
 \label{sec:com_protocol}
-In order to facilitate communication between clients and the server a simple communications protocol was designed.
-This protocol defines the set of legal messages (referred to as commands in this section) that may be exchanged between a client and the server.
+In order to facilitate communication between mobile clients and the match server a simple communications protocol was designed.
+This protocol defines the set of legal messages (referred to as commands in this section) that may be exchanged between the client and the server.
 
-The commands are encoded as JSON and share a common format.
-JSON was chosen because libraries for serializing and deserializing JSON are available for both Java and Python.
+The commands are encoded as \ac{JSON} and share a common format.
+\ac{JSON} was chosen because libraries for serializing and deserializing \ac{JSON} are available for both Java and Python.
 
 Every command has a \texttt{cmd} field indicating the type of command and a \texttt{data} field containing the data needed to process the command.
 For some command types the \texttt{data} field may be \texttt{null} if no data is needed to process a command of that particular type.
-All commands sent from a client to the server also contain an \texttt{id} field containing a unique identifier for the user.
+All commands sent from a client to the server also contain an \texttt{id} field with a unique identifier for the user.
 
 All commands are prefixed with two bytes in network byte order (big endian) indicating the length of the command.
 Using this approach enables the receiving end to read a single command from the network buffer without accidentally reading into the beginning of the following command.
-This is necessary because the communication protocol allows an endpoint to send multiple commands back-to-back without needing a reply in between.
+This is necessary because \ac{TCP}, which is the transport protocol, allows an endpoint to send multiple commands back-to-back without needing a reply in between.
 
 \subsection{Commands}
-In this section the different types of commands exchanged between the clients and the server will be described.
-Parameters are prefixed with a dollar sign in the descriptions.
+In this section the different types of commands exchanged between the mobile clients and the server will be described.
+Parameters are prefixed with a \texttt{\$} in the descriptions.
 
 \subsubsection{Matchmaking Commands}
 In order for a client to be matched against a suitable opponent it must first enter the matchmaking queue by sending the command shown in \autoref{tab:cmd_queue}.
@@ -44,7 +44,7 @@ In order for a client to be matched against a suitable opponent it must first en
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{\texttt{queue} command.}
+	\caption{The \texttt{queue} Command}
 	\label{tab:cmd_queue}
 \end{table}
 
@@ -67,11 +67,11 @@ If the client wants to be removed from the matchmaking queue the command shown i
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{\texttt{cancel} command.}
+	\caption{The \texttt{cancel} Command}
 	\label{tab:cmd_cancel}
 \end{table}
 
-When the server has found a suitable opponent it responds by sending the command shown in \autoref{tab:cmd_found} to both clients:
+When the server has found a suitable opponent it responds by sending the command shown in \autoref{tab:cmd_found} to both clients.
 
 \begin{table}[!ht]
 	\centering
@@ -89,11 +89,11 @@ When the server has found a suitable opponent it responds by sending the command
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{\texttt{found} command.}
+	\caption{The \texttt{found} Command}
 	\label{tab:cmd_found}
 \end{table}
 
-Both clients must reply with the command shown in \autoref{tab:cmd_accept} in order for the match to begin:
+Both clients must reply with the command shown in \autoref{tab:cmd_accept} in order for the match to begin.
 
 \begin{table}[!ht]
 	\centering
@@ -112,18 +112,18 @@ Both clients must reply with the command shown in \autoref{tab:cmd_accept} in or
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{\texttt{accept} command.}
+	\caption{The \texttt{accept} Command}
 	\label{tab:cmd_accept}
 \end{table}
 
-If both clients have not accepted within 20 seconds the match will be canceled and both clients will be removed from the matchmaking queue.
-If both clients accept within the time limit, then the server will send the command shown in \autoref{tab:cmd_start} to both clients to inform them that the match has started:
+If both clients have not accepted within 20 seconds the match will be cancelled and both clients will be removed from the matchmaking queue.
+If both clients accept within the time limit the server will send the command shown in \autoref{tab:cmd_start} to both clients to inform them that the match will start in 10 seconds.
 
 \begin{table}[!ht]
 	\centering
 	\begin{tabular}{| r | p{0.7\textwidth} |}
 		\hline
-		\textbf{Description} & Informs the client that the match has started. \\ \hline
+		\textbf{Description} & Informs the client that the match starts in 10 seconds. \\ \hline
 		\textbf{Direction} & Server $\rightarrow$ Client. \\ \hline
 		\textbf{Parameters} & None. \\ \hline
 		\textbf{Format} &
@@ -135,14 +135,14 @@ If both clients accept within the time limit, then the server will send the comm
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{\texttt{start} command.}
+	\caption{The \texttt{start} Command}
 	\label{tab:cmd_start}
 \end{table}
 
 \subsubsection{Match Progress Commands}
 During a match both clients must continuously relay their positions to the server so that it can determine if they are both following the correct route and if one them has won the match.
 \autoref{fig:match_flow} shows the basic flow of determining a winner (and loser) of a match.
-The commands involved in this flow will be described in this section.
+The commands involved in this flow will be described presently.
 
 \tikzstyle{decision} = [diamond, draw, fill=blue!20, minimum width=6em, minimum height=6em, text badly centered]
 \tikzstyle{block} = [rectangle, draw, fill=blue!20, minimum width=5em, minimum height=3em, text centered, rounded corners]
@@ -168,11 +168,11 @@ The commands involved in this flow will be described in this section.
 		\path [line] (winner) -- (end);
 		\path [line] (loser) -- (end);
 	\end{tikzpicture}
-	\caption{Match flow.}
+	\caption{Match Flow}
 	\label{fig:match_flow}
 \end{figure}
 
-A client must continuously relay its current position to the server using the command shown in \autoref{tab:cmd_pos}.
+A client must continuously relay its current position to the server using the command shown in \autoref{tab:cmd_pos}. The server responds with the progress of the opponent as shown in \autoref{tab:cmd_pos_server}.
 
 \begin{table}[!ht]
 	\centering
@@ -194,11 +194,9 @@ A client must continuously relay its current position to the server using the co
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{\texttt{position} command (client).}
+	\caption{The \texttt{position} command (client)}
 	\label{tab:cmd_pos}
 \end{table}
-
-The server responds with the progress of the opponent as shown in \autoref{tab:cmd_pos_server}.
 
 \begin{table}[!ht]
 	\centering
@@ -218,11 +216,11 @@ The server responds with the progress of the opponent as shown in \autoref{tab:c
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{\texttt{position} command (server).}
+	\caption{The \texttt{position} command (server)}
 	\label{tab:cmd_pos_server}
 \end{table}
 
-When a winner has been determined the server will send the command shown in \autoref{tab:cmd_winner} to both clients.
+When a winner has been determined the server will send the command shown in \autoref{tab:cmd_winner} to both clients. A winner is determined when either of the participants enter a winner or loser state.
 
 \begin{table}[!ht]
 	\centering
@@ -242,6 +240,6 @@ When a winner has been determined the server will send the command shown in \aut
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{\texttt{winner} command.}
+	\caption{The \texttt{winner} command}
 	\label{tab:cmd_winner}
 \end{table}

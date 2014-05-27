@@ -1,12 +1,12 @@
 \section{Socket Server}
-The socket server is responsible for handling communication with the clients, and as such it must understand the communications protocol described in \autoref{sec:com_protocol}.
+The socket server is responsible for handling communication with the clients, and as such it must implement the communications protocol described in \autoref{sec:com_protocol}.
 
-The server is designed to run in its own thread where it continually listens for incoming connections from clients and accepts them.
+The server is designed to run on its own thread where it continually listens for incoming connections from clients and accepts them.
 Once a connection has been established with a client, the server spawns a new thread which will handle all future communication with that particular client.
 The client thread is stopped when the client disconnects.
 
 \subsection{Sending and Receiving}
-As mentioned in \autoref{sec:com_protocol} all commands are prefixed with the length of the command.
+As mentioned, all commands are prefixed with the length of the command.
 The server uses this when receiving data as shown in \autoref{lst:recv}.
 
 \begin{code}[language={Python}, caption={Method for Receiving $n$ Bytes}, label={lst:recv}]
@@ -28,16 +28,16 @@ def _recv_n(self, n):
 
 This method will return either $n$ bytes, \texttt{None} if no data is available or \texttt{False} if the client has disconnected.
 It is first called with $n=2$ to retrieve the length, and then if neither \texttt{None} nor \texttt{False} was returned, it is called again with the length returned from the first call.
-Sending data is simpler: First, the server retrieves the length of the data it is about to send, then it sends the length, and then finally it sends the data.
+Sending data is simpler: first, the server calculates the length of the data it is about to send, then it sends the length and then finally it sends the data.
 Similar to the receive method, the server will keep trying to send until it has sent the entire message, or until the client has disconnected.
 
 \subsection{Thread Communication}
-The client threads and the matchmaker must be able to communicate back and forth.
+The client threads and the matchmaker must be able to communicate with each other.
 Since they are running in a multithreaded environment, some special care must be taken.
-The solution adopted for this project is to pass messages using Python's built-in \texttt{Queue} class, which automatically handles locking, making it safe to use in a multithreaded environment.
-The queues are used in FIFO mode as we want to process the messages in the order that they arrived.
+The solution adopted for this project is to pass messages using Python's built-in \texttt{Queue} class, which automatically handles locking, making it threadsafe.
+The queues are used in \ac{FIFO} mode as we want to process the messages in the order that they arrive.
 
-Each client thread and the matchmaker has access to three shared queues:
+Each client thread and the matchmaker share two queues and a shared list:
 
 \begin{description}
 	\item[\texttt{server\_cmd\_q}] \hfill \\
@@ -47,14 +47,14 @@ Each client thread and the matchmaker has access to three shared queues:
 		This queue is used to pass received commands from the client threads to the matchmaker.
 		For example, if a client sends a command to be added or removed from the matchmaking queue, then the server will pass the appropriate command to the matchmaker.
 	\item[\texttt{matches}] \hfill \\
-		This queue contains all ongoing matches.
-		Matches are represented by a small data class containing a reference to both players.
-		The matchmaker has access to this queue, and adds matches to it when they are started, and the server removes them again when a winner has been determined.
+		This list contains all ongoing matches.
+		Matches are represented by a data class containing a reference to both players.
+		The matchmaker has access to this list, and adds matches to it when they are started, and the server removes them again when a winner has been determined.
 \end{description}
 
 \subsection{Commands}
 Commands are encapsulated in two simple classes \texttt{Client\-Command} and \texttt{Server\-Command} for inbound and outbound commands, respectively.
-The reason for this is that it makes serializing commands and extending the server to support new command types more flexible.
+The reason for this is that it makes the implementation of new commands in the communication protocol more flexible.
 
 When a command is received from a client it is first deserialized using Python's built-in JSON decoder, and a \texttt{Client\-Command} instance is created containing the data from the command and a reference to the socket from which it was received.
 The socket is used when sending a response to the command.
@@ -69,9 +69,9 @@ class ClientCommand:
 	POSITION = 'position'
 	DISCONNECT = 'disconnect' # Only used internally.
 
-	def __init__(self, cmd, id, data, socket):
+	def __init__(self, cmd, user_id, data, socket):
 		self.cmd = cmd
-		self.id = id
+		self.user_id = user_id
 		self.data = data
 		self.socket = socket
 \end{code}
@@ -95,7 +95,7 @@ except KeyError:
 	pass # Unknown command type
 \end{code}
 
-This makes adding support for new command types flexible, as it only requires writing and registering a handler method for it.
+This makes adding support for new command types easy, as it only requires writing and registering a handler method for it.
 Furthermore, the class could also be extended with some form of data validation in order to make it more robust, but this is currently not implemented.
 
 The \texttt{Server\-Command} class is shown in \autoref{lst:servercommand}.
@@ -120,10 +120,10 @@ class ServerCommand:
 For example, \autoref{lst:sendcmd} shows how to create, serialize and send the command used for informing a client of the progress of its opponent (see Table \vref{tab:cmd_pos_server}).
 
 \begin{code}[language={Python}, caption={Creating and Sending a Command}, label={lst:sendcmd}]
-cmd = ServerCommand(ServerCommand.POSITION, {'completion': 42})
+cmd = ServerCommand(ServerCommand.POSITION, {'completion': 0.42})
 self._send(cmd.serialize())
 \end{code}
 
-The first argument is a string indicating the type of command, which is defined in the class itself, and the second argument is a Python dictionary containing the data associated with the command type.
+The first argument is a string indicating the type of command, which is defined in the class itself, and the second argument is a dictionary containing the data associated with the command type.
 The second argument defaults to \texttt{None} (similar to \texttt{null} in most other programming languages) as most commands sent by the server do not contain any data.
 The \texttt{serialize} method uses Python's built-in JSON encoder to convert the special variable \texttt{\_\_dict\_\_}, which contains every attribute of the instance, into JSON.

@@ -1,13 +1,14 @@
 \section{Rating System}
 The purpose of a rating system is to keep track of the relative skill levels of players.
 A rating system in its most basic form accomplishes this by representing the skill level of a player as a single number, which is decreased when the player loses a match, and increased when the player wins a match.
-The exact amount by which the rating is increased or decreased, and how often this is done etc. depends on the particular rating system.
+The exact amount by which the rating is increased and decreased and how often this is done depends on the particular rating system.
 
 In order to automatically match users against each other we need a way to determine their relative skill levels.
 This is also needed in order to provide users with feedback on their personal progress, for example by creating leaderboards or by providing users with statistics about their increase or decrease in rating.
 
-A number of rating systems already exist, which are in use in different types of games such as sports, board games and video games.
-In this section two of the most well known rating systems will be analyzed.
+A number of rating systems already exist, which are in used in different types of games such as sports, board games and video games.
+In this section two of the most well known rating systems will be described.
+
 The rating system used in this project will also be described in terms of its implementation and testing.
 
 \subsection{Elo}
@@ -56,7 +57,7 @@ This means that the rating of player A is less accurate than the rating of playe
 He argues that:
 
 \begin{itemize}
-	\item{The rating of player A should be increased by more than 16 points because it is already not accurate, and defeating a player with a fairly accurate rating of 1700 is a reasonable indication that the true rating of player A is much higher than 1700.}
+	\item{The rating of player A should be increased by more than 16 points, as it was in \autoref{sec:elo}, because it is already not accurate, and defeating a player with a fairly accurate rating of 1700 is a reasonable indication that the true rating of player A is much higher than 1700.}
 	\item{The rating of player B should be decreased by less than 16 points because the rating of player B is already fairly accurate, and because the rating of player A is not accurate very little can be inferred about the skill level of player B.}
 \end{itemize}
 
@@ -82,7 +83,7 @@ The value of $c$ depends on the application.
 \autoref{sec:glicko_config} contains a discussion about choosing an appropriate value for $c$.
 
 At the end of each rating period updated ratings and RDs are calculated for the players who competed during the rating period.
-The updated rating and RD of a player depend on the outcome of the match, the expected and the RD of both players.
+The updated rating and RD of a player depends on the outcome of the match, the expected outcome and the RD of both players.
 The formulas for updating ratings and RDs are not included here, but can be seen in the implementation of the Glicko rating system in \autoref{sec:glicko_implementation} and in~\citep{glicko}.
 
 \subsection{Glicko vs. Elo}
@@ -99,7 +100,7 @@ For these two reasons we have chosen the Glicko rating system as the rating syst
 
 \subsection{Configuration}
 \label{sec:glicko_config}
-Before the Glicko rating system can be used there a number of parameters which must be determined.
+Before the Glicko rating system can be used there are a number of parameters which must be determined.
 
 Unranked players must be assigned a default rating and RD.
 Glickman recommends that the default rating is set to 1500 and that the default RD is set to 350, and therefore we will also use these values.
@@ -170,4 +171,4 @@ All the other methods are auxiliary (by convention, a leading underscore indicat
 \subsection{Testing}
 Every method in the \texttt{Glicko} class has been unit tested.
 The \texttt{Glicko} class is very suitable for unit testing because it has no external dependencies or side effects.
-A total of 7 tests cases and 10 assertions were written, giving a code coverage of 97 \%.
+A total of 7 tests cases and 10 assertions were written, giving a code coverage of 97\%.
