@@ -19,7 +19,7 @@ In this section the different types of commands exchanged between the clients an
 Parameters are prefixed with a dollar sign in the descriptions.
 
 \subsubsection{Matchmaking Commands}
-In order for a client to be matched against a suitable opponent it must first enter the matchmaking queue by sending the command shown in Table \ref{tab:cmd_queue}.
+In order for a client to be matched against a suitable opponent it must first enter the matchmaking queue by sending the command shown in \autoref{tab:cmd_queue}.
 
 \newenvironment{command}
 {\bigskip\begin{minipage}{\textwidth}\hrule\begin{description}}
@@ -48,7 +48,7 @@ In order for a client to be matched against a suitable opponent it must first en
 	\label{tab:cmd_queue}
 \end{table}
 
-If the client wants to be removed from the matchmaking queue the command shown in Table \ref{tab:cmd_cancel} must be sent.
+If the client wants to be removed from the matchmaking queue the command shown in \autoref{tab:cmd_cancel} must be sent.
 
 \begin{table}[!ht]
 	\centering
@@ -71,7 +71,7 @@ If the client wants to be removed from the matchmaking queue the command shown i
 	\label{tab:cmd_cancel}
 \end{table}
 
-When the server has found a suitable opponent it responds by sending the command shown in Table \ref{tab:cmd_found} to both clients:
+When the server has found a suitable opponent it responds by sending the command shown in \autoref{tab:cmd_found} to both clients:
 
 \begin{table}[!ht]
 	\centering
@@ -93,7 +93,7 @@ When the server has found a suitable opponent it responds by sending the command
 	\label{tab:cmd_found}
 \end{table}
 
-Both clients must reply with the command shown in Table \ref{tab:cmd_accept} in order for the match to begin:
+Both clients must reply with the command shown in \autoref{tab:cmd_accept} in order for the match to begin:
 
 \begin{table}[!ht]
 	\centering
@@ -117,7 +117,7 @@ Both clients must reply with the command shown in Table \ref{tab:cmd_accept} in 
 \end{table}
 
 If both clients have not accepted within 20 seconds the match will be canceled and both clients will be removed from the matchmaking queue.
-If both clients accept within the time limit, then the server will send the command shown in Table \ref{tab:cmd_start} to both clients to inform them that the match has started:
+If both clients accept within the time limit, then the server will send the command shown in \autoref{tab:cmd_start} to both clients to inform them that the match has started:
 
 \begin{table}[!ht]
 	\centering
@@ -141,7 +141,7 @@ If both clients accept within the time limit, then the server will send the comm
 
 \subsubsection{Match Progress Commands}
 During a match both clients must continuously relay their positions to the server so that it can determine if they are both following the correct route and if one them has won the match.
-Figure \ref{fig:match_flow} shows the basic flow of determining a winner (and loser) of a match.
+\autoref{fig:match_flow} shows the basic flow of determining a winner (and loser) of a match.
 The commands involved in this flow will be described in this section.
 
 \tikzstyle{decision} = [diamond, draw, fill=blue!20, minimum width=6em, minimum height=6em, text badly centered]
@@ -172,7 +172,7 @@ The commands involved in this flow will be described in this section.
 	\label{fig:match_flow}
 \end{figure}
 
-A client must continuously relay its current position to the server using the command shown in Table \ref{tab:cmd_pos}.
+A client must continuously relay its current position to the server using the command shown in \autoref{tab:cmd_pos}.
 
 \begin{table}[!ht]
 	\centering
@@ -198,7 +198,7 @@ A client must continuously relay its current position to the server using the co
 	\label{tab:cmd_pos}
 \end{table}
 
-The server responds with the progress of the opponent as shown in Table \ref{tab:cmd_pos_server}.
+The server responds with the progress of the opponent as shown in \autoref{tab:cmd_pos_server}.
 
 \begin{table}[!ht]
 	\centering
@@ -222,7 +222,7 @@ The server responds with the progress of the opponent as shown in Table \ref{tab
 	\label{tab:cmd_pos_server}
 \end{table}
 
-When a winner has been determined the server will send the command shown in Table \ref{tab:cmd_winner} to both clients.
+When a winner has been determined the server will send the command shown in \autoref{tab:cmd_winner} to both clients.
 
 \begin{table}[!ht]
 	\centering

@@ -1,0 +1,30 @@
+% Removes two-sided margins.
+\setlrmargins{*}{*}{1}
+\checkandfixthelayout
+
+% Prints the title page.
+\newcommand{\maketitlepage}{
+	\thispagestyle{empty}
+	\begin{center}
+		\includegraphics[scale=1.2]{img/aau_logo.pdf} \\ [2cm]
+		\begin{description}
+			\item{\textbf{Title:}} \\
+			\fulltitle
+			\item{\textbf{Theme:}} \\
+			\theme
+			\item{\textbf{Project Period:}} \\
+			\projectperiod
+			\item{\textbf{Project Group:}} \\
+			\projectgroup
+			\item{\textbf{Authors:}} \\
+			\authorstitlepage
+			\item{\textbf{Advisor:}} \\
+			\advisor
+			\item{\textbf{Page Count:}} \\
+			\pages
+			\item{\textbf{Finished:}} \\
+			\finished
+		\end{description}
+		\vfill
+	\end{center}
+}

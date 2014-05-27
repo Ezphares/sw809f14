@@ -11,7 +11,6 @@ Another way of determining the location of the device is using network based loc
 \subsubsection{Android Providers}
 The Android \ac{API}'s contain multiple providers, which can be used. The one we are using for location is the Location Service, \ac{GPS} Provider, and Network Provider. These will give us access to the device location and status.
 
-
 \subsubsection{Android Location}
 The Android framework supplies an \ac{API} for working with location.
 The developer is presented with a few different options of how to work with location, and the one we choose was to work make a service, with a \texttt{LocationManager}.
@@ -19,7 +18,6 @@ The developer is presented with a few different options of how to work with loca
 The \texttt{LocationManager} provides all the default functionality of working with locations in Android, such as, checking the state of the \ac{GPS} connection to see if any satellites are available, and requesting location updates at a time interval or location difference threshold.
 
 The program is built as a service, so it runs in the background without blocking the UI thread, and also being able to run if the device-screen gets turned off.
-
 
 \subsubsection{Implementation}
 For the implementation a custom class is made, \texttt{GPSTracker}, which extends Service, and implements \texttt{LocationManager}.
@@ -33,27 +31,16 @@ This implementation relies heavily on a tutorial from AndroidHive by Ravi Tamada
 \subsection{Testing}
 The \texttt{GPSTracker} class has not been unit tested because this would require writing a whole new application to provide mock locations for the user. Instead the class outputs the coordinates it retrieves to a log so the person debugging can verify that it does indeed work. User tests were performed as well to ensure that the marker was placed correctly on the map.
 
-Seeing as this class was not unit tested it means the code coverage drops. The coverage can be seen in \autoref{tab:emma3}
+Seeing as this class was not unit tested it means the code coverage drops. The coverage can be seen in \autoref{tab:emma3}.
 
-\begin{figure}[ht]
-\caption{EMMA coverage results}
-\label{tab:emma3}
-\begin{tabular}{| c | c | c | c | c |}
-\hline
-class & method & block & line & name \\ \hline
-69\% (18/26) & 50\% (63/126) & 47\% (907/1930) & 54\% (254/464) & all classes \\
-\hline
-\end{tabular}
-\vspace{10pt}
-
-\begin{tabular}{| l | l |}
-\hline
-OVERALL STATS SUMMARY: & \\ \hline
-total packages: & 1 \\
-total classes: & 22 \\
-total methods: & 155 \\
-total executable files: & 10 \\
-total executable lines: & 644 \\
-\hline
-\end{tabular}
-\end{figure}
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+		\hline
+		\textbf{Class} & \textbf{Method} & \textbf{Block} & \textbf{Line} \\ \hline
+		69 \% (18/26) & 50 \% (63/126) & 47 \% (907/1930) & 54 \% (254/464) \\
+		\hline
+	\end{tabular}
+	\caption{EMMA Coverage Results}
+	\label{tab:emma3}
+\end{table}

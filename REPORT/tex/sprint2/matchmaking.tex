@@ -23,13 +23,13 @@ In order for two players A and B to be matched against each other there are thre
 
 The first criterion ensures that the two players have similar skill levels.
 The larger RD a player has, the larger the search range for that player will be.
-In other words, the greater uncertainty there is about the true rating of a player, the larger the search range for that player will be (see Section \ref{sec:glicko} for an explanation of the RD value).
+In other words, the greater uncertainty there is about the true rating of a player, the larger the search range for that player will be (see \autoref{sec:glicko} for an explanation of the RD value).
 
 The second criterion ensures that the difference in length between the two routes is within a certain percentage of the length of the shortest route.
 The value of $\alpha$ must be set when the matchmaker is configured.
 
 The third criterion ensures that when there are multiple possible matchups only the best are generated.
-To illustrate this scenario, suppose we have four players A, B, C and D as shown in Table \ref{tab:matchmaker_ex}.
+To illustrate this scenario, suppose we have four players A, B, C and D as shown in \autoref{tab:matchmaker_ex}.
 The lengths of the routes are omitted and assumed to be equal since they are not relevant for this example.
 The only possible matchup for player B is player C, since that is the only matchup where both the first and second criteria are satisfied.
 However, matching player C with player D is preferred over matching player C with player B, since $\Delta R_{BC} = 75$ and $\Delta R_{CD} = 25$.
@@ -45,7 +45,7 @@ The third criterion ensures that this matchup will be generated.
 		C	& 1575	& 100	& - \\
 		D	& 1600	& 50	& -
 	\end{tabular}
-	\caption{Four players along with their ratings and RDs.}
+	\caption{Four Players and Their Ratings and RDs.}
 	\label{tab:matchmaker_ex}
 \end{table}
 
@@ -68,7 +68,7 @@ One queue is for receiving messages from the server, such as ``add player A to t
 The matchmaker was tested by simulating 10 runs lasting 2 minutes each with 100 randomly generated players.
 Each player was given a random rating between 1000 and 2000, a random RD between 30 and 350 (the lower and upper bound for RD) and a random length between 5000 m and 10000 m.
 The runs were performed with $\alpha = 0.15$ and $\beta$ was incremented by 0.25 every 30 seconds.
-Table \ref{tab:test_results} shows the results of the test.
+\autoref{tab:test_results} shows the results of the test.
 
 \begin{table}[!ht]
 	\centering
@@ -88,7 +88,7 @@ Table \ref{tab:test_results} shows the results of the test.
 		\hline\hline
 		\textbf{Avg.}	& \textbf{94.4}			& \textbf{13.0}					& \textbf{250.5}					& \textbf{1.9}
 	\end{tabular}
-	\caption{Test results.}
+	\caption{Test Results}
 	\label{tab:test_results}
 \end{table}
 
