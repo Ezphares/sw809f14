@@ -1,6 +1,8 @@
 \section{Matchmaker}
 The matchmaker automatically matches users of similar skill levels against each other.
-While doing so the matchmaker must balance the trade-off of generating fair matchups and doing so in a timely fashion.
+It uses the ratings and RD of players described in \autoref{sec:glicko}.
+
+The matchmaker must balance the trade-off of generating fair matchups and doing so in a timely fashion.
 A beginner should not be matched against a seasoned runner, but on the other hand a user should also not have to wait more than a few minutes before being matched against another user.
 
 In the following sections the design, implementation and testing of the matchmaker is described.
@@ -9,7 +11,7 @@ In the following sections the design, implementation and testing of the matchmak
 In order for two players A and B to be matched against each other there are three criteria that must be satisfied:
 
 \begin{enumerate}
-	\item{The rating difference $\Delta R_{AB} = \left|R_A-R_B\right|$ for two ratings $R_A$ and $R_B$ must satisfy the following conditions:}
+	\item{The rating difference $\Delta R_{AB} = \left|R_A-R_B\right|$ for player A and B, where $R_A$ and $R_B$ are their respective ratings and $RD_A$ and $RD_B$ are their respective ratings deviations, must satisfy the following two conditions:}
 		\begin{itemize}
 			\item{$\Delta R_{AB} \leq RD_A$}
 			\item{$\Delta R_{AB} \leq RD_B$}
@@ -61,14 +63,15 @@ The matchmaker is written in Python because it needs to access the database to r
 The actual code of the matchmaker follows the concepts described in the previous section very closely, and is therefore not included here.
 
 The matchmaker is designed to run indefinitely in its own thread, where it continually attempts to generate matches from its internal list of queued players.
-It communicates with the socket server by passing messages using two thread-safe queues.
-One queue is for receiving messages from the server, such as ``add player A to the queue'' and ``remove player A from the queue'', and the other is for informing the server of the matches that it generates.
 
 \subsection{Testing}
-The matchmaker was tested by simulating 10 runs lasting 2 minutes each with 100 randomly generated players.
+The matchmaker was tested by simulating 10 runs with 100 randomly generated players in the matchmaking queue at the same time.
 Each player was given a random rating between 1000 and 2000, a random RD between 30 and 350 (the lower and upper bound for RD) and a random length between 5000 m and 10000 m.
+The simulation was run for 2 minutes.
+
 The runs were performed with $\alpha = 0.15$ and $\beta$ was incremented by 0.25 every 30 seconds.
 \autoref{tab:test_results} shows the results of the test.
+From left to right the columns show: number of the run, percentage of players matched within the 2 minutes, average rating difference between the players, average difference in length of the routes and the average queue time.
 
 \begin{table}[!ht]
 	\centering
