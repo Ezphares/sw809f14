@@ -1,0 +1,11 @@
+\section{Known Limitations}
+Given that this is a proof of concept there are certain limitations to the implementation.
+
+\begin{itemize}
+\item If the user loses connection with the server during a run there is no way to inform the other participant that a disconnect has happened.
+\item It is not possible to use the application without logging in. Closing the application without logging in requires the user to press the home button.
+\item If there is not Internet connection when logging in the application crashes when the user tries to retrieve their routes.
+\item The activity lifecycle on the Android system is currently not handled properly. This should be remedied by adding functionality to handle all stages.
+\item The feedback in the application is currently mostly toasts, however depending on the user's phone setting the phone may not display these toasts. This can be fixed by creating dialogs instead.
+\item Some combinations of messages are currently untested and might cause security issues on the server.
+\end{itemize}
