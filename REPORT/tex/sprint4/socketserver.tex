@@ -1,13 +1,13 @@
 \section{Socket Server}
-The socket server is responsible for handling communication with the clients, and as such it must understand the communications protocol described in Section \ref{sec:com_protocol}.
+The socket server is responsible for handling communication with the clients, and as such it must understand the communications protocol described in \autoref{sec:com_protocol}.
 
 The server is designed to run in its own thread where it continually listens for incoming connections from clients and accepts them.
 Once a connection has been established with a client, the server spawns a new thread which will handle all future communication with that particular client.
 The client thread is stopped when the client disconnects.
 
 \subsection{Sending and Receiving}
-As mentioned in Section \ref{sec:com_protocol} all commands are prefixed with the length of the command.
-The server uses this when receiving data as shown in Listing \ref{lst:recv}.
+As mentioned in \autoref{sec:com_protocol} all commands are prefixed with the length of the command.
+The server uses this when receiving data as shown in \autoref{lst:recv}.
 
 \begin{code}[language={Python}, caption={Method for Receiving $n$ Bytes}, label={lst:recv}]
 def _recv_n(self, n):
@@ -58,7 +58,7 @@ The reason for this is that it makes serializing commands and extending the serv
 
 When a command is received from a client it is first deserialized using Python's built-in JSON decoder, and a \texttt{Client\-Command} instance is created containing the data from the command and a reference to the socket from which it was received.
 The socket is used when sending a response to the command.
-Listing \ref{lst:clientcommand} shows the \texttt{Client\-Command} class.
+\autoref{lst:clientcommand} shows the \texttt{Client\-Command} class.
 
 \begin{code}[language={Python}, caption={\texttt{ClientCommand} Class}, label={lst:clientcommand}]
 class ClientCommand:
@@ -76,7 +76,7 @@ class ClientCommand:
 		self.socket = socket
 \end{code}
 
-In order to invoke the appropriate method to process a particular command type, the server defines handlers for the different command types that it supports, as shown in Listing \ref{lst:handlers}.
+In order to invoke the appropriate method to process a particular command type, the server defines handlers for the different command types that it supports, as shown in \autoref{lst:handlers}.
 
 \begin{code}[language={Python}, caption={Handlers for Different Command Types}, label={lst:handlers}]
 self.handlers = {
@@ -86,7 +86,7 @@ self.handlers = {
 	}
 \end{code}
 
-The appropriate handler is invoked as shown in Listing \ref{lst:invoke_handler}, where \texttt{client\_cmd} is assumed to be a \texttt{Client\-Command} instance.
+The appropriate handler is invoked as shown in \autoref{lst:invoke_handler}, where \texttt{client\_cmd} is assumed to be a \texttt{Client\-Command} instance.
 
 \begin{code}[language={Python}, caption={Invoking a Handler Method}, label={lst:invoke_handler}]
 try:
@@ -98,7 +98,7 @@ except KeyError:
 This makes adding support for new command types flexible, as it only requires writing and registering a handler method for it.
 Furthermore, the class could also be extended with some form of data validation in order to make it more robust, but this is currently not implemented.
 
-The \texttt{Server\-Command} class is shown in Listing \ref{lst:servercommand}.
+The \texttt{Server\-Command} class is shown in \autoref{lst:servercommand}.
 This class is used to prepare commands which must be sent by the server.
 
 \begin{code}[language={Python}, caption={\texttt{ServerCommand} Class}, label={lst:servercommand}]
@@ -117,7 +117,7 @@ class ServerCommand:
 		return json.dumps(self.__dict__)
 \end{code}
 
-For example, Listing \ref{lst:sendcmd} shows how to create, serialize and send the command used for informing a client of the progress of its opponent (see Table \ref{tab:cmd_pos_server} on Page \pageref{tab:cmd_pos_server}).
+For example, \autoref{lst:sendcmd} shows how to create, serialize and send the command used for informing a client of the progress of its opponent (see Table \vref{tab:cmd_pos_server}).
 
 \begin{code}[language={Python}, caption={Creating and Sending a Command}, label={lst:sendcmd}]
 cmd = ServerCommand(ServerCommand.POSITION, {'completion': 42})
