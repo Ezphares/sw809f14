@@ -55,7 +55,7 @@ The decision to use a boolean on the \texttt{Route} to denote whether or not the
 
 The server is implemented in Django~\citep{djangoproject}, a web framework for the Python programming language. We decided to use Python3, the latest version of Python at the time of development. We made use of several of the features of Django, to ease the implementation of the previously mentioned design. An example of this, is Django's \ac{ORM}, which was used to implement the database, removing any need to write database code directly. As such, the \texttt{Route} table seen in \autoref{fig:sprint1-db-model} was implemented as a Django model with the code seen in \autoref{lst:sprint1-route-model}. From this model, Django is able to generate code for several different database engines, chosen by changing a single parameter in a settings file.
 
-\begin{code}[language={Python}, label={lst:sprint1-route-model}, caption={The ``Route'' Model}]
+\begin{code}[language={Python}, label={lst:sprint1-route-model}, caption={The \texttt{Route} Model}]
 from django.db import models
 from django.contrib.auth.models import User
 
