@@ -19,14 +19,9 @@ In this section the different types of commands exchanged between the mobile cli
 Parameters are prefixed with a \texttt{\$} in the descriptions.
 
 \subsubsection{Matchmaking Commands}
-In order for a client to be matched against a suitable opponent it must first enter the matchmaking queue by sending the command shown in \autoref{tab:cmd_queue}.
+In order for a client to be matched against a suitable opponent it must first enter the matchmaking queue by sending the following command:
 
-\newenvironment{command}
-{\bigskip\begin{minipage}{\textwidth}\hrule\begin{description}}
-{\end{description}\hrule\end{minipage}\bigskip}
-
-\begin{table}[!ht]
-	\centering
+\begin{center}
 	\begin{tabular}{| r | p{0.7\textwidth} |}
 		\hline
 		\textbf{Description} & Adds the client to the matchmaking queue. \\ \hline
@@ -44,14 +39,11 @@ In order for a client to be matched against a suitable opponent it must first en
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{The \texttt{queue} Command}
-	\label{tab:cmd_queue}
-\end{table}
+\end{center}
 
-If the client wants to be removed from the matchmaking queue the command shown in \autoref{tab:cmd_cancel} must be sent.
+If the client wants to be removed from the matchmaking queue the following command must be sent:
 
-\begin{table}[!ht]
-	\centering
+\begin{center}
 	\begin{tabular}{| r | p{0.7\textwidth} |}
 		\hline
 		\textbf{Description} & Removes the client from the matchmaking queue. \\ \hline
@@ -67,14 +59,11 @@ If the client wants to be removed from the matchmaking queue the command shown i
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{The \texttt{cancel} Command}
-	\label{tab:cmd_cancel}
-\end{table}
+\end{center}
 
-When the server has found a suitable opponent it responds by sending the command shown in \autoref{tab:cmd_found} to both clients.
+When the server has found a suitable opponent it responds by sending the following command to both clients:
 
-\begin{table}[!ht]
-	\centering
+\begin{center}
 	\begin{tabular}{| r | p{0.7\textwidth} |}
 		\hline
 		\textbf{Description} & Informs the client that an opponent has been found. \\ \hline
@@ -89,14 +78,11 @@ When the server has found a suitable opponent it responds by sending the command
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{The \texttt{found} Command}
-	\label{tab:cmd_found}
-\end{table}
+\end{center}
 
-Both clients must reply with the command shown in \autoref{tab:cmd_accept} in order for the match to begin.
+Both clients must reply with the following command in order for the match to begin:
 
-\begin{table}[!ht]
-	\centering
+\begin{center}
 	\begin{tabular}{| r | p{0.7\textwidth} |}
 		\hline
 		\textbf{Description} & Accept the match. \\ \hline
@@ -112,15 +98,12 @@ Both clients must reply with the command shown in \autoref{tab:cmd_accept} in or
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{The \texttt{accept} Command}
-	\label{tab:cmd_accept}
-\end{table}
+\end{center}
 
 If both clients have not accepted within 20 seconds the match will be cancelled and both clients will be removed from the matchmaking queue.
-If both clients accept within the time limit the server will send the command shown in \autoref{tab:cmd_start} to both clients to inform them that the match will start in 10 seconds.
+If both clients accept within the time limit the server will send the following command to both clients to inform them that the match will start in 10 seconds:
 
-\begin{table}[!ht]
-	\centering
+\begin{center}
 	\begin{tabular}{| r | p{0.7\textwidth} |}
 		\hline
 		\textbf{Description} & Informs the client that the match starts in 10 seconds. \\ \hline
@@ -135,9 +118,7 @@ If both clients accept within the time limit the server will send the command sh
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{The \texttt{start} Command}
-	\label{tab:cmd_start}
-\end{table}
+\end{center}
 
 \subsubsection{Match Progress Commands}
 During a match both clients must continuously relay their positions to the server so that it can determine if they are both following the correct route and if one them has won the match.
@@ -172,10 +153,9 @@ The commands involved in this flow will be described presently.
 	\label{fig:match_flow}
 \end{figure}
 
-A client must continuously relay its current position to the server using the command shown in \autoref{tab:cmd_pos}. The server responds with the progress of the opponent as shown in \autoref{tab:cmd_pos_server}.
+A client must continuously relay its current position to the server using the following command:
 
-\begin{table}[!ht]
-	\centering
+\begin{center}
 	\begin{tabular}{| r | p{0.7\textwidth} |}
 		\hline
 		\textbf{Description} & Informs the server of the current position of the client. \\ \hline
@@ -194,17 +174,16 @@ A client must continuously relay its current position to the server using the co
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{The \texttt{position} command (client)}
-	\label{tab:cmd_pos}
-\end{table}
+\end{center}
 
-\begin{table}[!ht]
-	\centering
+The server responds with the following command, containing the progress of the opponent:
+
+\begin{center}
 	\begin{tabular}{| r | p{0.7\textwidth} |}
 		\hline
 		\textbf{Description} & Informs the client of the progress of its opponent. \\ \hline
 		\textbf{Direction} & Server $\rightarrow$ Client. \\ \hline
-		\textbf{Parameters} & \texttt{\$completion} : Progress of opponent in percent. \\ \hline
+		\textbf{Parameters} & \texttt{\$completion} : Progress of opponent. \\ \hline
 		\textbf{Format} &
 \begin{lstlisting}[language=Command]
 {
@@ -216,14 +195,11 @@ A client must continuously relay its current position to the server using the co
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{The \texttt{position} command (server)}
-	\label{tab:cmd_pos_server}
-\end{table}
+\end{center}
 
-When a winner has been determined the server will send the command shown in \autoref{tab:cmd_winner} to both clients. A winner is determined when either of the participants enter a winner or loser state.
+When a winner has been determined the server will send the following command to both clients:
 
-\begin{table}[!ht]
-	\centering
+\begin{center}
 	\begin{tabular}{| r | p{0.7\textwidth} |}
 		\hline
 		\textbf{Description} & Informs the client of the result of the match. \\ \hline
@@ -240,6 +216,6 @@ When a winner has been determined the server will send the command shown in \aut
 \end{lstlisting}
 		\\ \hline
 	\end{tabular}
-	\caption{The \texttt{winner} command}
-	\label{tab:cmd_winner}
-\end{table}
+\end{center}
+
+A winner is determined when either of the participants enter a winner or loser state.
